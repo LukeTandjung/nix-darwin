@@ -31,6 +31,7 @@
           vesktop
           sketchybar
           aerospace
+          raycast
           kitty
         ];
 

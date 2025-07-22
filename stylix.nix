@@ -8,15 +8,24 @@
   
   # 2) Inline Base16 “Bauh Nord” scheme
   stylix.base16Scheme = {
-    slug   = "bauh-nord";
-    scheme = "Bauh Nord";
-    author = "Luke Tandjung";
-    base00 = "242D42";  base01 = "374057";  base02 = "434C5E";
-    base03 = "4C566A";  base04 = "828282";  base05 = "B7B7B7";
-    base06 = "EEEEEE";  base07 = "8FBCBB";  base08 = "BF616A";
-    base09 = "D08770";  base0A = "EBCB8B";  base0B = "A3BE8C";
-    base0C = "88C0D0";  base0D = "81A1C1";  base0E = "B48EAD";
-    base0F = "5E81AC";
+    scheme = "Kanagawa";
+    author = "Tommaso Laurenzi (https://github.com/rebelot)";
+    base00 = "1F1F28";
+    base01 = "16161D";
+    base02 = "223249";
+    base03 = "54546D";
+    base04 = "727169";
+    base05 = "DCD7BA";
+    base06 = "C8C093";
+    base07 = "717C7C";
+    base08 = "C34043";
+    base09 = "FFA066";
+    base0A = "C0A36E";
+    base0B = "76946A";
+    base0C = "6A9589";
+    base0D = "7E9CD8";
+    base0E = "957FB8";
+    base0F = "D27E99";
   };
 
   # 3) Fonts
