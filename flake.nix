@@ -29,10 +29,11 @@
           helix
           brave
           vesktop
-          sketchybar
           aerospace
           raycast
           kitty
+          spotify
+          bartender
         ];
 
         users.users.luketandjung = {
