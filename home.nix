@@ -66,6 +66,9 @@
     ];
   };
 
+  # Spotify-player Configuration
+  programs.spotify-player.enable = true;
+
   # --- Package Management ---
   home.packages = [
   ];

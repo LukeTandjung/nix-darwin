@@ -12,7 +12,6 @@
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    spicetify-nix.url = "github:Gerg-L/spicetify-nix";
   };
 
   outputs =
@@ -22,7 +21,6 @@
       stylix,
       nix-darwin,
       home-manager,
-      spicetify-nix,
     }:
     let
       system = "aarch64-darwin";
@@ -32,12 +30,9 @@
         config.allowUnfree = true;
       };
 
-      spicePkgs = spicetify-nix.legacyPackages.${pkgs.stdenv.system};
-
       configuration =
         {
           pkgs,
-          spicePkgs,
           inputs,
           ...
         }:
@@ -46,6 +41,7 @@
           # $ nix-env -qaP | grep wgeti
 
           environment.systemPackages = with pkgs; [
+            git
             aerospace
             raycast
             bartender
@@ -82,32 +78,11 @@
     {
       darwinConfigurations."Lukes-Mac-mini" = nix-darwin.lib.darwinSystem {
         inherit system;
-        specialArgs = { inherit pkgs inputs spicePkgs; };
+        specialArgs = { inherit pkgs inputs; };
         modules = [
           configuration
           stylix.darwinModules.stylix
           ./stylix.nix
-
-          # Import the spicetify-nix module for system-level setup
-          spicetify-nix.darwinModules.spicetify
-          # The configuration for the spicetify module goes here.
-          # Since we passed spicePkgs in specialArgs, it's available in the module's scope.
-          (
-            {
-              config,
-              pkgs,
-              spicePkgs,
-              ...
-            }:
-            {
-              programs.spicetify = {
-                enable = true;
-                # Use theme from the passed spicePkgs
-                theme = spicePkgs.themes.text;
-                colorScheme = "Kanagawa";
-              };
-            }
-          )
           home-manager.darwinModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
