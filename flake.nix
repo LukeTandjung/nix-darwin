@@ -15,7 +15,15 @@
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
   };
 
-  outputs = inputs@{ self, nixpkgs, stylix, nix-darwin, home-manager, spicetify-nix }:
+  outputs =
+    inputs@{
+      self,
+      nixpkgs,
+      stylix,
+      nix-darwin,
+      home-manager,
+      spicetify-nix,
+    }:
     let
       system = "aarch64-darwin";
       # Create a pkgs set that allows unfree
@@ -26,46 +34,52 @@
 
       spicePkgs = spicetify-nix.legacyPackages.${pkgs.stdenv.system};
 
-      configuration = { pkgs, spicePkgs, inputs, ... }: {
-        # List packages installed in system profile. To search by name, run:
-        # $ nix-env -qaP | grep wgeti
-     
-        environment.systemPackages = with pkgs; [
-          helix
-          brave
-          vesktop
-          aerospace
-          raycast
-          kitty
-          bartender
-          zed-editor
-          rainfrog
-        ];
+      configuration =
+        {
+          pkgs,
+          spicePkgs,
+          inputs,
+          ...
+        }:
+        {
+          # List packages installed in system profile. To search by name, run:
+          # $ nix-env -qaP | grep wgeti
 
-        users.users.luketandjung = {
-          name = "luketandjung";
-          home = "/Users/luketandjung";
+          environment.systemPackages = with pkgs; [
+            aerospace
+            raycast
+            bartender
+            postgresql
+            dbeaver-bin
+            postman
+            docker
+          ];
+
+          users.users.luketandjung = {
+            name = "luketandjung";
+            home = "/Users/luketandjung";
+          };
+
+          # Necessary for using flakes on this system.
+          nix.settings.experimental-features = "nix-command flakes";
+
+          # Set Git commit hash for darwin-version.
+          system.configurationRevision = self.rev or self.dirtyRev or null;
+
+          # Used for backwards compatibility, please read the changelog before changing.
+          # $ darwin-rebuild changelog
+          system.stateVersion = 6;
+
+          # The platform the configuration will be used on.
+          nixpkgs.hostPlatform = "aarch64-darwin";
+
+          fonts.packages = with pkgs; [
+            font-awesome
+            jetbrains-mono
+          ];
         };
-        
-        # Necessary for using flakes on this system.
-        nix.settings.experimental-features = "nix-command flakes";
-
-        # Set Git commit hash for darwin-version.
-        system.configurationRevision = self.rev or self.dirtyRev or null;
-
-        # Used for backwards compatibility, please read the changelog before changing.
-        # $ darwin-rebuild changelog
-        system.stateVersion = 6;
-
-        # The platform the configuration will be used on.
-        nixpkgs.hostPlatform = "aarch64-darwin";
-
-        fonts.packages = with pkgs; [
-          font-awesome
-          jetbrains-mono
-        ];
-      };
-    in {
+    in
+    {
       darwinConfigurations."Lukes-Mac-mini" = nix-darwin.lib.darwinSystem {
         inherit system;
         specialArgs = { inherit pkgs inputs spicePkgs; };
@@ -73,20 +87,27 @@
           configuration
           stylix.darwinModules.stylix
           ./stylix.nix
-          
+
           # Import the spicetify-nix module for system-level setup
           spicetify-nix.darwinModules.spicetify
           # The configuration for the spicetify module goes here.
           # Since we passed spicePkgs in specialArgs, it's available in the module's scope.
-          ({ config, pkgs, spicePkgs, ... }: {
-            programs.spicetify = {
-              enable = true;
-              # Use theme from the passed spicePkgs
-              theme = spicePkgs.themes.text;
-              colorScheme = "Kanagawa";
-            };
-          })
-
+          (
+            {
+              config,
+              pkgs,
+              spicePkgs,
+              ...
+            }:
+            {
+              programs.spicetify = {
+                enable = true;
+                # Use theme from the passed spicePkgs
+                theme = spicePkgs.themes.text;
+                colorScheme = "Kanagawa";
+              };
+            }
+          )
           home-manager.darwinModules.home-manager
           {
             home-manager.useGlobalPkgs = true;

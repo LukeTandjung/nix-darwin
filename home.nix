@@ -1,4 +1,10 @@
-{ config, pkgs, lib, inputs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 
 {
   home.username = "luketandjung";
@@ -14,16 +20,21 @@
     extraPackages = [ pkgs.nodejs_22 ]; # Ensure nodejs_22 is available on macOS
     userSettings = {
       node = {
-        path     = lib.getExe pkgs.nodejs_22;
+        path = lib.getExe pkgs.nodejs_22;
         npm_path = lib.getExe' pkgs.nodejs_22 "npm";
       };
       languages = {
         Python = {
-          language_servers = [ "pyright" "ruff" ];
+          language_servers = [
+            "pyright"
+            "ruff"
+          ];
         };
       };
-      direnv = { enable = true; };
-      vim_mode = true;
+      direnv = {
+        enable = true;
+      };
+      helix_mode = true;
       show_edit_predictions = false;
       buffer_font_size = lib.mkForce 14.0;
       ui_font_size = lib.mkForce 14.0;
@@ -37,10 +48,26 @@
     nix-direnv.enable = true;
   };
 
+  # Vesktop Configuration
+  programs.vesktop.enable = true;
+
+  # Kitty Configuration
+  programs.kitty.enable = true;
+
+  # Helix Configuration
+  programs.helix = {
+    enable = true;
+    languages.language = [
+      {
+        name = "nix";
+        auto-format = true;
+        formatter.command = lib.getExe pkgs.nixfmt-rfc-style;
+      }
+    ];
+  };
+
   # --- Package Management ---
-  home.packages = with pkgs; [
-    # Note: Excluded Wayland-specific, NixOS-specific, and audio visualizers.
-    # Find macOS-native alternatives if needed.
+  home.packages = [
   ];
 
   # --- MIGRATING YOUR RICE ---
