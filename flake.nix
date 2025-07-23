@@ -12,9 +12,10 @@
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    spicetify-nix.url = "github:Gerg-L/spicetify-nix";
   };
 
-  outputs = inputs@{ self, nixpkgs, stylix, nix-darwin, home-manager }:
+  outputs = inputs@{ self, nixpkgs, stylix, nix-darwin, home-manager, spicetify-nix }:
     let
       system = "aarch64-darwin";
       # Create a pkgs set that allows unfree
@@ -22,9 +23,13 @@
         inherit system;
         config.allowUnfree = true;
       };
-      configuration = { pkgs, ... }: {
+
+      spicePkgs = spicetify-nix.legacyPackages.${pkgs.stdenv.system};
+
+      configuration = { pkgs, spicePkgs, inputs, ... }: {
         # List packages installed in system profile. To search by name, run:
-        # $ nix-env -qaP | grep wget
+        # $ nix-env -qaP | grep wgeti
+     
         environment.systemPackages = with pkgs; [
           helix
           brave
@@ -32,8 +37,9 @@
           aerospace
           raycast
           kitty
-          spotify
           bartender
+          zed-editor
+          rainfrog
         ];
 
         users.users.luketandjung = {
@@ -62,18 +68,31 @@
     in {
       darwinConfigurations."Lukes-Mac-mini" = nix-darwin.lib.darwinSystem {
         inherit system;
-        specialArgs = { inherit pkgs inputs; };
+        specialArgs = { inherit pkgs inputs spicePkgs; };
         modules = [
           configuration
           stylix.darwinModules.stylix
           ./stylix.nix
+          
+          # Import the spicetify-nix module for system-level setup
+          spicetify-nix.darwinModules.spicetify
+          # The configuration for the spicetify module goes here.
+          # Since we passed spicePkgs in specialArgs, it's available in the module's scope.
+          ({ config, pkgs, spicePkgs, ... }: {
+            programs.spicetify = {
+              enable = true;
+              # Use theme from the passed spicePkgs
+              theme = spicePkgs.themes.text;
+              colorScheme = "Kanagawa";
+            };
+          })
+
           home-manager.darwinModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.luketandjung = ./home.nix;
             home-manager.backupFileExtension = "hm-bak";
-
             # Optionally, use home-manager.extraSpecialArgs to pass
             # arguments to home.nix
           }
