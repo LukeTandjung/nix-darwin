@@ -69,6 +69,8 @@
   # Spotify-player Configuration
   programs.spotify-player.enable = true;
 
+  programs.lazydocker.enable = true;
+
   # --- Package Management ---
   home.packages = [
   ];
