@@ -42,7 +42,7 @@
 
           environment.systemPackages = with pkgs; [
             git
-            aerospace
+            yabai
             raycast
             bartender
             postgresql
@@ -57,6 +57,12 @@
             name = "luketandjung";
             home = "/Users/luketandjung";
           };
+
+          security.sudo.extraConfig = ''
+            %staff ALL = (ALL) NOPASSWD: ALL
+          '';
+
+          system.defaults.finder.QuitMenuItem = true;
 
           # Necessary for using flakes on this system.
           nix.settings.experimental-features = "nix-command flakes";
@@ -75,6 +81,30 @@
             font-awesome
             jetbrains-mono
           ];
+
+          services.yabai = {
+            enable = true;
+            config = {
+              layout = "bsp";
+              window_placement = "second_child";
+              top_padding = 16;
+              bottom_padding = 16;
+              left_padding = 16;
+              right_padding = 16;
+              window_gap = 16;
+              mouse_modifier = "cmd";
+              focus_follows_mouse = "autoraise";
+              menubar_opacity = 0.0;
+              window_opacity = "on";
+              active_window_opacity = 1.0;
+              normal_window_opacity = 0.80;
+              external_bar = "all:40:0";
+            };
+            extraConfig = ''
+              yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
+              sudo yabai --load-sa
+            '';
+          };
 
           services.postgresql = {
             enable = true;
@@ -118,6 +148,11 @@
               fi
             '';
           };
+
+          system.activationScripts.postActivation.text = ''
+            echo "Updated /private/etc/sudoers.d/yabai successfully!"
+            su - "$(logname)" -c '${pkgs.skhd}/bin/skhd -r'
+          '';
         };
     in
     {
