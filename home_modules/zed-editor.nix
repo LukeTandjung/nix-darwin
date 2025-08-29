@@ -32,5 +32,16 @@
       buffer_font_size = lib.mkForce 14.0;
       ui_font_size = lib.mkForce 14.0;
     };
+    userKeymaps = [
+      {
+        context = "Workspace";
+        bindings = {
+          alt-h = "workspace::ActivatePaneLeft";
+          alt-l = "workspace::ActivatePaneRight";
+          alt-k = "workspace::ActivatePaneUp";
+          alt-j = "workspace::ActivatePaneDown";
+        };
+      }
+    ];
   };
 }
