@@ -16,5 +16,6 @@
     ./zellij.nix
     ./zen-browser.nix
     ./zsh.nix
+    ./yazi.nix
   ];
 }
