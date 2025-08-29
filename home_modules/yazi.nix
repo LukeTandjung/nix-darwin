@@ -19,6 +19,16 @@
         ];
         show_hidden = true;
       };
+      opener = {
+        edit = [
+          {
+            run = "sudo hx '$@'";
+            desc = "Helix";
+            block = true;
+            for = "macos";
+          }
+        ]
+      }
     };
   };
 }
