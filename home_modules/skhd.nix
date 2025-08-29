@@ -36,7 +36,7 @@
       cmd + shift - 0x17 : yabai -m window --space 5; yabai -m space --focus 5
 
       cmd - 0x0C : open -na kitty
-      cmd - 0x0E : open -a Finder
+      cmd - 0x0E : kitty --single-instance=no zsh -lc yazi
       cmd - 0x07 : kill $(yabai -m query --windows --window | jq '.pid')
     '';
   };
