@@ -22,7 +22,7 @@
       opener = {
         edit = [
           {
-            run = 'sudo hx "$@"';
+            run = ''sudo hx "$@"'';
             desc = "Helix";
             block = true;
             for = "macos";
