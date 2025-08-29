@@ -27,7 +27,7 @@
             block = true;
             for = "macos";
           }
-        ]
+        ];
       };
     };
   };
