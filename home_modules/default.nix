@@ -17,5 +17,6 @@
     ./zen-browser.nix
     ./zsh.nix
     ./yazi.nix
+    ./obsidian.nix
   ];
 }
