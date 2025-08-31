@@ -59,6 +59,8 @@
               typst-live
               tinymist
               tetex
+              rustc
+              cargo
             ];
           };
 
