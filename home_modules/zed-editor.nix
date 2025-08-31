@@ -10,10 +10,14 @@
     enable = true;
     package = pkgs.zed-editor;
     extraPackages = [ pkgs.nodejs_22 ]; # Ensure nodejs_22 is available on macOS
+    extensions = [
+      "typst.zed"
+      "zed-latex"
+    ];
     userSettings = {
       node = {
         path = lib.getExe pkgs.nodejs_22;
-        npm_path = lib.getExe' pkgs.nodejs_22 "npm";
+        npm_path = lib.getExe pkgs.nodejs_22 "npm";
       };
       tab_size = 2;
       languages = {
