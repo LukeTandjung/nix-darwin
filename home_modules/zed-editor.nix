@@ -31,10 +31,6 @@
           initialization_options = {
             exportPdf = "onSave";
             outputPath = "$root/$name";
-            typstExtraArgs = [
-              "--"
-              "main.typ"
-            ];
           };
         };
       };
