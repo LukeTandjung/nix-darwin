@@ -17,7 +17,7 @@
     userSettings = {
       node = {
         path = lib.getExe pkgs.nodejs_22;
-        npm_path = lib.getExe pkgs.nodejs_22 "npm";
+        npm_path = lib.getExe' pkgs.nodejs_22 "npm";
       };
       tab_size = 2;
       languages = {
