@@ -58,6 +58,7 @@
               typstyle
               typst-live
               tinymist
+              miktex
             ];
           };
 
