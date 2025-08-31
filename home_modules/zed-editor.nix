@@ -11,8 +11,9 @@
     package = pkgs.zed-editor;
     extraPackages = [ pkgs.nodejs_22 ]; # Ensure nodejs_22 is available on macOS
     extensions = [
-      "typst.zed"
-      "zed-latex"
+      "nix"
+      "typst"
+      "latex"
     ];
     userSettings = {
       node = {
@@ -20,6 +21,23 @@
         npm_path = lib.getExe' pkgs.nodejs_22 "npm";
       };
       tab_size = 2;
+      lsp = {
+        nix = {
+          binary = {
+            path_lookup = true;
+          };
+        };
+        tinymist = {
+          initialization_options = {
+            exportPdf = "onSave";
+            outputPath = "$root/$name";
+            typstExtraArgs = [
+              "--"
+              "main.typ"
+            ];
+          };
+        };
+      };
       languages = {
         Python = {
           language_servers = [
