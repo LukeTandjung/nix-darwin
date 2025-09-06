@@ -61,6 +61,7 @@
               tetex
               rustc
               cargo
+              brave
             ];
           };
 
