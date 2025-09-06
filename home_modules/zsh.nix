@@ -6,5 +6,11 @@
   ...
 }:
 {
-  programs.zsh.enable = true;
+  programs.zsh = {
+    enable = true;
+    package = pkgs.zsh;
+    initContent = ''
+      export PATH="$HOME/.cargo/bin:$PATH"
+    '';
+  };
 }

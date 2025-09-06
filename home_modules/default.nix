@@ -13,7 +13,6 @@
     ./spicetify.nix
     ./vesktop.nix
     ./zed-editor.nix
-    ./zellij.nix
     ./zen-browser.nix
     ./zsh.nix
     ./yazi.nix
