@@ -6,6 +6,7 @@
     extraPlugins = with pkgs.postgresql17Packages; [
       timescaledb
     ];
+    settings.shared_preload_libraries = "timescaledb";
     port = 5433;
     authentication = pkgs.lib.mkOverride 10 ''
       #type database  DBuser  auth-method
@@ -13,10 +14,8 @@
       host    b_connect_test_db    b_connect_test_user    127.0.0.1/32    scram-sha-256
       host    b_connect_test_db    b_connect_test_user    ::1/128         scram-sha-256
     '';
-  };
 
-  system.activationScripts.postgresInit = {
-    text = ''
+    initialScript = pkgs.writeText "backend-initScript" ''
       #!/usr/bin/env bash
       set -euo pipefail
 
