@@ -2,7 +2,10 @@
 {
   services.postgresql = {
     enable = true;
-    package = pkgs.postgresql_16;
+    package = pkgs.postgresql_17;
+    extraPlugins = with pkgs.postgresql17Packages; [
+      timescaledb
+    ];
     port = 5433;
     authentication = pkgs.lib.mkOverride 10 ''
       #type database  DBuser  auth-method
