@@ -5,11 +5,13 @@
   inputs,
   ...
 }:
-
+let
+  isDarwin = pkgs.stdenv.isDarwin;
+  isLinux = pkgs.stdenv.isLinux;
+in    
 {
-  home.username = "luketandjung";
-  home.homeDirectory = "/Users/luketandjung"; # Standard macOS home directory path
-  home.stateVersion = "25.05";
+  home.username = if isDarwin then "luketandjung" else "luke";
+  home.homeDirectory = if isDarwin then "/Users/luketandjung" else "/home/luke"; # Standard macOS home directory path
 
   programs.home-manager.enable = true;
 

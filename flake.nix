@@ -1,5 +1,14 @@
 {
-  description = "Luke's Nix Darwin System";
+  description = "Luke's Nix Darwin/NixOS System Flake";
+
+  nixConfig = {
+    experimental-features = [
+      "flakes"
+      "nix-command"
+      "pipe-operators"
+    ];
+    trusted-users = [ "root" "luke" "luketandjung" ];
+  };
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-unstable";
@@ -17,10 +26,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
+    dank-material-shell = {
+      url = "github:AvengeMedia/DankMaterialShell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    inputs@{
+    inputs @ {
       self,
       nixpkgs,
       stylix,
@@ -28,103 +41,31 @@
       home-manager,
       zen-browser,
       spicetify-nix,
+      ...
     }:
     let
-      system = "aarch64-darwin";
-      # Create a pkgs set that allows unfree
-      pkgs = import nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
-      };
+      inherit (builtins) readDir;
+      inherit (nixpkgs.lib) attrsToList const groupBy listToAttrs mapAttrs nameValuePair;
 
-      configuration =
-        {
-          pkgs,
-          inputs,
-          ...
-        }:
-        {
-          # List packages installed in system profile. To search by name, run:
-          # $ nix-env -qaP | grep wgeti
+      lib' = nixpkgs.lib.extend (const <| const <| nix-darwin.lib);
+      lib  = lib'.extend <| import ./lib inputs;
 
-          environment = {
-            systemPackages = with pkgs; [
-              git
-              raycast
-              dbeaver-bin
-              postman
-              notion-app
-              typst
-              typstyle
-              typst-live
-              tinymist
-              tetex
-              rustc
-              cargo
-              brave
-            ];
-          };
+      hostsByType = readDir ./hosts
+        |> mapAttrs (name: const <| import ./hosts/${name} lib)
+        |> attrsToList
+        |> groupBy ({ value, ... }:
+          if value ? class && value.class == "nixos" then
+            "nixosConfigurations"
+          else
+            "darwinConfigurations")
+        |> mapAttrs (const listToAttrs);
 
-          system.primaryUser = "luketandjung";
+      hostConfigs = hostsByType.nixosConfigurations // hostsByType.darwinConfigurations
+        |> attrsToList
+        |> map ({ name, value }: nameValuePair name value.config)
+        |> listToAttrs;
 
-          users.users.luketandjung = {
-            name = "luketandjung";
-            home = "/Users/luketandjung";
-          };
-
-          security.sudo.extraConfig = ''
-            %staff ALL = (ALL) NOPASSWD: ALL
-          '';
-
-          system.defaults.finder.QuitMenuItem = true;
-
-          # Necessary for using flakes on this system.
-          nix.settings.experimental-features = "nix-command flakes";
-
-          # Set Git commit hash for darwin-version.
-          system.configurationRevision = self.rev or self.dirtyRev or null;
-
-          # Used for backwards compatibility, please read the changelog before changing.
-          # $ darwin-rebuild changelog
-          system.stateVersion = 6;
-
-          # The platform the configuration will be used on.
-          nixpkgs.hostPlatform = "aarch64-darwin";
-
-          fonts.packages = with pkgs; [
-            font-awesome
-            jetbrains-mono
-            ibm-plex
-          ];
-
-          system.activationScripts.postActivation.text = ''
-            echo "Updated /private/etc/sudoers.d/yabai successfully!"
-            su - "$(logname)" -c '${pkgs.skhd}/bin/skhd -r'
-          '';
-        };
-    in
-    {
-      darwinConfigurations."Lukes-Mac-mini" = nix-darwin.lib.darwinSystem {
-        inherit system;
-        specialArgs = { inherit pkgs inputs system; };
-        modules = [
-          configuration
-          stylix.darwinModules.stylix
-          ./darwin_modules
-          home-manager.darwinModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.luketandjung = ./home.nix;
-            home-manager.backupFileExtension = "hm-bak";
-            home-manager.sharedModules = [
-              inputs.zen-browser.homeModules.beta
-              inputs.spicetify-nix.homeManagerModules.spicetify
-            ];
-            # Optionally, use home-manager.extraSpecialArgs to pass
-            # arguments to home.nix
-          }
-        ];
-      };
-    };
+    in hostsByType // hostConfigs // {
+      inherit inputs lib;
+    }; 
 }
