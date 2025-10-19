@@ -5,7 +5,7 @@
     ./hardware.nix
     ./desktop.nix
     ./audio.nix
-    ./networking.nix
+    ./network.nix
     ./power.nix
     ./users.nix
     ./packages.nix
