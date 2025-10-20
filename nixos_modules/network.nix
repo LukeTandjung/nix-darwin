@@ -2,7 +2,7 @@
 
 {
   networking = {
-    hostName = "Lukes-Mac-air";
+    hostName = "nixos";
     networkmanager.enable = true;
   };
 }
