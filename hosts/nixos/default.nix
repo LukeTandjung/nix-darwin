@@ -18,4 +18,6 @@ lib: lib.nixosSystem' ({ config, pkgs, lib, inputs, ... }: {
       inputs.spicetify-nix.homeManagerModules.spicetify
     ];
   };
+
+  system.stateVersion = "25.11";
 })

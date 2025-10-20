@@ -3,6 +3,7 @@
 let
   isDarwin = pkgs.stdenv.isDarwin;
   isLinux = pkgs.stdenv.isLinux;
+in
 {
   imports = [
     ./btop.nix
