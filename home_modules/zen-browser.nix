@@ -32,5 +32,5 @@
       };
     };
   };
-  stylix.targets.zen-browser.profileNames = if pkgs.stdenv.isDarwin then [ "luke" ] else [];
+  stylix.targets.zen-browser.profileNames = [ "luke" ];
 }
