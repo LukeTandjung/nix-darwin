@@ -1,7 +1,9 @@
 { ... }:
 {
-  services.logind = {
-    powerKey = "ignore";
-    powerKeyLongPress = "ignore";
+  services.logind.settings = {
+    Login = {
+      HandlePowerKey = "ignore";
+      HandlePowerKeyLongPress = "ignore";
+    };
   };
 }
