@@ -4,9 +4,7 @@
   lib,
   inputs,
   ...
-}: let
-  isLinux = pkgs.stdenv.isLinux;
-in {
+}: {
   programs.zen-browser = {
     enable = true;
     policies = {
@@ -34,10 +32,8 @@ in {
       };
     };
   };
-
-  if isLinux then {
+  lib.mkIf pkgs.stdenv.isLinux {
     stylix.targets.zen-browser.enable = false;
-  } else {
-    stylix.targets.zen-browser.profileNames = [ "luke" ];
-  }
+  };
+  stylix.targets.zen-browser.profileNames = [ "luke" ];
 }
