@@ -1,4 +1,10 @@
-{ config, pkgs, lib, ... }: {
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+{
   imports = [
     ./btop.nix
     ./direnv.nix
@@ -16,5 +22,6 @@
     ./yazi.nix
     ./skhd.nix
     ./dank-material-shell.nix
+    ./hyprland.nix
   ];
 }
