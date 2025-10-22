@@ -18,4 +18,5 @@ in {
     ./zsh.nix
     ./yazi.nix
     ./skhd.nix
+  ]
 }
