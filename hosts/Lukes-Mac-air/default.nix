@@ -11,14 +11,14 @@ in nixpkgs.lib.nixosSystem {
     ./hardware-configuration.nix
     ../../nixos_modules
     stylix.nixosModules.stylix
-    home-manager.nixosModules.home-manager
+    home-manager.nixosModules.home-manager {
+      home-manager = {
+        useGlobalPkgs = true;
+        useUserPackages = true;
+        backupFileExtension = "hm-bak";
+        users.luketandjung = import ../../home.nix;
+        sharedModules = sharedHomeModules;
+      };
+    }
   ];
-
-  home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    backupFileExtension = "hm-bak";
-    users.luketandjung = import ../../home.nix;
-    sharedModules = sharedHomeModules;
-  };
 }

@@ -10,14 +10,14 @@ in nix-darwin.lib.darwinSystem {
     ./configuration.nix
     ../../darwin_modules
     stylix.darwinModules.stylix
-    home-manager.darwinModules.home-manager
+    home-manager.darwinModules.home-manager {
+      home-manager = {
+        useGlobalPkgs = true;
+        useUserPackages = true;
+        backupFileExtension = "hm-bak";
+        users.luketandjung = import ../../home.nix;
+        sharedModules = sharedHomeModules;
+      };
+    }
   ];
-
-  home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    backupFileExtension = "hm-bak";
-    users.luketandjung = import ../../home.nix;
-    sharedModules = sharedHomeModules;
-  };
 }
