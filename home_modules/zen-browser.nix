@@ -4,11 +4,13 @@
   lib,
   inputs,
   ...
-}: {
+}: let
+  isLinux = pkgs.stdenv.isLinux;
+in {
   programs.zen-browser = {
     enable = true;
     policies = {
-    AutofillAddressEnabled = true;
+      AutofillAddressEnabled = true;
       AutofillCreditCardEnabled = false;
       DisableAppUpdate = true;
       DisableFeedbackCommands = true;
@@ -33,5 +35,9 @@
     };
   };
 
-  stylix.targets.zen-browser.profileNames = [ "luke" ];
+  if isLinux then {
+    stylix.targets.zen-browser.enable = false;
+  } else {
+    stylix.targets.zen-browser.profileNames = [ "luke" ];
+  }
 }
