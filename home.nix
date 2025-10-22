@@ -18,4 +18,7 @@ in
     ./home_modules
   ];
   home.packages = [ ];
+
+  # This suppresses the login message that appears for Kitty!
+  home.file.".hushlogin".text = "";
 }
