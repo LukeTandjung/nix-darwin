@@ -4,8 +4,7 @@
   lib,
   inputs,
   ...
-}:
-{
+}: lib.mkIf pkgs.stdenv.isDarwin {
   programs.zen-browser = {
     enable = true;
     policies = {
