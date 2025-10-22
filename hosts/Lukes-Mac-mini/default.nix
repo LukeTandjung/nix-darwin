@@ -5,7 +5,7 @@
     spicetify-nix.homeManagerModules.spicetify
   ];
 in nix-darwin.lib.darwinSystem {
-  system = "aarch64-darwin"
+  system = "aarch64-darwin";
   modules = [
     ./configuration.nix
     ../../darwin_modules
