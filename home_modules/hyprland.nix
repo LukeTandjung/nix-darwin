@@ -150,7 +150,7 @@ lib.mkIf pkgs.stdenv.isLinux {
         "$mainMod, comma, exec, dms ipc call settings toggle"
         "$mainMod, M, exec, dms ipc call notepad toggle"
         "$mainMod ALT, L, exec, dms ipc call lock lock"
-        ", XF86PowerOff, exec, dms ipc call powermenu toggle"
+        "$mainMod, XF86PowerOff, exec, dms ipc call powermenu toggle"
         "$mainMod, W, exec, dms ipc call dankdash wallpaper"
         "$mainMod, TAB, exec, dms ipc call hypr toggleOverview"
 
