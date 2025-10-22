@@ -1,5 +1,5 @@
 { inputs, ... }: let
-  inherit (inputs) nixpkgs home-manager stylix zen-browser spicetify-nix dank-material-shell;
+  inherit (inputs) nixpkgs home-manager stylix zen-browser spicetify-nix dankMaterialShell;
   sharedHomeModules = [
     # While importing Stylix as a NixOS module also does so for HM, rebuilding without explicitly
     # importing the HM module causes build errors. Apparently this is because it is not imported
@@ -7,6 +7,7 @@
     stylix.homeModules.stylix
     zen-browser.homeModules.beta
     spicetify-nix.homeManagerModules.spicetify
+    dankMaterialShell.homeModules.dankMaterialShell.default
   ];
 in nixpkgs.lib.nixosSystem {
   system = "x86_64-linux";
