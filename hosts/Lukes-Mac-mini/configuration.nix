@@ -48,4 +48,6 @@
     echo "Updated /private/etc/sudoers.d/yabai successfully!"
     su - "$(logname)" -c '${pkgs.skhd}/bin/skhd -r'
   '';
+
+  system.stateVersion = 6;
 }
