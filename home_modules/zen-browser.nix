@@ -6,7 +6,7 @@
   ...
 }: let
   isLinux = pkgs.stdenv.isLinux;
-in lib.mkMerge [{
+in {
   programs.zen-browser = {
     enable = true;
     policies = {
@@ -34,8 +34,10 @@ in lib.mkMerge [{
       };
     };
   };
+}
+
+// (if isLinux then {
+  stylix.targets.zen-browser.enable = false;
+} else {
   stylix.targets.zen-browser.profileNames = [ "luke" ];
-  (lib.mkIf isLinux {
-    stylix.targets.zen-browser.enable = false;
-  });
-}]
+})
