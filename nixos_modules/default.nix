@@ -9,5 +9,6 @@
     ./power.nix
     ./users.nix
     ./packages.nix
+    ./typst.nix
   ];
 }
