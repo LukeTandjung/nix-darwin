@@ -17,6 +17,9 @@
   environment.systemPackages = with pkgs; [
     nautilus
     wl-clipboard
+    cliphist
+    cava
+    qt6-multimedia
     hyprcursor
     catppuccin-cursors.frappeBlue
     imagemagick
