@@ -11,7 +11,12 @@
     };
     extraModulePackages = with config.boot.kernelPackages; [ broadcom_sta ];
     kernelModules = [ "wl" ];
-    blacklistedKernelModules = [ "b43" "bcma" "brcmfmac" "brcmsmac" ];
+    blacklistedKernelModules = [
+      "b43"
+      "bcma"
+      "brcmfmac"
+      "brcmsmac"
+    ];
   };
 
   hardware = {
@@ -21,5 +26,4 @@
   };
 
   services.blueman.enable = true;
-  services.libinput.enable = true;
 }
