@@ -23,5 +23,6 @@
     catppuccin-cursors.frappeBlue
     imagemagick
     brightnessctl
+    playerctl
   ];
 }

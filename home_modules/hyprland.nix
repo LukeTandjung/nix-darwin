@@ -150,7 +150,7 @@ lib.mkIf pkgs.stdenv.isLinux {
         "$mainMod, comma, exec, dms ipc call settings toggle"
         "$mainMod, M, exec, dms ipc call notepad toggle"
         "$mainMod ALT, L, exec, dms ipc call lock lock"
-        ",XF86PowerOff, exec, dms ipc call powermenu toggle"
+        "$mainMod, XF86PowerOff, exec, dms ipc call powermenu toggle"
         "$mainMod, W, exec, dms ipc call dankdash wallpaper"
         "$mainMod, TAB, exec, dms ipc call hypr toggleOverview"
 
@@ -193,15 +193,15 @@ lib.mkIf pkgs.stdenv.isLinux {
         ",XF86AudioLowerVolume, exec, dms ipc call audio decrement 5"
         ",XF86AudioMute, exec, dms ipc call audio mute"
         ",XF86AudioMicMute, exec, dms ipc call audio micmute"
-        ",XF86MonBrightnessUp, exec, dms ipc call brightness increment 5"
-        ",XF86MonBrightnessDown, exec, dms ipc call brightness decrement 5"
+        ",XF86MonBrightnessUp, exec, brightnessctl s 5%+"
+        ",XF86MonBrightnessDown, exec, brightnessctl s 5%-"
       ];
 
       bindl = [
-        ", XF86AudioNext, exec, playerctl next"
-        ", XF86AudioPause, exec, playerctl play-pause"
-        ", XF86AudioPlay, exec, playerctl play-pause"
-        ", XF86AudioPrev, exec, playerctl previous"
+        ",XF86AudioNext, exec, playerctl next"
+        ",XF86AudioPause, exec, playerctl play-pause"
+        ",XF86AudioPlay, exec, playerctl play-pause"
+        ",XF86AudioPrev, exec, playerctl previous"
       ];
 
       # Window and workspace rules
