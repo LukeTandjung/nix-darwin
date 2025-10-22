@@ -2,7 +2,7 @@
 
 {
   # Display manager
-  services.xserver.displayManager.gdm.enable = true;
+  services.displayManager.gdm.enable = true;
 
   # Hyprland
   programs.hyprland = {
@@ -21,6 +21,6 @@
     catppuccin-cursors.frappeBlue
     imagemagick
     brightnessctl
-    dank-material-shell.packages.${pkgs.system}.default
+    inputs.dank-material-shell.packages.${pkgs.system}.default
   ];
 }
