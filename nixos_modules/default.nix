@@ -10,5 +10,6 @@
     ./users.nix
     ./packages.nix
     ./typst.nix
+    ./brave.nix
   ];
 }
