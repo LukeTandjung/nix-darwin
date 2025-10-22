@@ -9,7 +9,9 @@
         efiSysMountPoint = "/boot";
       };
     };
-    kernelModules = [ "brcmfmac" ];
+    extraModulePackages = with config.boot.kernelPackages; [ broadcom_sta ];
+    kernelModules = [ "wl" ];
+    blacklistedKernelModules = [ "b43" "bcma" "brcmfmac" "brcmsmac" ];
   };
 
   hardware = {
