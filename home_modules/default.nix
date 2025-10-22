@@ -1,7 +1,4 @@
-{ config, pkgs, lib, ... }: let
-  isDarwin = pkgs.stdenv.isDarwin;
-  isLinux = pkgs.stdenv.isLinux;
-in {
+{ config, pkgs, lib, ... }: {
   imports = [
     ./btop.nix
     ./direnv.nix
@@ -18,5 +15,5 @@ in {
     ./zsh.nix
     ./yazi.nix
     ./skhd.nix
-  ]
+  ];
 }
