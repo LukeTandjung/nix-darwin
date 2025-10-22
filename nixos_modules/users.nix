@@ -13,6 +13,4 @@
     enable = true;
     wheelNeedsPassword = false;
   };
-
-  programs.zsh.enable = true;
 }
