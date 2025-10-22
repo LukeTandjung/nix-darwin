@@ -19,6 +19,7 @@ lib.mkIf pkgs.stdenv.isLinux {
 
       # Autostart
       "exec-once" = [
+        "bash -c \"wl-paste --watch cliphist store &\""
         "dms run & hyprctl setcursor catppuccin-frappe-blue-cursors 24"
       ];
 
