@@ -12,6 +12,7 @@ in
 {
   home.username = if isDarwin then "luketandjung" else "luke";
   home.homeDirectory = if isDarwin then "/Users/luketandjung" else "/home/luke";
+  home.stateVersion = "25.05";
   programs.home-manager.enable = true;
   imports = [
     ./home_modules
