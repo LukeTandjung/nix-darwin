@@ -4,8 +4,7 @@
   lib,
   inputs,
   ...
-}:
-{
+}: lib.mkIf pkgs.stdenv.isDarwin {
   services.skhd = {
     enable = true;
     package = pkgs.skhd;
