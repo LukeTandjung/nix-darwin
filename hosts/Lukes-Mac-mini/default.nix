@@ -20,4 +20,4 @@ in nix-darwin.lib.darwinSystem {
     users.luketandjung = import ../../home.nix;
     sharedModules = sharedHomeModules;
   };
-})
+}
