@@ -3,7 +3,7 @@
 {
   # Display manager
   services.xserver.displayManager.gdm.enable = true;
-  
+
   # Hyprland
   programs.hyprland = {
     enable = true;
@@ -12,7 +12,7 @@
 
   # Terminal
   environment.sessionVariables.TERMINAL = "kitty";
-  
+
   # Desktop packages
   environment.systemPackages = with pkgs; [
     nautilus
@@ -21,10 +21,6 @@
     catppuccin-cursors.frappeBlue
     imagemagick
     brightnessctl
-  ];
-
-  # For DankMaterialShell!
-  environment.systemPackages = with inputs; [
     dank-material-shell.packages.${pkgs.system}.default
   ];
 }
