@@ -6,8 +6,11 @@
   time.timeZone = "Europe/London";
   i18n.defaultLocale = "en_US.UTF-8";
 
-  nixpkgs = {
-    config.allowUnfree = true;
+  nixpkgs.config = {
+    allowUnfree = true;
+    permittedInsecurePackages = [
+      "broadcom-sta-6.30.223.271-57-6.12.43"
+    ];
   };
 
   system.copySystemConfiguration = false;
