@@ -16,7 +16,7 @@ in nixpkgs.lib.nixosSystem {
         useGlobalPkgs = true;
         useUserPackages = true;
         backupFileExtension = "hm-bak";
-        users.luketandjung = import ../../home.nix;
+        users.luke = import ../../home.nix;
         sharedModules = sharedHomeModules;
       };
     }
