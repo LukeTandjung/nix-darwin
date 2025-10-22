@@ -1,16 +1,17 @@
 { inputs, ... }: let
-  inherit (inputs) nix-darwin nixpkgs home-manager stylix zen-browser spicetify-nix;
+  inherit (inputs) nixpkgs home-manager stylix zen-browser spicetify-nix;
   sharedHomeModules = [
     zen-browser.homeModules.beta
     spicetify-nix.homeManagerModules.spicetify
   ];
-in nix-darwin.lib.darwinSystem {
-  system = "aarch64-darwin"
+in nixpkgs.lib.nixosSystem {
+  system = "x86_64-linux";
   modules = [
     ./configuration.nix
-    ../../darwin_modules
-    stylix.darwinModules.stylix
-    home-manager.darwinModules.home-manager
+    ./hardware-configuration.nix
+    ../../nixos_modules
+    stylix.nixosModules.stylix
+    home-manager.nixosModules.home-manager
   ];
 
   home-manager = {
@@ -20,4 +21,4 @@ in nix-darwin.lib.darwinSystem {
     users.luketandjung = import ../../home.nix;
     sharedModules = sharedHomeModules;
   };
-})
+}
