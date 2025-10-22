@@ -4,9 +4,7 @@
   lib,
   inputs,
   ...
-}: let
-  isLinux = pkgs.stdenv.isLinux;
-in {
+}: {
   programs.zen-browser = {
     enable = true;
     policies = {
@@ -34,10 +32,5 @@ in {
       };
     };
   };
+  stylix.targets.zen-browser.profileNames = if pkgs.stdenv.isDarwin then [ "luke" ] else [];
 }
-
-// (if isLinux then {
-  stylix.targets.zen-browser.enable = false;
-} else {
-  stylix.targets.zen-browser.profileNames = [ "luke" ];
-})
