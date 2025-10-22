@@ -11,5 +11,7 @@
     ./packages.nix
     ./typst.nix
     ./stylix.nix
+    ./figma.nix
+    ./yaak.nix
   ];
 }
