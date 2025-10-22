@@ -3,17 +3,15 @@ This is my Nix-Darwin dotfiles. There are many like it, but this one is mine.
 
 Most people would rice a minimal Linux distro like Arch or NixOS (NixOS is better if you really want to know).
 
-I chose to undo the billions of dollars of investment and countless designer manhours Apple has invested into their design system, and riced my Mac. 
+Not only did I choose to rice my NixOS setup, I also decided to undo the billions of dollars of investment and countless designer manhours Apple has invested into their design system, and riced my Mac. Liquid Glass is overrated anyway.
 
 - **Theme**: Base16 Kanagawa by rebelot.
-- **Status Bar**: spacebar
-- **Window Tiling Manager**: yabai
+- **Status Bar**: DankMaterialShell for NixOS, spacebar for OSX
+- **Window Tiling Manager**: Hyprland for NixOS and yabai for OSX
 - **Terminal Emulator**: kitty
-- **Terminal Multiplexer**: zellij
 - **IDE**: Zed and Helix (will transition to Helix as soon as I figure out its keybinds in time...)
 - **zsh Styling**: oh-my-posh
-- **System-wide Styling**: stylix
-- **Wallpapers**: Wallper
+- **System-wide Styling**: DankMaterialShell and Stylix for NixOS, just Stylix for OSX
 - **Program Launcher**: Raycast
 
 To install, you need Nix and Nix-Darwin. It's just a matter of cloning the changes into a repo of your choice, and symlinking appropriately.
