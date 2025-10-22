@@ -11,5 +11,5 @@
   };
 
   system.copySystemConfiguration = false;
-  system.stateVersion = "unstable";
+  system.stateVersion = "25.11";
 }
