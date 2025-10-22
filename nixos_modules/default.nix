@@ -13,5 +13,6 @@
     ./stylix.nix
     ./figma.nix
     ./yaak.nix
+    ./logind.nix
   ];
 }
