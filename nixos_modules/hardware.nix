@@ -9,11 +9,7 @@
         efiSysMountPoint = "/boot";
       };
     };
-    
-    # Broadcom WiFi drivers for older MacBooks
-    extraModulePackages = with config.boot.kernelPackages; [ broadcom_sta ];
-    kernelModules = [ "wl" ];
-    blacklistedKernelModules = [ "b43" "bcma" "brcmfmac" "brcmsmac" ];
+    kernelModules = [ "brcmfmac" ];
   };
 
   hardware = {
