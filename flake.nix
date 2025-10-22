@@ -26,9 +26,19 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
-    dank-material-shell = {
+    dgop = {
+      url = "github:AvengeMedia/dgop";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    dms-cli = {
+      url = "github:AvengeMedia/danklinux";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    dankMaterialShell = {
       url = "github:AvengeMedia/DankMaterialShell";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.dgop.follows = "dgop";
+      inputs.dms-cli.follows = "dms-cli";
     };
   };
 
@@ -41,13 +51,14 @@
       home-manager,
       zen-browser,
       spicetify-nix,
-      dank-material-shell,
+      dankMaterialShell,
       ...
     }:
     let
       sharedHomeModules = [
         zen-browser.homeModules.beta
         spicetify-nix.homeManagerModules.spicetify
+        dankMaterialShell.homeModules.dankMaterialShell.default
       ];
     in {
       nixosConfigurations.Lukes-Mac-air =

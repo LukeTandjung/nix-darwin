@@ -21,6 +21,5 @@
     catppuccin-cursors.frappeBlue
     imagemagick
     brightnessctl
-    inputs.dank-material-shell.packages.${pkgs.system}.default
   ];
 }

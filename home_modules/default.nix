@@ -15,5 +15,6 @@
     ./zsh.nix
     ./yazi.nix
     ./skhd.nix
+    ./dank-material-shell.nix
   ];
 }
