@@ -1,5 +1,5 @@
 { inputs, ... }: let
-  inherit (inputs) nix-darwin nixpkgs home-manager stylix zen-browser spicetify-nix;
+  inherit (inputs) nix-darwin nixpkgs home-manager stylix zen-browser spicetify-nix dank-material-shell;
   sharedHomeModules = [
     zen-browser.homeModules.beta
     spicetify-nix.homeManagerModules.spicetify

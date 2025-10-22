@@ -41,6 +41,7 @@
       home-manager,
       zen-browser,
       spicetify-nix,
+      dank-material-shell,
       ...
     }:
     let
