@@ -1,6 +1,9 @@
 { inputs, ... }: let
   inherit (inputs) nixpkgs home-manager stylix zen-browser spicetify-nix dank-material-shell;
   sharedHomeModules = [
+    # While importing Stylix as a NixOS module also does so for HM, rebuilding without explicitly
+    # importing the HM module causes build errors. Apparently this is because it is not imported
+    # into HM user subtree at runtime.
     stylix.homeModules.stylix
     zen-browser.homeModules.beta
     spicetify-nix.homeManagerModules.spicetify
