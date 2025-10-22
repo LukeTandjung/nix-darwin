@@ -15,7 +15,7 @@ in nix-darwin.lib.darwinSystem {
         useGlobalPkgs = true;
         useUserPackages = true;
         backupFileExtension = "hm-bak";
-        users.luketandjung = import ../../home.nix;
+        users.luketandjung = ../../home.nix;
         sharedModules = sharedHomeModules;
       };
     }
