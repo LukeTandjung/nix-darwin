@@ -2,12 +2,12 @@
   description = "Luke's Nix Darwin/NixOS System Flake";
 
   nixConfig = {
-    experimental-features = [
-      "flakes"
-      "nix-command"
-      "pipe-operators"
+    experimental-features = "nix-command flakes pipe-operators";
+    trusted-users = [
+      "root"
+      "luke"
+      "luketandjung"
     ];
-    trusted-users = [ "root" "luke" "luketandjung" ];
   };
 
   inputs = {
@@ -43,7 +43,7 @@
   };
 
   outputs =
-    inputs @ {
+    inputs@{
       self,
       nixpkgs,
       stylix,
@@ -60,15 +60,14 @@
         spicetify-nix.homeManagerModules.spicetify
         dankMaterialShell.homeModules.dankMaterialShell.default
       ];
-    in {
-      nixosConfigurations.Lukes-Mac-air =
-        import ./hosts/Lukes-Mac-air {
-          inherit inputs sharedHomeModules;
-        };
+    in
+    {
+      nixosConfigurations.Lukes-Mac-air = import ./hosts/Lukes-Mac-air {
+        inherit inputs sharedHomeModules;
+      };
 
-      darwinConfigurations.Lukes-Mac-mini =
-        import ./hosts/Lukes-Mac-mini {
-          inherit inputs sharedHomeModules;
-        };
+      darwinConfigurations.Lukes-Mac-mini = import ./hosts/Lukes-Mac-mini {
+        inherit inputs sharedHomeModules;
+      };
     };
 }
