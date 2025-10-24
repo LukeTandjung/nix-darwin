@@ -18,7 +18,7 @@
         "@wheel"
       ];
     };
-
+  };
   # Also ensure nixpkgs config allows unfree
   nixpkgs.config.allowUnfree = true;
-};
+}
