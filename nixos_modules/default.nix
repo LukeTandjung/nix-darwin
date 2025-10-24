@@ -14,5 +14,6 @@
     ./figma.nix
     ./yaak.nix
     ./logind.nix
+    ./nix.nix
   ];
 }
