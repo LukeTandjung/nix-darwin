@@ -30,6 +30,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
+    leetgpu.url = "github:LukeTandjung/leetgpu_cli_nix";
     dgop = {
       url = "github:AvengeMedia/dgop";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -56,12 +57,14 @@
       zen-browser,
       spicetify-nix,
       dankMaterialShell,
+      leetgpu,
       ...
     }:
     let
       sharedHomeModules = [
         zen-browser.homeModules.beta
         spicetify-nix.homeManagerModules.spicetify
+        leetgpu.homeManagerModules.default
         dankMaterialShell.homeModules.dankMaterialShell.default
       ];
     in

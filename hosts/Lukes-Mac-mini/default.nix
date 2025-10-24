@@ -1,8 +1,9 @@
 { inputs, ... }: let
-  inherit (inputs) nix-darwin nixpkgs home-manager stylix zen-browser spicetify-nix dankMaterialShell;
+  inherit (inputs) nix-darwin nixpkgs home-manager stylix zen-browser spicetify-nix dankMaterialShell leetgpu;
   sharedHomeModules = [
     zen-browser.homeModules.beta
     spicetify-nix.homeManagerModules.spicetify
+    leetgpu.homeManagerModules.default
     dankMaterialShell.homeModules.dankMaterialShell.default
   ];
 in nix-darwin.lib.darwinSystem {

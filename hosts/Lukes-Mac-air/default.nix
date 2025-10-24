@@ -3,6 +3,7 @@
   sharedHomeModules = [
     zen-browser.homeModules.beta
     spicetify-nix.homeManagerModules.spicetify
+    leetgpu.homeManagerModules.default
     dankMaterialShell.homeModules.dankMaterialShell.default
   ];
 in nixpkgs.lib.nixosSystem {
