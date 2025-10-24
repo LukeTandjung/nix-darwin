@@ -15,7 +15,6 @@
       })
         pkgs.firefox-unwrapped
         { };
-    };
     policies = {
       AutofillAddressEnabled = true;
       AutofillCreditCardEnabled = false;
