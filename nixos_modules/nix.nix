@@ -17,14 +17,7 @@
         "luke"
         "@wheel"
       ];
-
-      # Allow unfree packages
-      allow-unfree = true;
     };
-
-    # Use nixpkgs from flake
-    registry.nixpkgs.flake = pkgs;
-  };
 
   # Also ensure nixpkgs config allows unfree
   nixpkgs.config.allowUnfree = true;
