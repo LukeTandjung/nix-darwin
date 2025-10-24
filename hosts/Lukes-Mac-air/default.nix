@@ -1,5 +1,5 @@
 { inputs, ... }: let
-  inherit (inputs) nixpkgs home-manager stylix zen-browser spicetify-nix dankMaterialShell;
+  inherit (inputs) nixpkgs home-manager stylix zen-browser spicetify-nix dankMaterialShell leetgpu;
   sharedHomeModules = [
     zen-browser.homeModules.beta
     spicetify-nix.homeManagerModules.spicetify
