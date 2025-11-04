@@ -41,6 +41,9 @@
             "ruff"
           ];
         };
+        PHP = {
+          format_on_save = "off";
+        };
       };
       direnv = {
         enable = true;
