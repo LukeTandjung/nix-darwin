@@ -23,8 +23,4 @@
     iptsd.enable = true;
     thermald.enable = true;
   };
-
-  config = {
-    microsoft-surface.surface-control.enable = true;
-  };
 }
