@@ -16,11 +16,15 @@
     bluetooth.enable = true;
     sensor.iio.enable = true;
     graphics.enable = true;
+    microsoft-surface.kernelVersion = "longterm";
   };
 
   services = {
     iptsd.enable = true;
-    surface-control.enable = true;
     thermald.enable = true;
   };
+
+  config = {
+    microsoft-surface.surface-control.enable = true;
+  }
 }
