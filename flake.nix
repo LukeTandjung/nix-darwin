@@ -16,6 +16,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-unstable";
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     stylix.url = "github:nix-community/stylix/master";
     home-manager = {
       url = "github:nix-community/home-manager/master";

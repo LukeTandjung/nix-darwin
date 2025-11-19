@@ -9,21 +9,18 @@
         efiSysMountPoint = "/boot";
       };
     };
-    extraModulePackages = with config.boot.kernelPackages; [ broadcom_sta ];
-    kernelModules = [ "wl" ];
-    blacklistedKernelModules = [
-      "b43"
-      "bcma"
-      "brcmfmac"
-      "brcmsmac"
-    ];
   };
 
   hardware = {
     enableAllFirmware = true;
     bluetooth.enable = true;
     sensor.iio.enable = true;
+    graphics.enable = true;
   };
 
-  services.blueman.enable = true;
+  services = {
+    iptsd.enable = true;
+    surface-control.enable = true;
+    thermald.enable = true;
+  }
 }
