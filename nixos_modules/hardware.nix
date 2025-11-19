@@ -26,5 +26,5 @@
 
   config = {
     microsoft-surface.surface-control.enable = true;
-  }
+  };
 }
