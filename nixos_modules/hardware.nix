@@ -15,8 +15,6 @@
     enableAllFirmware = true;
     bluetooth.enable = true;
     sensor.iio.enable = true;
-    graphics.enable = true;
-    microsoft-surface.kernelVersion = "longterm";
   };
 
   services = {
