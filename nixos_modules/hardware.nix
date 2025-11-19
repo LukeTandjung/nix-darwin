@@ -23,4 +23,4 @@
     surface-control.enable = true;
     thermald.enable = true;
   };
-};
+}
