@@ -22,5 +22,5 @@
     iptsd.enable = true;
     surface-control.enable = true;
     thermald.enable = true;
-  }
-}
+  };
+};
