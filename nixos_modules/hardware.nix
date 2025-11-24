@@ -14,11 +14,5 @@
   hardware = {
     enableAllFirmware = true;
     bluetooth.enable = true;
-    sensor.iio.enable = true;
-  };
-
-  services = {
-    iptsd.enable = true;
-    thermald.enable = true;
   };
 }

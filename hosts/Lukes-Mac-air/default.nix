@@ -1,5 +1,5 @@
 { inputs, ... }: let
-  inherit (inputs) nixpkgs home-manager stylix zen-browser spicetify-nix dankMaterialShell leetgpu nixos-hardware;
+  inherit (inputs) nixpkgs home-manager stylix zen-browser spicetify-nix dankMaterialShell leetgpu;
   sharedHomeModules = [
     zen-browser.homeModules.beta
     spicetify-nix.homeManagerModules.spicetify
@@ -22,6 +22,5 @@ in nixpkgs.lib.nixosSystem {
         sharedModules = sharedHomeModules;
       };
     }
-    nixos-hardware.nixosModules.microsoft-surface-common
   ];
 }
