@@ -4,7 +4,8 @@
   lib,
   inputs,
   ...
-}: {
+}:
+{
   programs.zen-browser = {
     enable = true;
     # At the time of writing this (24 October 2025), aarch64-darwin machines are experiencing GTK+3 build failures.
@@ -81,6 +82,13 @@
           title = "GitHub";
           url = "https://github.com";
           position = 6;
+          isEssential = true;
+        };
+        t3chat = {
+          id = "a1b2c3d4-7777-4444-8888-777777777777";
+          title = "t3.chat";
+          url = "https://t3.chat/";
+          position = 7;
           isEssential = true;
         };
       };
