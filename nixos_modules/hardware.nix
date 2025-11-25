@@ -9,6 +9,9 @@
         efiSysMountPoint = "/boot";
       };
     };
+    # These options are Framework 12 specific modules!
+    initrd.kernelModules = [ "pinctrl_tigerlake" ];
+    kernelModules = [ "soc_button_array" ];
   };
 
   hardware = {

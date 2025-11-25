@@ -24,5 +24,9 @@
     imagemagick
     brightnessctl
     playerctl
+
+    # These are Framework 12 specific settings!
+    iio-sensor-proxy
+    iio-hyprland
   ];
 }
