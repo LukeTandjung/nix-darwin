@@ -9,7 +9,10 @@ lib.mkIf pkgs.stdenv.isLinux {
   wayland.windowManager.hyprland = {
     enable = true;
     settings = {
-      monitor = [ ",preferred,auto,auto" ];
+      monitor = [
+        "eDP-1,preferred,auto,auto"
+        "DP-3,preferred,auto,auto,mirror,eDP-1"
+      ];
 
       # Variables
       "$terminal" = "kitty";
