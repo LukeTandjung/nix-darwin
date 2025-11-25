@@ -8,13 +8,12 @@
 {
   programs.git = {
     enable = true;
-    package = pkgs.git.override { withLibsecret = true; };
+    package = pkgs.git;
     settings = {
       user = {
         name = "LukeTandjung";
         email = "lukelucus123@gmail.com";
       };
-      credential.helper = "libsecret";
     };
   };
 }

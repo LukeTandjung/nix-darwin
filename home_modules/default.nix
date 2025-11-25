@@ -25,5 +25,6 @@
     ./hyprland.nix
     ./leetgpu.nix
     ./git.nix
+    ./ssh.nix
   ];
 }
