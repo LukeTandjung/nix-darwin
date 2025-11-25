@@ -5,7 +5,6 @@
   environment.systemPackages = with pkgs; [
     git
     wget
-    acpi
     upower
   ];
 
