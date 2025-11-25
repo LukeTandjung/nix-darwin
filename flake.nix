@@ -49,6 +49,7 @@
       nixpkgs,
       stylix,
       nix-darwin,
+      nixos-hardware,
       home-manager,
       zen-browser,
       spicetify-nix,

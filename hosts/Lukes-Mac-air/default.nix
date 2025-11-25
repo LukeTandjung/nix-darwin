@@ -1,5 +1,5 @@
 { inputs, ... }: let
-  inherit (inputs) nixpkgs home-manager stylix zen-browser spicetify-nix dankMaterialShell leetgpu;
+  inherit (inputs) nixpkgs nixos-hardware home-manager stylix zen-browser spicetify-nix dankMaterialShell leetgpu;
   sharedHomeModules = [
     zen-browser.homeModules.beta
     spicetify-nix.homeManagerModules.spicetify
@@ -13,6 +13,7 @@ in nixpkgs.lib.nixosSystem {
     ./hardware-configuration.nix
     ../../nixos_modules
     stylix.nixosModules.stylix
+    nixos-hardware.nixosModules.framework-12-13th-gen-intel
     home-manager.nixosModules.home-manager {
       home-manager = {
         useGlobalPkgs = true;
