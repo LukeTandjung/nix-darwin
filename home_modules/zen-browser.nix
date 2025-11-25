@@ -87,7 +87,7 @@
         t3chat = {
           id = "a1b2c3d4-7777-4444-8888-777777777777";
           title = "t3.chat";
-          url = "https://t3.chat/";
+          url = "https://t3.chat";
           position = 7;
           isEssential = true;
         };
