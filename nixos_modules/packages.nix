@@ -6,6 +6,7 @@
     git
     wget
     acpi
+    upower
   ];
 
   # Fonts
