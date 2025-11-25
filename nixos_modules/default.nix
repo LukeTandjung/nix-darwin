@@ -4,6 +4,7 @@
   imports = [
     ./hardware.nix
     ./desktop.nix
+    ./wallpaper.nix
     ./audio.nix
     ./network.nix
     ./power.nix
@@ -13,7 +14,6 @@
     ./stylix.nix
     ./figma.nix
     ./yaak.nix
-    ./logind.nix
     ./nix.nix
     ./rnote.nix
   ];
