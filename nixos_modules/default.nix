@@ -15,5 +15,6 @@
     ./yaak.nix
     ./logind.nix
     ./nix.nix
+    ./rnote.nix
   ];
 }
