@@ -24,5 +24,6 @@
     ./dank-material-shell.nix
     ./hyprland.nix
     ./leetgpu.nix
+    ./git.nix
   ];
 }
