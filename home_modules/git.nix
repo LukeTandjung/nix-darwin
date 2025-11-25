@@ -8,7 +8,7 @@
 {
   programs.git = {
     enable = true;
-    package = pkgs.git.override { withLibSecret = true; };
+    package = pkgs.git.override { withLibsecret = true; };
     settings = {
       user = {
         name = "LukeTandjung";
