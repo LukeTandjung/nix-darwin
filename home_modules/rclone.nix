@@ -16,20 +16,20 @@
       };
 
       secrets = {
-        client_id = "~/secrets/rclone_client_id";
-        client_secret = "$~/secrets/rclone_client_secret";
-        token = "$~/secrets/rclone_token.json";
+        client_id = "${config.home.homeDirectory}/secrets/rclone_client_id";
+        client_secret = "${config.home.homeDirectory}/secrets/rclone_client_secret";
+        token = "${config.home.homeDirectory}/secrets/rclone_token.json";
       };
 
       mounts = {
         "Documents" = {
           enable = true;
-          mountPoint = "$~/Documents";
+          mountPoint = "${config.home.homeDirectory}/Documents";
           options = {
             vfs-cache-mode = "writes";
             dir-cache-time = "12h";
             poll-interval = "30s";
-            cache-dir = "~/.cache/rclone";
+            cache-dir = "${config.home.homeDirectory}/.cache/rclone";
             unmask = "0022";
           };
         };
