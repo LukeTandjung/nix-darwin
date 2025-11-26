@@ -15,5 +15,6 @@
     ./yaak.nix
     ./nix.nix
     ./rnote.nix
+    ./inkscape.nix
   ];
 }
