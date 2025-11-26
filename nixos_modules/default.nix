@@ -4,7 +4,6 @@
   imports = [
     ./hardware.nix
     ./desktop.nix
-    ./wallpaper.nix
     ./audio.nix
     ./network.nix
     ./power.nix
