@@ -32,7 +32,7 @@
             cache-dir = "~/.cache/rclone";
             unmask = "0022";
           };
-        }
+        };
       };
     };
   };
