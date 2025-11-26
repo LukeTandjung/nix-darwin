@@ -15,8 +15,6 @@
       logo = {
         source = "./assets/hokusai.png";
         type = "kitty-direct";
-        width = 25;
-        height = 25;
         padding = {
           top = 1;
           left = 3;

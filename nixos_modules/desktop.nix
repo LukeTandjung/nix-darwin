@@ -21,7 +21,7 @@
     cava
     hyprcursor
     catppuccin-cursors.frappeBlue
-    imagemagick7
+    imagemagick
     brightnessctl
     playerctl
 
