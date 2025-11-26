@@ -11,7 +11,7 @@
     # Keep defaults; set agent behavior for all hosts
     matchBlocks."*" = {
       addKeysToAgent = "yes";
-      identityFile = [ "~/.ssh/id_ed25519" ];
+      identityFile = [ "~/secrets/id_ed25519" ];
       identitiesOnly = true;
     };
   };
