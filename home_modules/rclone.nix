@@ -30,7 +30,7 @@
             dir-cache-time = "12h";
             poll-interval = "30s";
             cache-dir = "${config.home.homeDirectory}/.cache/rclone";
-            unmask = "0022";
+            umask = "0022";
           };
         };
       };
