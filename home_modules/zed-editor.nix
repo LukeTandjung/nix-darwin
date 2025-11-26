@@ -14,6 +14,7 @@
       "nix"
       "typst"
       "latex"
+      "opencode"
     ];
     userSettings = {
       node = {
