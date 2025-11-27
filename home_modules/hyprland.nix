@@ -36,8 +36,8 @@ lib.mkIf pkgs.stdenv.isLinux {
 
       general = {
         gaps_in = 5;
-        gaps_out = 20;
-        border_size = 2;
+        gaps_out = 5;
+        border_size = 1;
         resize_on_border = false;
         allow_tearing = false;
         layout = "dwindle";
@@ -192,8 +192,8 @@ lib.mkIf pkgs.stdenv.isLinux {
         ",XF86AudioLowerVolume, exec, dms ipc call audio decrement 5"
         ",XF86AudioMute, exec, dms ipc call audio mute"
         ",XF86AudioMicMute, exec, dms ipc call audio micmute"
-        ",XF86MonBrightnessUp, exec, dms ipc call brightness increment 5"
-        ",XF86MonBrightnessDown, exec, dms ipc call brightness decrement 5"
+        ",XF86MonBrightnessUp, exec, dms ipc call brightness increment 5 backlight:intel_backlight"
+        ",XF86MonBrightnessDown, exec, dms ipc call brightness decrement 5 backlight:intel_backlight"
       ];
 
       bindl = [
