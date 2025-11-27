@@ -192,8 +192,8 @@ lib.mkIf pkgs.stdenv.isLinux {
         ",XF86AudioLowerVolume, exec, dms ipc call audio decrement 5"
         ",XF86AudioMute, exec, dms ipc call audio mute"
         ",XF86AudioMicMute, exec, dms ipc call audio micmute"
-        ",XF86MonBrightnessUp, exec, brightnessctl s 5%+"
-        ",XF86MonBrightnessDown, exec, brightnessctl s 5%-"
+        ",XF86MonBrightnessUp, exec, dms ipc call brightness increment 5"
+        ",XF86MonBrightnessDown, exec, dms ipc call brightness decrement 5"
       ];
 
       bindl = [
