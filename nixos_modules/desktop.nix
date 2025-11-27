@@ -22,7 +22,6 @@
     hyprcursor
     catppuccin-cursors.frappeBlue
     imagemagick
-    brightnessctl
     playerctl
 
     # These are Framework 12 specific settings!
