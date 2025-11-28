@@ -8,15 +8,6 @@
 {
   programs.zen-browser = {
     enable = true;
-    # At the time of writing this (24 October 2025), aarch64-darwin machines are experiencing GTK+3 build failures.
-    # This package override is necessary to stop this.
-    package = lib.mkIf pkgs.stdenv.isDarwin (
-      (pkgs.wrapFirefox.override {
-        libcanberra-gtk3 = pkgs.libcanberra-gtk2;
-      })
-        pkgs.firefox-unwrapped
-        { }
-    );
     policies = {
       AutofillAddressEnabled = true;
       AutofillCreditCardEnabled = false;
