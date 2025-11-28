@@ -6,7 +6,6 @@
     git
     wget
     upower
-    hubstaff
   ];
 
   # Fonts
