@@ -33,6 +33,17 @@
             umask = "0022";
           };
         };
+        "Pictures" = {
+          enable = true;
+          mountPoint = "${config.home.homeDirectory}/Pictures";
+          options = {
+            vfs-cache-mode = "writes";
+            dir-cache-time = "12h";
+            poll-interval = "30s";
+            cache-dir = "${config.home.homeDirectory}/.cache/rclone";
+            umask = "0022";
+          };
+        };
       };
     };
   };
