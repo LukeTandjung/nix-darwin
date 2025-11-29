@@ -9,18 +9,69 @@
   programs.helix = {
     package = pkgs.helix;
     enable = true;
-    languages.language = [
-      {
-        name = "nix";
-        auto-format = true;
-        formatter.command = lib.getExe pkgs.nixfmt-rfc-style;
-      }
-      {
-        name = "typst";
-        auto-format = true;
-        formatter.command = "typstyle";
-      }
-    ];
+    languages = {
+      language-server = {
+        nixd.command = "${pkgs.nixd}/bin/nixd";
+        typescript-language-server = {
+          command = "${pkgs.nodePackages.typescript-language-server}/bin/typescript-language-server";
+          args = [ "--stdio" ];
+        };
+        rust-analyzer.command = "${pkgs.rust-analyzer}/bin/rust-analyzer";
+        ty.command = "${pkgs.ty}/bin/ty";
+      };
+      language = [
+        {
+          name = "nix";
+          language-servers = [ "nixd" ];
+          auto-format = true;
+          formatter.command = lib.getExe pkgs.nixfmt-rfc-style;
+          file-types = [
+            "nix"
+          ];
+        }
+        {
+          name = "typst";
+          language-servers = [ "tinymist" ];
+          auto-format = true;
+          formatter.command = "typstyle";
+          file-types = [
+            "typ"
+          ];
+        }
+        {
+          name = "typescript";
+          language-servers = [ "typescript-language-server" ];
+          auto-format = true;
+          formatter = {
+            command = "${pkgs.prettier}/bin/prettier";
+            args = [
+              "--parser"
+              "typescript"
+            ];
+          };
+          file-types = [
+            "ts"
+            "tsx"
+          ];
+        }
+        {
+          name = "rust";
+          language-servers = [ "rust-analyzer" ];
+          auto-format = false;
+          file_type = [
+            "rs"
+          ];
+        }
+        {
+          name = "python";
+          language-servers = [ "ty" ];
+          auto-format = true;
+          file_type = [
+            "py"
+          ];
+        }
+      ];
+    };
     settings = {
       keys.normal = {
         "C-y" = [
