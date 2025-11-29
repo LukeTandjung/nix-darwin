@@ -66,7 +66,7 @@
           name = "python";
           language-servers = [ "ty" ];
           auto-format = true;
-          file_type = [
+          file_types = [
             "py"
           ];
         }
