@@ -3,6 +3,7 @@
   # 1) Core engine settings
   stylix.enable = true;
   stylix.autoEnable = true;
+  stylix.enableReleaseChecks = false;
 
   # 2) Inline Base16 “Bauh Nord” scheme
   stylix.base16Scheme = {
