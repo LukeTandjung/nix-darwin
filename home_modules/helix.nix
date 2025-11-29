@@ -22,7 +22,7 @@
         };
         vscode-langservers-extracted = {
           command = "${pkgs.vscode-langservers-extracted}/bin/vscode-langservers-extracted";
-          args = [ "--stdio" ]
+          args = [ "--stdio" ];
         };
         rust-analyzer.command = "${pkgs.rust-analyzer}/bin/rust-analyzer";
         ty = {
@@ -51,7 +51,11 @@
         }
         {
           name = "typescript";
-          language-servers = [ "typescript-language-server" "tailwindcss-ls" "vscode-langservers-extracted" ];
+          language-servers = [
+            "typescript-language-server"
+            "tailwindcss-ls"
+            "vscode-langservers-extracted"
+          ];
           auto-format = true;
           formatter = {
             command = "${pkgs.prettier}/bin/prettier";
@@ -66,7 +70,11 @@
         }
         {
           name = "tsx";
-          language-servers = [ "typescript-language-server" "tailwindcss-ls" "vscode-langservers-extracted" ];
+          language-servers = [
+            "typescript-language-server"
+            "tailwindcss-ls"
+            "vscode-langservers-extracted"
+          ];
           auto-format = true;
           formatter = {
             command = "${pkgs.prettier}/bin/prettier";
