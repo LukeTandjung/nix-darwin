@@ -20,6 +20,7 @@
           command = "${pkgs.tailwindcss-language-server}/bin/tailwindcss-language-server";
           args = [ "--stdio" ];
         };
+        # This language server is responsible for handling regular HTML, CSS, JS, and JSON!
         vscode-langservers-extracted = {
           command = "${pkgs.vscode-langservers-extracted}/bin/vscode-langservers-extracted";
           args = [ "--stdio" ];
