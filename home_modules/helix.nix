@@ -58,7 +58,7 @@
           name = "rust";
           language-servers = [ "rust-analyzer" ];
           auto-format = false;
-          file_type = [
+          file_types = [
             "rs"
           ];
         }
