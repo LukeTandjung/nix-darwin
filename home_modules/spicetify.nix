@@ -4,9 +4,8 @@
   lib,
   inputs,
   ...
-}:
-{
-  programs.spicetify = lib.mkIf pkgs.stdenv.isLinux {
+}: lib.mkIf pkgs.stdenv.isLinux {
+  programs.spicetify = {
     enable = true;
   };
 }
