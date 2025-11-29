@@ -27,6 +27,12 @@
             block = true;
             for = "macos";
           }
+          {
+            run = ''hx "$@"'';
+            desc = "Helix";
+            block = true;
+            for = "linux";
+          }
         ];
       };
     };

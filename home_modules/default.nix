@@ -27,5 +27,7 @@
     ./git.nix
     ./ssh.nix
     ./rclone.nix
+    ./lazygit.nix
+    ./claude-code.nix
   ];
 }
