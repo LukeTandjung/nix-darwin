@@ -34,7 +34,7 @@
         ":insert-output lazygit"
         ":buffer-close!"
         ":redraw"
-      ];;
+      ];
     };
   };
 }
