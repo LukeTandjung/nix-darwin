@@ -6,7 +6,7 @@
   ...
 }:
 {
-  programs.spicetify = {
+  programs.spicetify = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
   };
 }
