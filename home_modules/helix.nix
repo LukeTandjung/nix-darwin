@@ -58,7 +58,7 @@
           name = "rust";
           language-servers = [ "rust-analyzer" ];
           auto-format = false;
-          file_types = [
+          file-types = [
             "rs"
           ];
         }
@@ -66,7 +66,7 @@
           name = "python";
           language-servers = [ "ty" ];
           auto-format = true;
-          file_types = [
+          file-types = [
             "py"
           ];
         }
