@@ -2,7 +2,7 @@
   inherit (inputs) nix-darwin nixpkgs home-manager stylix zen-browser spicetify-nix dankMaterialShell leetgpu;
   sharedHomeModules = [
     zen-browser.homeModules.beta
-    spicetify-nix.homeManagerModules.spicetify
+    # spicetify-nix.homeManagerModules.spicetify  # Disabled: archive.org DRM fetch issue on Darwin
     leetgpu.homeManagerModules.default
     dankMaterialShell.homeModules.dankMaterialShell.default
   ];
