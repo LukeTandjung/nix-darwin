@@ -23,14 +23,14 @@
     ];
     settings = {
       keys.normal = {
-        C.y = [
+        "C-y" = [
           ":sh rm -f /tmp/unique-file"
           ":insert-output yazi %{buffer_name} --chooser-file=/tmp/unique-file"
           ":insert-output echo '\x1b[?1049h\x1b[?2004h' > /dev/tty"
           ":open %sh{sudo cat /tmp/unique-file}"
           ":redraw"
         ];
-        C.g = [
+        "C-g" = [
           ":new"
           ":insert-output lazygit"
           ":buffer-close!"
