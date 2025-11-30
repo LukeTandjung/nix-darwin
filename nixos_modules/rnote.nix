@@ -1,6 +1,7 @@
 { pkgs, ... }:
 {
-  environment.systemPackages = [
-    pkgs.rnote
+  environment.systemPackages = with pkgs; [
+    rnote
+    libinput
   ];
 }
