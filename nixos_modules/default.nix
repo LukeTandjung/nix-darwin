@@ -14,7 +14,7 @@
     ./figma.nix
     ./yaak.nix
     ./nix.nix
-    ./rnote.nix
+    ./flatpak.nix
     ./inkscape.nix
   ];
 }

@@ -17,6 +17,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    flatpaks.url = "github:in-a-dil-emma/declarative-flatpak/latest";
     stylix = {
       url = "github:nix-community/stylix/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -53,6 +54,7 @@
       stylix,
       nix-darwin,
       nixos-hardware,
+      flatpaks,
       home-manager,
       zen-browser,
       spicetify-nix,

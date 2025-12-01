@@ -1,12 +1,24 @@
-{ inputs, ... }: let
-  inherit (inputs) nixpkgs nixos-hardware home-manager stylix zen-browser spicetify-nix dankMaterialShell leetgpu;
+{ inputs, ... }:
+let
+  inherit (inputs)
+    nixpkgs
+    nixos-hardware
+    flatpaks
+    home-manager
+    stylix
+    zen-browser
+    spicetify-nix
+    dankMaterialShell
+    leetgpu
+    ;
   sharedHomeModules = [
     zen-browser.homeModules.beta
     spicetify-nix.homeManagerModules.spicetify
     leetgpu.homeManagerModules.default
     dankMaterialShell.homeModules.dankMaterialShell.default
   ];
-in nixpkgs.lib.nixosSystem {
+in
+nixpkgs.lib.nixosSystem {
   system = "x86_64-linux";
   modules = [
     ./configuration.nix
@@ -14,7 +26,9 @@ in nixpkgs.lib.nixosSystem {
     ../../nixos_modules
     stylix.nixosModules.stylix
     nixos-hardware.nixosModules.framework-12-13th-gen-intel
-    home-manager.nixosModules.home-manager {
+    flatpaks.nixosModules.default
+    home-manager.nixosModules.home-manager
+    {
       home-manager = {
         useGlobalPkgs = true;
         useUserPackages = true;
