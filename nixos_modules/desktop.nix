@@ -1,7 +1,7 @@
-{ inputs, pkgs, ... }:
+{ pkgs, ... }:
 
 {
-  # Display manager
+  # Display manager when you first login!
   services.displayManager.gdm.enable = true;
 
   # Hyprland
@@ -29,4 +29,14 @@
     iio-hyprland
     libinput
   ];
+
+  # xdg portal settings for desktop configuration
+  xdg.portal = {
+    enable = true;
+    xdgOpenUsePortal = true;
+    extraPortals = with pkgs; [
+      xdg-desktop-portal-hyprland
+      xdg-xdg-desktop-portal-gtk
+    ];
+  };
 }
