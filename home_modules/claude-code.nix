@@ -6,6 +6,12 @@
   programs.claude-code = {
     enable = true;
     package = pkgs.claude-code;
+    mcpServers = {
+      figma-desktop = {
+        type = "http";
+        url = "http://127.0.0.1:3845/mcp";
+      };
+    };
     memory.text = ''
       # Typescript Rules
       - In tsconfig.json, under compilerOptions, the paths key must always be the value { "*": [ "./app/*" ] }.
