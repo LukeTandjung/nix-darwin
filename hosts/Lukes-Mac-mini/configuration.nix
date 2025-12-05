@@ -30,7 +30,10 @@
     %staff ALL = (ALL) NOPASSWD: ALL
   '';
 
-  system.defaults.finder.QuitMenuItem = true;
+  system.defaults.finder = {
+    QuitMenuItem = true;
+    AppleShowAllFiles = true;
+  };
 
   nixpkgs = {
     hostPlatform = "aarch64-darwin";
