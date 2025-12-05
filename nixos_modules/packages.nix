@@ -6,8 +6,6 @@
     git
     wget
     upower
-    brave
-    firefox
   ];
 
   # Fonts
