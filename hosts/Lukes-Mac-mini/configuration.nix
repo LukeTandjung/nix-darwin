@@ -16,6 +16,8 @@
       tetex
       rustc
       cargo
+      firefox
+      brave
     ];
   };
 
