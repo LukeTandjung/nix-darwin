@@ -46,6 +46,13 @@
           format_on_save = "off";
         };
       };
+      agent_servers = {
+        "Kimi CLI" = {
+          command = "kimi";
+          args = [ "--acp" ];
+          env = { };
+        };
+      };
       direnv = {
         enable = true;
       };
