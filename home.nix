@@ -14,7 +14,7 @@ in
   home = {
     username = if isDarwin then "luketandjung" else "luke";
     homeDirectory = if isDarwin then "/Users/luketandjung" else "/home/luke";
-    stateVersion = "25.05";
+    stateVersion = "26.05";
     packages = [ ];
 
     # This suppresses the login message that appears for Kitty!
