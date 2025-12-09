@@ -18,6 +18,7 @@
           "effect-mcp@latest"
         ];
         env = { };
+        type = "stdio";
       };
     };
     memory.text = ''
