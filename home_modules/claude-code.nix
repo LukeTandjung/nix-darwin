@@ -11,6 +11,14 @@
         type = "http";
         url = "http://127.0.0.1:3845/mcp";
       };
+      effect-docs = {
+        command = "npx";
+        args = [
+          "-y"
+          "effect-mcp@latest"
+        ];
+        env = { };
+      };
     };
     memory.text = ''
       # Typescript Rules
@@ -23,8 +31,9 @@
       - Do not use type assertions (... as type).
       - Unless stated otherwisem, Typescript is only used in the React frontend. Furthermore, we heavily make use of two libraries to write it:
         the BaseUI Headless Component Library and Effect-TS. Use the Claude skill for fetching llms.txt when working with these libraries.
+        For Effect-TS, there is an MCP server to fetch documentation.
       - If Typescript was to be used for the Bun backend, we will use Elysia.js and Effect-TS. Use the Claude skill for fetching llms.txt when
-        working with these libraries.
+        working with these libraries. For Effect-TS, there is an MCP server to fetch documentation.
 
       # Rust Rules
       I am new to Rust and am trying to learn it. When I ask any Rust-related questions, do not give me the answer outright.
