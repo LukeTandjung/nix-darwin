@@ -20,6 +20,10 @@
         env = { };
         type = "stdio";
       };
+      docs-dedalus = {
+        type = "http";
+        url = "https://docs.dedaluslabs.ai/mcp";
+      }
     };
     memory.text = ''
       # Typescript Rules
