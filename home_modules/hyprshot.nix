@@ -9,6 +9,6 @@ lib.mkIf pkgs.stdenv.isLinux {
   programs.hyprshot = {
     enable = true;
     package = pkgs.hyprshot;
-    saveLocation = "$HOME/Pictures/Others";
+    saveLocation = "$HOME/Screenshots";
   };
 }
