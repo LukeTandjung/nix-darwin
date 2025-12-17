@@ -180,6 +180,11 @@ lib.mkIf pkgs.stdenv.isLinux {
         # Scroll through workspaces
         "$mainMod, mouse_down, workspace, e+1"
         "$mainMod, mouse_up, workspace, e-1"
+
+        # Screenshot settings
+        "$mainMod, PRINT, exec, hyprshot -m window"
+        ", PRINT, exec, hyprshot -m output"
+        "#mainMod SHIFT, PRINT, exec hyprshot -m region"
       ];
 
       bindm = [

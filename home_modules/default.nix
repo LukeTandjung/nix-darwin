@@ -29,5 +29,6 @@
     ./rclone.nix
     ./lazygit.nix
     ./claude-code.nix
+    ./hyprshot.nix
   ];
 }
