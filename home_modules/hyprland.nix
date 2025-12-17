@@ -184,7 +184,7 @@ lib.mkIf pkgs.stdenv.isLinux {
         # Screenshot settings
         "$mainMod, PRINT, exec, hyprshot -m window"
         ", PRINT, exec, hyprshot -m output"
-        "#mainMod SHIFT, PRINT, exec hyprshot -m region"
+        "$mainMod SHIFT, PRINT, exec hyprshot -m region"
       ];
 
       bindm = [
