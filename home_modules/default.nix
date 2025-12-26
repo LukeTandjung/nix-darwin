@@ -30,5 +30,6 @@
     ./lazygit.nix
     ./claude-code.nix
     ./hyprshot.nix
+    ./orchids.nix
   ];
 }

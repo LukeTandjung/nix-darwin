@@ -10,11 +10,13 @@ let
     spicetify-nix
     dankMaterialShell
     leetgpu
+    orchids
     ;
   sharedHomeModules = [
     zen-browser.homeModules.beta
     spicetify-nix.homeManagerModules.spicetify
     leetgpu.homeManagerModules.default
+    orchids.homeManagerModules.default
     dankMaterialShell.homeModules.dankMaterialShell.default
   ];
 in
