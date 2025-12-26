@@ -5,7 +5,7 @@
   inputs,
   ...
 }: lib.mkIf pkgs.stdenv.isLinux {
-  programs.dankMaterialShell = {
+  programs.dank-material-shell = {
     enable = true;
     enableCalendarEvents = false;
   };

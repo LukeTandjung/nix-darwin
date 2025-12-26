@@ -16,7 +16,7 @@ let
     spicetify-nix.homeManagerModules.spicetify # Disabled: archive.org DRM fetch issue on Darwin
     leetgpu.homeManagerModules.default
     orchids.homeManagerModules.default
-    dankMaterialShell.homeModules.dankMaterialShell.default
+    dankMaterialShell.homeModules.dank-material-shell
   ];
 in
 nix-darwin.lib.darwinSystem {

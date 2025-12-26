@@ -17,7 +17,7 @@ let
     spicetify-nix.homeManagerModules.spicetify
     leetgpu.homeManagerModules.default
     orchids.homeManagerModules.default
-    dankMaterialShell.homeModules.dankMaterialShell.default
+    dankMaterialShell.homeModules.dank-material-shell
   ];
 in
 nixpkgs.lib.nixosSystem {

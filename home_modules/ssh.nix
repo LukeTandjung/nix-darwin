@@ -8,7 +8,8 @@
 {
   programs.ssh = {
     enable = true;
-    # Keep defaults; set agent behavior for all hosts
+    enableDefaultConfig = false;
+    # Set agent behavior for all hosts
     matchBlocks."*" = {
       addKeysToAgent = "yes";
       identityFile = [ "~/secrets/id_ed25519" ];
