@@ -391,11 +391,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1766757110,
-        "narHash": "sha256-juDdO8SvPFylDjiJwDlIg53SPdYC9tuNRbUtOCMJY4s=",
+        "lastModified": 1766758050,
+        "narHash": "sha256-xNLCwRwDiaCSS1e9+Sj+RYR5s6XO9l45voymcIFhEZo=",
         "owner": "LukeTandjung",
         "repo": "orchids",
-        "rev": "07bf380f89e5b47166f549e6401895ed92172d43",
+        "rev": "be0880bcda83c8df00b44cba5a5fdba27a8b3410",
         "type": "github"
       },
       "original": {
