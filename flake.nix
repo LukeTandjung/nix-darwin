@@ -36,6 +36,7 @@
     };
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
     leetgpu.url = "github:LukeTandjung/leetgpu_cli_nix";
+    orchids.url = "github:LukeTandjung/orchids";
     dgop = {
       url = "github:AvengeMedia/dgop";
       inputs.nixpkgs.follows = "nixpkgs";
