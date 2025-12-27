@@ -36,7 +36,6 @@
     };
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
     leetgpu.url = "github:LukeTandjung/leetgpu_cli_nix";
-    orchids.url = "github:LukeTandjung/orchids";
     dgop = {
       url = "github:AvengeMedia/dgop";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -61,7 +60,6 @@
       spicetify-nix,
       dankMaterialShell,
       leetgpu,
-      orchids,
       ...
     }:
     let
@@ -69,7 +67,6 @@
         zen-browser.homeModules.beta
         spicetify-nix.homeManagerModules.spicetify
         leetgpu.homeManagerModules.default
-        orchids.homeManagerModules.default
         dankMaterialShell.homeModules.dank-material-shell
       ];
     in
