@@ -16,5 +16,6 @@
     ./nix.nix
     ./flatpak.nix
     ./inkscape.nix
+    ./rnote.nix
   ];
 }

@@ -16,6 +16,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-unstable";
+    rnote-nixpkgs.url = "github:nixos/nixpkgs/9da7f1cf7f8a6e2a7cb3001b048546c92a8258b4";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     flatpaks.url = "github:in-a-dil-emma/declarative-flatpak/latest";
     stylix = {
@@ -51,6 +52,7 @@
     inputs@{
       self,
       nixpkgs,
+      rnote-nixpkgs,
       stylix,
       nix-darwin,
       nixos-hardware,

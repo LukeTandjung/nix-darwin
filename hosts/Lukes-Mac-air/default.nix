@@ -3,6 +3,7 @@ let
   inherit (inputs)
     nixpkgs
     nixos-hardware
+    rnote-nixpkgs
     flatpaks
     home-manager
     stylix
@@ -20,6 +21,7 @@ let
 in
 nixpkgs.lib.nixosSystem {
   system = "x86_64-linux";
+  specialArgs = { inherit rnote-nixpkgs; };
   modules = [
     ./configuration.nix
     ./hardware-configuration.nix
