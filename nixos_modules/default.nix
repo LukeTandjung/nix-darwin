@@ -11,8 +11,6 @@
     ./packages.nix
     ./typst.nix
     ./stylix.nix
-    ./figma.nix
-    ./cursor.nix
     ./nix.nix
     ./flatpak.nix
     ./inkscape.nix

@@ -1,7 +1,4 @@
 {
-  config,
-  pkgs,
-  lib,
   ...
 }:
 {
@@ -30,5 +27,6 @@
     ./lazygit.nix
     ./claude-code.nix
     ./hyprshot.nix
+    ./vscode.nix
   ];
 }
