@@ -12,7 +12,7 @@
     ./typst.nix
     ./stylix.nix
     ./figma.nix
-    ./yaak.nix
+    ./cursor.nix
     ./nix.nix
     ./flatpak.nix
     ./inkscape.nix
