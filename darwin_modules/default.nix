@@ -9,7 +9,6 @@
     ./postgresql.nix
     ./raycast.nix
     ./rust.nix
-    ./spacebar.nix
     ./stylix.nix
     ./typst.nix
     ./yabai.nix
