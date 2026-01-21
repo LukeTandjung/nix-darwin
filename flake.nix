@@ -55,6 +55,10 @@
       url = "github:homebrew/homebrew-cask";
       flake = false;
     };
+    homebrew-formulae = {
+      url = "github:FelixKratz/homebrew-formulae";
+      flake = false;
+    };
   };
 
   outputs =
