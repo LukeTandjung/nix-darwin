@@ -16,13 +16,6 @@
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
     };
 
-    casks = [
-      "figma"
-      "capcut"
-      "yaak"
-      "claude"
-    ];
-
     # Optional: Enable fully-declarative tap management
     #
     # With mutableTaps disabled, taps can no longer be added imperatively with `brew tap`.
@@ -30,4 +23,11 @@
   };
 
   homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
+
+  homebrew.casks = [
+    "figma"
+    "capcut"
+    "yaak"
+    "claude"
+  ];
 }
