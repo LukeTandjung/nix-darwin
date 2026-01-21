@@ -23,6 +23,7 @@
       "capcut"
       "yaak"
       "claude"
+      "font-jetbrains-mono-nerd-font"
     ];
   };
 }
