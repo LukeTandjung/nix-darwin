@@ -1,11 +1,17 @@
 { ... }:
 {
   imports = [
-    ./postgresql.nix
-    ./spacebar.nix
-    ./stylix.nix
-    ./yabai.nix
+    ./dbeaver.nix
+    ./git.nix
     ./home_manager.nix
     ./nix-homebrew.nix
+    ./notion.nix
+    ./postgresql.nix
+    ./raycast.nix
+    ./rust.nix
+    ./spacebar.nix
+    ./stylix.nix
+    ./typst.nix
+    ./yabai.nix
   ];
 }
