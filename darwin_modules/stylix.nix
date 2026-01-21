@@ -1,4 +1,4 @@
-{ pkgs, system, ... }:
+{ pkgs, ... }:
 {
   # 1) Core engine settings
   stylix.enable = true;

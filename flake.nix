@@ -46,18 +46,19 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.dgop.follows = "dgop";
     };
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    homebrew-core = {
+      url = "github:homebrew/homebrew-core";
+      flake = false;
+    };
+    homebrew-cask = {
+      url = "github:homebrew/homebrew-cask";
+      flake = false;
+    };
   };
 
   outputs =
     inputs@{
-      self,
-      nixpkgs,
-      rnote-nixpkgs,
-      stylix,
-      nix-darwin,
-      nixos-hardware,
-      flatpaks,
-      home-manager,
       zen-browser,
       spicetify-nix,
       dankMaterialShell,
