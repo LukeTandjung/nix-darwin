@@ -16,5 +16,6 @@
     ./inkscape.nix
     ./rnote.nix
     ./evince.nix
+    ./home_manager.nix
   ];
 }
