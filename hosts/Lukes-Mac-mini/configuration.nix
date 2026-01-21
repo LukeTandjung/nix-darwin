@@ -1,23 +1,6 @@
 { pkgs, inputs, ... }:
 
 {
-  # List packages installed in system profile
-  environment = {
-    systemPackages = with pkgs; [
-      git
-      raycast
-      dbeaver-bin
-      postman
-      notion-app
-      typst
-      typstyle
-      typst-live
-      tinymist
-      tetex
-      rustc
-      cargo
-    ];
-  };
 
   system.primaryUser = "luketandjung";
 
