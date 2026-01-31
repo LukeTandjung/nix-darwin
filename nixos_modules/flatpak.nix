@@ -6,7 +6,7 @@
       "flathub" = "https://dl.flathub.org/repo/flathub.flatpakrepo";
     };
     packages = [
-      "flathub:io.beekeeperstudio.Studio"
+      "flathub:app/io.beekeeperstudio.Studio//stable"
     ];
   };
 }
