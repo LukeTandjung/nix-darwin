@@ -4,7 +4,7 @@
   users.users.luke = {
     isNormalUser = true;
     description = "Luke";
-    extraGroups = [ "wheel" "networkmanager" ];
+    extraGroups = [ "wheel" "networkmanager" "docker" ];
     shell = pkgs.zsh;
   };
 
