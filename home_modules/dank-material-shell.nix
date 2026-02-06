@@ -18,6 +18,75 @@ lib.mkIf pkgs.stdenv.isLinux {
         launcherLogoMode = "os";
         launcherLogoColorOverride = "primary";
         wallpaperPath = "/home/luke/Pictures/Wallpapers/painting_in_balcony.jpeg";
+        isLightMode = false;
+        doNotDisturb = false;
+        perMonitorWallpaper = false;
+        monitorWallpapers = { };
+        perModeWallpaper = false;
+        wallpaperPathLight = "";
+        wallpaperPathDark = "";
+        monitorWallpapersLight = { };
+        monitorWallpapersDark = { };
+        wallpaperTransition = "fade";
+        includedTransitions = [
+          "fade"
+          "wipe"
+          "disc"
+          "stripes"
+          "iris bloom"
+          "pixelate"
+          "portal"
+        ];
+        wallpaperCyclingEnabled = true;
+        wallpaperCyclingMode = "interval";
+        wallpaperCyclingInterval = 1800;
+        wallpaperCyclingTime = "06:00";
+        monitorCyclingSettings = { };
+        nightModeEnabled = true;
+        nightModeTemperature = 4500;
+        nightModeHighTemperature = 6500;
+        nightModeAutoEnabled = true;
+        nightModeAutoMode = "time";
+        nightModeStartHour = 21;
+        nightModeStartMinute = 0;
+        nightModeEndHour = 6;
+        nightModeEndMinute = 0;
+        latitude = 0;
+        longitude = 0;
+        nightModeUseIPLocation = false;
+        nightModeLocationProvider = "";
+        themeModeAutoEnabled = false;
+        themeModeAutoMode = "time";
+        themeModeStartHour = 22;
+        themeModeStartMinute = 0;
+        themeModeEndHour = 6;
+        themeModeEndMinute = 0;
+        themeModeShareGammaSettings = true;
+        weatherLocation = "London, UK";
+        weatherCoordinates = "51.5074,-0.1278";
+        pinnedApps = [ ];
+        barPinnedApps = [ ];
+        dockLauncherPosition = 0;
+        hiddenTrayIds = [ ];
+        trayItemOrder = [ ];
+        recentColors = [ ];
+        showThirdPartyPlugins = false;
+        launchPrefix = "";
+        lastBrightnessDevice = "";
+        brightnessExponentialDevices = { };
+        brightnessUserSetValues = { };
+        brightnessExponentValues = { };
+        selectedGpuIndex = 0;
+        nvidiaGpuTempEnabled = false;
+        nonNvidiaGpuTempEnabled = false;
+        enabledGpuPciIds = [ ];
+        wifiDeviceOverride = "";
+        weatherHourlyDetailed = true;
+        hiddenApps = [ ];
+        appOverrides = { };
+        searchAppActions = true;
+        vpnLastConnected = "";
+        configVersion = 3;
         barConfigs = [
           {
             id = "default";
