@@ -45,6 +45,10 @@
       url = "github:AvengeMedia/DankMaterialShell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    dsearch = {
+      url = "github:AvengeMedia/danksearch";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     homebrew-core = {
       url = "github:homebrew/homebrew-core";
@@ -65,6 +69,7 @@
       zen-browser,
       spicetify-nix,
       dankMaterialShell,
+      dsearch,
       leetgpu,
       ...
     }:
@@ -74,6 +79,7 @@
         spicetify-nix.homeManagerModules.spicetify
         leetgpu.homeManagerModules.default
         dankMaterialShell.homeModules.dank-material-shell
+        dsearch.homeModules.default
       ];
     in
     {
