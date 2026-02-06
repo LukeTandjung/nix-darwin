@@ -17,7 +17,7 @@ lib.mkIf pkgs.stdenv.isLinux {
         showClipboard = true;
         launcherLogoMode = "os";
         launcherLogoColorOverride = "primary";
-        wallpaperPath = "/home/luke/Pictures/Wallpapers";
+        wallpaperPath = "/home/luke/Pictures/Wallpapers/painting_in_balcony.jpeg";
         barConfigs = [
           {
             id = "default";
@@ -26,8 +26,16 @@ lib.mkIf pkgs.stdenv.isLinux {
             position = 0;
             screenPreferences = [ "all" ];
             showOnLastDisplay = true;
-            leftWidgets = [ "launcherButton" "workspaceSwitcher" "focusedWindow" ];
-            centerWidgets = [ "music" "clock" "weather" ];
+            leftWidgets = [
+              "launcherButton"
+              "workspaceSwitcher"
+              "focusedWindow"
+            ];
+            centerWidgets = [
+              "music"
+              "clock"
+              "weather"
+            ];
             rightWidgets = [
               "systemTray"
               "cpuUsage"
