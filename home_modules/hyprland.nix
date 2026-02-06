@@ -23,13 +23,14 @@ lib.mkIf pkgs.stdenv.isLinux {
       # Autostart
       "exec-once" = [
         "bash -c \"wl-paste --watch cliphist store &\""
-        "dms run"
+        "dms run &"
       ];
 
       # Environment
       env = [
         "XCURSOR_SIZE,24"
         "HYPRCURSOR_SIZE,24"
+        "XCURSOR_THEME,Adwaita"
       ];
 
       general = {
