@@ -27,6 +27,5 @@
     ./lazygit.nix
     ./claude-code.nix
     ./hyprshot.nix
-    ./vscode.nix
   ];
 }
