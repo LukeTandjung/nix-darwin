@@ -19,8 +19,6 @@
     wl-clipboard
     cliphist
     cava
-    hyprcursor
-    catppuccin-cursors.frappeBlue
     imagemagick
     playerctl
 

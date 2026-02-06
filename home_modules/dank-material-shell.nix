@@ -10,7 +10,7 @@
     enableCalendarEvents = false;
     settings = {
       fontFamily = "JetBrains Mono";
-      cornerRadius = 4;
+      cornerRadius = 6;
       showWorkspaceApps = true;
       showClipboard = false;
       launcherLogoMode = "os";

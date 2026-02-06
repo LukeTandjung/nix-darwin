@@ -23,15 +23,13 @@ lib.mkIf pkgs.stdenv.isLinux {
       # Autostart
       "exec-once" = [
         "bash -c \"wl-paste --watch cliphist store &\""
-        "dms run & hyprctl setcursor catppuccin-frappe-blue-cursors 24"
+        "dms run"
       ];
 
       # Environment
       env = [
         "XCURSOR_SIZE,24"
         "HYPRCURSOR_SIZE,24"
-        "XCURSOR_THEME,catppuccin-frappe-blue-cursors"
-        "HYPRCURSOR_THEME,catppuccin-frappe-blue-cursors"
       ];
 
       general = {
@@ -109,7 +107,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       };
 
       cursor = {
-        enable_hyprcursor = true;
+        enable_hyprcursor = false;
         no_hardware_cursors = 1;
       };
 
