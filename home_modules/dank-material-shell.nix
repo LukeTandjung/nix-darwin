@@ -14,25 +14,9 @@ lib.mkIf pkgs.stdenv.isLinux {
         fontFamily = "JetBrains Mono";
         cornerRadius = 6;
         showWorkspaceApps = true;
-        showClipboard = false;
+        showClipboard = true;
         launcherLogoMode = "os";
         launcherLogoColorOverride = "primary";
-        appLauncherViewMode = "grid";
-        spotlightModalViewMode = "grid";
-        barConfigs = [
-          {
-            id = "default";
-            position = 0;
-            screenPreferences = [ "all" ];
-            showOnLastDisplay = true;
-            leftWidgets = [ "launcherButton" "workspaceSwitcher" "focusedWindow" ];
-            centerWidgets = [ "music" "clock" "weather" ];
-            rightWidgets = [ "systemTray" "cpuUsage" "memUsage" "notificationButton" "battery" "controlCenterButton" ];
-            spacing = 4;
-            innerPadding = 4;
-            bottomGap = 0;
-          }
-        ];
       };
       session = {
         weatherLocation = "London, UK";
