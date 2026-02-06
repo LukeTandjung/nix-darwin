@@ -210,8 +210,7 @@ lib.mkIf pkgs.stdenv.isLinux {
 
       # Window and workspace rules
       windowrule = [
-        "suppressevent maximize, class:.*"
-        "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
+        "nofocus, 1, class:^$, title:^$, xwayland:1, floating:1, fullscreen:0, pinned:0"
       ];
     };
   };
