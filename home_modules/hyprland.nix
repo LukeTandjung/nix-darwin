@@ -210,7 +210,7 @@ lib.mkIf pkgs.stdenv.isLinux {
 
       # Window and workspace rules
       windowrule = [
-        "nofocus, 1, class:^$, title:^$, xwayland:1, floating:1, fullscreen:0, pinned:0"
+        "no_focus on, match:class ^$, match:title ^$, match:xwayland true, match:floating true, match:fullscreen false, match:pinned false"
       ];
     };
   };
