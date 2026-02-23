@@ -22,11 +22,12 @@
       "sketchybar"
     ];
     casks = [
-      "figma"
       "capcut"
-      "yaak"
       "claude"
+      "docker"
+      "figma"
       "font-jetbrains-mono-nerd-font"
+      "yaak"
     ];
   };
 }
