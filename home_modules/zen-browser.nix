@@ -27,7 +27,7 @@
       settings = {
         "zen.welcome-screen.seen" = true;
       };
-      pinsForce = false;
+      pinsForce = true;
       pins = {
         nixos-packages = {
           id = "a1b2c3d4-1111-4444-8888-111111111111";
