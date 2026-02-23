@@ -3,10 +3,7 @@
   system.defaults = {
     NSGlobalDomain = {
       AppleInterfaceStyle = "Dark";
+      "com.apple.swipescrolldirection" = false;
     };
-    trackpad = {
-      ActuationStrength = 1;
-    };
-    ".GlobalPreferences"."com.apple.swipescrolldirection" = false;
   };
 }
