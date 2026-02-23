@@ -2,10 +2,44 @@
   pkgs,
   ...
 }:
+let
+  version = "2.1.50";
+
+  denoTargets = {
+    "aarch64-darwin" = "aarch64-apple-darwin";
+    "x86_64-linux" = "x86_64-unknown-linux-gnu";
+  };
+
+  hashes = {
+    "aarch64-darwin" = "sha256-ivshwgonybQq+nPP0x4kfpM4GKG9wEsg3Us3UBu2Hjw=";
+    "x86_64-linux" = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+  };
+in
 {
   programs.claude-code = {
     enable = true;
-    package = pkgs.claude-code;
+    package = pkgs.stdenv.mkDerivation {
+      pname = "claude-code-compiled";
+      inherit version;
+      dontUnpack = true;
+      nativeBuildInputs = [ pkgs.deno pkgs.cacert ];
+      outputHashAlgo = "sha256";
+      outputHashMode = "recursive";
+      outputHash = hashes.${pkgs.stdenv.hostPlatform.system};
+      buildPhase = ''
+        export DENO_DIR=$TMPDIR/deno
+        export HOME=$TMPDIR
+        export SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt
+        deno compile --allow-all \
+          --target ${denoTargets.${pkgs.stdenv.hostPlatform.system}} \
+          --output claude \
+          "npm:@anthropic-ai/claude-code@${version}"
+      '';
+      installPhase = ''
+        mkdir -p $out/bin
+        install -m755 claude $out/bin/claude
+      '';
+    };
     mcpServers = {
       figma-desktop = {
         type = "http";
