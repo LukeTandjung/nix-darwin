@@ -90,5 +90,9 @@
       darwinConfigurations.Lukes-Mac-mini = import ./hosts/Lukes-Mac-mini {
         inherit inputs sharedHomeModules;
       };
+
+      darwinConfigurations.Lukes-MacBook-Pro = import ./hosts/Lukes-MacBook-Pro {
+        inherit inputs sharedHomeModules;
+      };
     };
 }
