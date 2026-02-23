@@ -24,7 +24,6 @@
     casks = [
       "capcut"
       "claude"
-      "docker"
       "figma"
       "font-jetbrains-mono-nerd-font"
       "yaak"
