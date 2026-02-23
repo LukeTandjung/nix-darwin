@@ -21,20 +21,28 @@
   nixpkgs = {
     hostPlatform = "aarch64-darwin";
     config.allowUnfree = true;
-    # overlays = [
-    #   (final: prev: {
-    #     spotify = prev.spotify.overrideAttrs (oldAttrs: {
-    #       src =
-    #         if (prev.stdenv.isDarwin && prev.stdenv.isAarch64) then
-    #           prev.fetchurl {
-    #             url = "https://web.archive.org/web/20251029235406/https://download.scdn.co/SpotifyARM64.dmg";
-    #             hash = "sha256-0gwoptqLBJBM0qJQ+dGAZdCD6WXzDJEs0BfOxz7f2nQ=";
-    #           }
-    #         else
-    #           oldAttrs.src;
-    #     });
-    #   })
-    # ];
+    overlays = [
+      # Vesktop codesign fix (https://github.com/nixos/nixpkgs/issues/484618)
+      (final: prev: {
+        vesktop = prev.vesktop.overrideAttrs (oldAttrs: {
+          pnpmBuildFlags = (oldAttrs.pnpmBuildFlags or []) ++ [
+            (prev.lib.optionalString prev.stdenv.hostPlatform.isDarwin "-c.mac.identity=null")
+          ];
+        });
+      })
+      # (final: prev: {
+      #   spotify = prev.spotify.overrideAttrs (oldAttrs: {
+      #     src =
+      #       if (prev.stdenv.isDarwin && prev.stdenv.isAarch64) then
+      #         prev.fetchurl {
+      #           url = "https://web.archive.org/web/20251029235406/https://download.scdn.co/SpotifyARM64.dmg";
+      #           hash = "sha256-0gwoptqLBJBM0qJQ+dGAZdCD6WXzDJEs0BfOxz7f2nQ=";
+      #         }
+      #       else
+      #         oldAttrs.src;
+      #   });
+      # })
+    ];
   };
 
   fonts.packages = with pkgs; [
