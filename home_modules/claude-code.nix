@@ -23,6 +23,7 @@ in
       inherit version;
       dontUnpack = true;
       dontPatchELF = true;
+      dontStrip = true;
       nativeBuildInputs = [
         pkgs.deno
         pkgs.cacert
