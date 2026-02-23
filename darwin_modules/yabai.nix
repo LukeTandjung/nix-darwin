@@ -22,6 +22,11 @@
     extraConfig = ''
       yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
       sudo yabai --load-sa
+
+      # Ensure 5 spaces exist
+      for _ in $(seq 1 $((5 - $(yabai -m query --spaces | jq length)))); do
+        yabai -m space --create
+      done
     '';
   };
 }

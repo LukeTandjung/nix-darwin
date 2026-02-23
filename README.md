@@ -14,5 +14,37 @@ Not only did I choose to rice my NixOS setup, I also decided to undo the billion
 - **System-wide Styling**: DankMaterialShell and Stylix for NixOS, just Stylix for OSX
 - **Program Launcher**: Raycast
 
-To install, you need Nix and Nix-Darwin. It's just a matter of cloning the changes into a repo of your choice, and symlinking appropriately.
-For example, if you chose to clone the repo at ~/nix-darwin, then the symlink you would need to create is /etc/nix-darwin -> ~/nix-darwin.
+To install, you need Nix and nix-darwin. Clone the repo and symlink appropriately.
+For example, if you clone to `~/nix-darwin`, create the symlink `/etc/nix-darwin -> ~/nix-darwin`.
+
+### Manual Steps (Fresh Mac)
+
+These cannot be automated through nix-darwin and must be done once per fresh macOS install.
+
+1. **Install Xcode Command Line Tools**
+   ```bash
+   xcode-select --install
+   ```
+
+2. **Grant Accessibility Permissions**
+   - Go to **System Settings > Privacy & Security > Accessibility**
+   - Add `/run/current-system/sw/bin/yabai`
+   - Add `/run/current-system/sw/bin/skhd`
+
+3. **Partially Disable SIP** (required for yabai scripting addition)
+   - Shut down the Mac
+   - Hold the power button until "Loading startup options..." appears
+   - Click **Options** > **Continue**, select a user and enter your password
+   - Open **Utilities > Terminal** from the menu bar
+   - Run:
+     ```bash
+     csrutil enable --without fs --without debug --without nvram
+     ```
+   - Reboot
+
+   > **Note:** As of macOS Tahoe (26), the scripting addition does not work. See [yabai#2634](https://github.com/koekeishiya/yabai/issues/2634) for updates.
+
+4. **Create Desktop Workspaces**
+   - Open Mission Control (swipe up with three/four fingers or Ctrl+Up)
+   - Click the **+** button in the top Spaces bar to add workspaces
+   - Optionally enable native space switching in **System Settings > Keyboard > Keyboard Shortcuts > Mission Control > Switch to Desktop 1/2/3/etc.**
