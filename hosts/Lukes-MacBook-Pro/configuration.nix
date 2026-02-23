@@ -2,6 +2,10 @@
 
 {
 
+  modules.slack.enable = false;
+  modules.raycast.enable = false;
+  modules.notion.enable = false;
+
   system.primaryUser = "luketandjung";
 
   users.users.luketandjung = {
