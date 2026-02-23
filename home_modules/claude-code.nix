@@ -12,7 +12,7 @@ let
 
   hashes = {
     "aarch64-darwin" = "sha256-ivshwgonybQq+nPP0x4kfpM4GKG9wEsg3Us3UBu2Hjw=";
-    "x86_64-linux" = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    "x86_64-linux" = "sha256-gT6CLl+BPyJZPs0daQippMEDV/gSaXEVqAzzQ0m9awo=";
   };
 in
 {
@@ -22,7 +22,10 @@ in
       pname = "claude-code-compiled";
       inherit version;
       dontUnpack = true;
-      nativeBuildInputs = [ pkgs.deno pkgs.cacert ];
+      nativeBuildInputs = [
+        pkgs.deno
+        pkgs.cacert
+      ];
       outputHashAlgo = "sha256";
       outputHashMode = "recursive";
       outputHash = hashes.${pkgs.stdenv.hostPlatform.system};
