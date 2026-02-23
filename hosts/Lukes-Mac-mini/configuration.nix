@@ -24,10 +24,20 @@
     overlays = [
       # Vesktop codesign fix (https://github.com/nixos/nixpkgs/issues/484618)
       (final: prev: {
-        vesktop = prev.vesktop.overrideAttrs (oldAttrs: {
-          pnpmBuildFlags = (oldAttrs.pnpmBuildFlags or []) ++ [
-            (prev.lib.optionalString prev.stdenv.hostPlatform.isDarwin "-c.mac.identity=null")
-          ];
+        vesktop = prev.vesktop.overrideAttrs (old: {
+          buildPhase = ''
+            runHook preBuild
+
+            pnpm build
+            pnpm exec electron-builder \
+              --dir \
+              -c.asarUnpack="**/*.node" \
+              -c.electronDist=${if prev.stdenv.hostPlatform.isDarwin then "." else "electron-dist"} \
+              -c.electronVersion=${prev.electron.version} \
+              ${prev.lib.optionalString prev.stdenv.hostPlatform.isDarwin "-c.mac.identity=null"}
+
+            runHook postBuild
+          '';
         });
       })
       # (final: prev: {
