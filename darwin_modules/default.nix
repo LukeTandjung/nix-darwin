@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./1password.nix
     ./dbeaver.nix
     ./git.nix
     ./home_manager.nix
