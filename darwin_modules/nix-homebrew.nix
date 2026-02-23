@@ -16,6 +16,8 @@
     enable = true;
     taps = builtins.attrNames config.nix-homebrew.taps;
     brews = [
+      "bash"
+      "coreutils"
       "gdal"
       "sketchybar"
     ];
