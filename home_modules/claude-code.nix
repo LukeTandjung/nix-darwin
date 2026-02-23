@@ -22,6 +22,7 @@ in
       pname = "claude-code-compiled";
       inherit version;
       dontUnpack = true;
+      dontPatchELF = true;
       nativeBuildInputs = [
         pkgs.deno
         pkgs.cacert
