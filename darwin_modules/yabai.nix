@@ -50,7 +50,7 @@ in
       window_gap = 16;
       mouse_modifier = "cmd";
       focus_follows_mouse = "autoraise";
-      menubar_opacity = 0.0;
+      menubar_opacity = 1.0;
       window_opacity = "on";
       active_window_opacity = 1.0;
       normal_window_opacity = 0.80;
