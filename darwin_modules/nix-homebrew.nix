@@ -35,7 +35,6 @@
       "claude"
       "figma"
       "font-jetbrains-mono-nerd-font"
-      "tailscale-app"
       "yaak"
     ];
   };
