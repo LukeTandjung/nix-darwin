@@ -13,7 +13,6 @@
     ./slack.nix
     ./system-defaults.nix
     ./stylix.nix
-    ./tailscale.nix
     ./typst.nix
     ./yabai.nix
   ];
