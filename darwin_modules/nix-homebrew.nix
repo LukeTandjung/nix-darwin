@@ -16,6 +16,15 @@
     enable = true;
     taps = builtins.attrNames config.nix-homebrew.taps;
     brews = [
+      # Agent tools
+      "ast-grep"
+      "fastmod"
+      "fzf"
+      "gh"
+      "jq"
+      "ripgrep"
+      "tree"
+
       "bash"
       "coreutils"
       "gdal"
