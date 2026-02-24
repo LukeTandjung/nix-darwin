@@ -25,6 +25,7 @@
     ./ssh.nix
     ./rclone.nix
     ./lazygit.nix
+    ./mise.nix
     ./claude-code.nix
     ./hyprshot.nix
   ];
