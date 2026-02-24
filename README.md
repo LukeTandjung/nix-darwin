@@ -42,9 +42,24 @@ These cannot be automated through nix-darwin and must be done once per fresh mac
      ```
    - Reboot
 
-   > **Note:** As of macOS Tahoe (26), the scripting addition does not work. See [yabai#2634](https://github.com/koekeishiya/yabai/issues/2634) for updates.
+4. **Set nvram boot arg** (required for yabai scripting addition on Apple Silicon)
+   ```bash
+   sudo nvram boot-args=-arm64e_preview_abi
+   ```
+   Then **reboot**. After reboot, `sudo yabai --load-sa` should work automatically via the yabai config.
 
-4. **Create Desktop Workspaces**
+5. **Grant TCC permissions for yabai** (if they don't appear in System Settings UI)
+   ```bash
+   YABAI=$(which yabai)
+   CSREQ=$(codesign -d -r- "$YABAI" 2>&1 | awk -F ' => ' '/designated/{print $2}' | csreq -r- -b /dev/stdout | xxd -p | tr -d '\n')
+
+   for service in kTCCServiceAccessibility kTCCServiceScreenCapture; do
+     sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" \
+       "INSERT OR REPLACE INTO access (service,client,client_type,auth_value,auth_reason,auth_version,csreq,indirect_object_identifier_type,indirect_object_identifier,flags,last_modified,boot_uuid,last_reminded) VALUES ('$service','$YABAI',1,2,3,1,X'$CSREQ',0,'UNUSED',0,strftime('%s','now'),'UNUSED',strftime('%s','now'));"
+   done
+   ```
+
+6. **Create Desktop Workspaces**
    - Open Mission Control (swipe up with three/four fingers or Ctrl+Up)
    - Click the **+** button in the top Spaces bar to add workspaces
    - Optionally enable native space switching in **System Settings > Keyboard > Keyboard Shortcuts > Mission Control > Switch to Desktop 1/2/3/etc.**
