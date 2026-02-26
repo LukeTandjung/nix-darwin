@@ -1,5 +1,7 @@
 { ... }:
 {
+  security.pam.services.sudo_local.touchIdAuth = true;
+
   system.defaults = {
     NSGlobalDomain = {
       AppleInterfaceStyle = "Dark";
