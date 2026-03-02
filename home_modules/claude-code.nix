@@ -11,7 +11,7 @@ let
   };
 
   hashes = {
-    "aarch64-darwin" = "sha256-ygYBNStnDMTNRDz65iZ4loNVlt5JBLpXOxsofsOGno4=";
+    "aarch64-darwin" = "sha256-mmzLEiW2C6768VYMJHD+8ZhArHNJ08T2WeSU2A+0/b0=";
     "x86_64-linux" = "sha256-C3aBkOI4TVvihB2DJ6j+OUrLiyZ7E/Fr6ki7QNI2Fyc=";
   };
 in
