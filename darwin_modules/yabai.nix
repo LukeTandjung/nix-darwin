@@ -49,11 +49,12 @@ in
       right_padding = 16;
       window_gap = 16;
       mouse_modifier = "cmd";
-      focus_follows_mouse = "autoraise";
-      menubar_opacity = 1.0;
-      window_opacity = "on";
-      active_window_opacity = 1.0;
-      normal_window_opacity = 0.80;
+      # Disabled: window opacity fights with Tahoe's compositor, causing
+      # WindowServer to burn 33-42% CPU. See https://github.com/koekeishiya/yabai/issues/2685
+      # focus_follows_mouse = "autoraise";
+      # window_opacity = "on";
+      # active_window_opacity = 1.0;
+      # normal_window_opacity = 0.80;
       external_bar = "all:0:0";
     };
     extraConfig = ''
