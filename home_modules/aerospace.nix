@@ -10,7 +10,7 @@ lib.mkIf pkgs.stdenv.isDarwin {
 
     settings = {
       config-version = 2;
-      start-at-login = false;
+      start-at-login = true;
 
       default-root-container-layout = "tiles";
       default-root-container-orientation = "auto";
