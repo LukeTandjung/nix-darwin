@@ -1,5 +1,4 @@
 {
-  config,
   pkgs,
   lib,
   ...
@@ -34,7 +33,13 @@ lib.mkIf pkgs.stdenv.isDarwin {
       #   - window_opacity (active/normal)
       #   - menubar_opacity = 0.0
 
-      persistent-workspaces = [ "1" "2" "3" "4" "5" ];
+      persistent-workspaces = [
+        "1"
+        "2"
+        "3"
+        "4"
+        "5"
+      ];
 
       mode.main.binding = {
         # Window focus (cmd + arrow)
@@ -61,11 +66,26 @@ lib.mkIf pkgs.stdenv.isDarwin {
         cmd-5 = "workspace 5";
 
         # Move window to workspace + focus (cmd + shift + 1-5)
-        cmd-shift-1 = [ "move-node-to-workspace 1" "workspace 1" ];
-        cmd-shift-2 = [ "move-node-to-workspace 2" "workspace 2" ];
-        cmd-shift-3 = [ "move-node-to-workspace 3" "workspace 3" ];
-        cmd-shift-4 = [ "move-node-to-workspace 4" "workspace 4" ];
-        cmd-shift-5 = [ "move-node-to-workspace 5" "workspace 5" ];
+        cmd-shift-1 = [
+          "move-node-to-workspace 1"
+          "workspace 1"
+        ];
+        cmd-shift-2 = [
+          "move-node-to-workspace 2"
+          "workspace 2"
+        ];
+        cmd-shift-3 = [
+          "move-node-to-workspace 3"
+          "workspace 3"
+        ];
+        cmd-shift-4 = [
+          "move-node-to-workspace 4"
+          "workspace 4"
+        ];
+        cmd-shift-5 = [
+          "move-node-to-workspace 5"
+          "workspace 5"
+        ];
 
         # Open kitty (cmd + q)
         cmd-q = "exec-and-forget open -na kitty";
