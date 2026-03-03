@@ -3,45 +3,38 @@
   ...
 }:
 let
-  version = "2.1.50";
+  version = "2.1.63";
 
-  denoTargets = {
-    "aarch64-darwin" = "aarch64-apple-darwin";
-    "x86_64-linux" = "x86_64-unknown-linux-gnu";
+  baseUrl = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases";
+
+  platforms = {
+    "aarch64-darwin" = {
+      slug = "darwin-arm64";
+      hash = "sha256:2e8667322e0bd104087df2a8857f176acc75d7091aa02828825dfeb4a5708531";
+    };
+    "x86_64-linux" = {
+      slug = "linux-x64";
+      hash = "sha256:734447e461bb92f0ffd5f683bb6216c35a3c16e8dd84be8d150b43605d39b0d1";
+    };
   };
 
-  hashes = {
-    "aarch64-darwin" = "sha256-mmzLEiW2C6768VYMJHD+8ZhArHNJ08T2WeSU2A+0/b0=";
-    "x86_64-linux" = "sha256-C3aBkOI4TVvihB2DJ6j+OUrLiyZ7E/Fr6ki7QNI2Fyc=";
-  };
+  platform = platforms.${pkgs.stdenv.hostPlatform.system};
 in
 {
   programs.claude-code = {
     enable = true;
     package = pkgs.stdenv.mkDerivation {
-      pname = "claude-code-compiled";
+      pname = "claude-code";
       inherit version;
+      src = pkgs.fetchurl {
+        url = "${baseUrl}/${version}/${platform.slug}/claude";
+        hash = platform.hash;
+      };
       dontUnpack = true;
       dontFixup = true;
-      nativeBuildInputs = [
-        pkgs.deno
-        pkgs.cacert
-      ];
-      outputHashAlgo = "sha256";
-      outputHashMode = "recursive";
-      outputHash = hashes.${pkgs.stdenv.hostPlatform.system};
-      buildPhase = ''
-        export DENO_DIR=$TMPDIR/deno
-        export HOME=$TMPDIR
-        export SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt
-        deno compile --allow-all \
-          --target ${denoTargets.${pkgs.stdenv.hostPlatform.system}} \
-          --output claude \
-          "npm:@anthropic-ai/claude-code@${version}"
-      '';
       installPhase = ''
         mkdir -p $out/bin
-        install -m755 claude $out/bin/claude
+        install -m755 $src $out/bin/claude
       '';
     };
     mcpServers = {
