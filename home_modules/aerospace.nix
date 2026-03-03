@@ -23,7 +23,6 @@ lib.mkIf pkgs.stdenv.isDarwin {
         outer = {
           left = 16;
           bottom = 16;
-          top = 16; # 40 (external bar) + 16 (padding)
           right = 16;
         };
       };
