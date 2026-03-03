@@ -6,10 +6,11 @@
 lib.mkIf pkgs.stdenv.isDarwin {
   programs.aerospace = {
     enable = true;
+    launchd.enable = true;
 
     settings = {
       config-version = 2;
-      start-at-login = false;
+      start-at-login = true;
 
       default-root-container-layout = "tiles";
       default-root-container-orientation = "auto";
