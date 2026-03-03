@@ -15,6 +15,5 @@
     ./stylix.nix
 
     ./typst.nix
-    ./yabai.nix
   ];
 }

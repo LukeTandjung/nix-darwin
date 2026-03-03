@@ -17,7 +17,7 @@
     ./zen-browser.nix
     ./zsh.nix
     ./yazi.nix
-    ./skhd.nix
+    ./aerospace.nix
     ./dank-material-shell.nix
     ./hyprland.nix
     ./leetgpu.nix
