@@ -23,7 +23,7 @@ lib.mkIf pkgs.stdenv.isDarwin {
         outer = {
           left = 16;
           bottom = 16;
-          top = 56; # 40 (external bar) + 16 (padding)
+          top = 16; # 40 (external bar) + 16 (padding)
           right = 16;
         };
       };
@@ -93,8 +93,8 @@ lib.mkIf pkgs.stdenv.isDarwin {
         # Open kitty with yazi (cmd + e)
         cmd-e = "exec-and-forget open -na kitty --args zsh -lc yazi";
 
-        # Close focused window (cmd + x)
-        cmd-x = "close";
+        # Quit focused app (cmd + x)
+        cmd-x = "exec-and-forget osascript -e 'tell application (path to frontmost application as text) to quit'";
       };
     };
   };

@@ -7,7 +7,7 @@
     taps = {
       "homebrew/homebrew-core" = inputs.homebrew-core;
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
-      "FelixKratz/homebrew-formulae" = inputs.homebrew-formulae;
+      "mocki-toki/formulae" = inputs.homebrew-formulae;
     };
     mutableTaps = false;
   };
@@ -28,7 +28,6 @@
       "bash"
       "coreutils"
       "gdal"
-      "sketchybar"
     ];
     casks = [
       "capcut"
@@ -37,6 +36,7 @@
       "font-jetbrains-mono-nerd-font"
       "tailscale-app"
       "yaak"
+      "mocki-toki/formulae/barik"
     ];
   };
 }

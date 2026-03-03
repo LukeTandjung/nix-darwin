@@ -59,7 +59,7 @@
       flake = false;
     };
     homebrew-formulae = {
-      url = "github:FelixKratz/homebrew-formulae";
+      url = "github:mocki-toki/homebrew-formulae";
       flake = false;
     };
   };
