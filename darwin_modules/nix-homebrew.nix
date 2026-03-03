@@ -7,7 +7,7 @@
     taps = {
       "homebrew/homebrew-core" = inputs.homebrew-core;
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
-      "mocki-toki/formulae" = inputs.homebrew-formulae;
+      "mocki-toki/homebrew-formulae" = inputs.homebrew-formulae;
     };
     mutableTaps = false;
   };
