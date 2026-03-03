@@ -10,7 +10,7 @@
     enable = true;
     package = pkgs.zsh;
     initContent = ''
-      export PATH="$HOME/.cargo/bin:$PATH"
+      export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
     '';
   };
 }
