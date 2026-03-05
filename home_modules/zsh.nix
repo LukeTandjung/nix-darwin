@@ -10,7 +10,7 @@
     enable = true;
     package = pkgs.zsh;
     initContent = ''
-      export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+      export PATH="/opt/homebrew/bin:$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
     '';
   };
 }
