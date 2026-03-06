@@ -8,10 +8,6 @@
     package = pkgs.helix;
     enable = true;
     languages = {
-      indent = {
-        tab-width = 2;
-        unit = " ";
-      };
       language-server = {
         nixd.command = "${pkgs.nixd}/bin/nixd";
         typescript-language-server = {
