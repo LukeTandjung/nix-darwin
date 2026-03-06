@@ -22,6 +22,7 @@ in
 
     sessionVariables = {
       EDITOR = "hx";
+      DOCKER_HOST = "unix:///Users/luketandjung/.orbstack/run/docker.sock";
     };
   };
 
