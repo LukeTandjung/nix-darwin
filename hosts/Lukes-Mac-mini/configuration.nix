@@ -2,9 +2,7 @@
 
 {
 
-  modules.slack.enable = true;
-  modules.raycast.enable = true;
-  modules.notion.enable = true;
+  networking.hostName = "Lukes-Mac-mini";
 
   system.primaryUser = "luketandjung";
 
