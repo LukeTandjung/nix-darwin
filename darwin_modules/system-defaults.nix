@@ -30,6 +30,11 @@
       ];
     };
 
+    trackpad = {
+      Clicking = true;
+      TrackpadRightClick = true;
+    };
+
     CustomSystemPreferences."com.apple.dock" = {
       autohide-time-modifier = 0.0;
       autohide-delay = 0.0;
