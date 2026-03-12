@@ -25,8 +25,21 @@ lib.mkIf pkgs.stdenv.isDarwin {
           left = 16;
           bottom = 16;
           top = [
-            { monitor = { "MSI G24C4" = 32; }; }
-            { monitor = { "U34E2M" = 32; }; }
+            {
+              monitor = {
+                "MSI G24C4" = 32;
+              };
+            }
+            {
+              monitor = {
+                "U34E2M" = 32;
+              };
+            }
+            {
+              monitor = {
+                "XREAL One Pro" = 32;
+              };
+            }
             16
           ];
           right = 16;
