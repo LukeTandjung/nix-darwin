@@ -324,21 +324,21 @@
         "type": "github"
       }
     },
-    "leetgpu": {
+    "luke-pkgs": {
       "inputs": {
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1761569691,
-        "narHash": "sha256-8Uun85IA4L4Hz9Dan/IgMUJN9HRm7q7ItYOLeNVOY0M=",
+        "lastModified": 1774989332,
+        "narHash": "sha256-t+epcfgdEOxvfPXFD2DnMUOce2hJa30nEw8FYcgam8Y=",
         "owner": "LukeTandjung",
-        "repo": "leetgpu_cli_nix",
-        "rev": "efc5a4c19a6a2e53da73f81e568ba898bfd1707d",
+        "repo": "luke-nix-emporium",
+        "rev": "b8cd4e994e385d7663a3ddd3bff08560ae086bdc",
         "type": "github"
       },
       "original": {
         "owner": "LukeTandjung",
-        "repo": "leetgpu_cli_nix",
+        "repo": "luke-nix-emporium",
         "type": "github"
       }
     },
@@ -518,7 +518,7 @@
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
         "homebrew-formulae": "homebrew-formulae",
-        "leetgpu": "leetgpu",
+        "luke-pkgs": "luke-pkgs",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixos-hardware": "nixos-hardware",
