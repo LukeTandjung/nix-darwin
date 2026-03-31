@@ -2,6 +2,7 @@
 {
   imports = [
     ./dbeaver.nix
+    ./fancy-cat.nix
     ./git.nix
     ./home_manager.nix
     ./nix-homebrew.nix
