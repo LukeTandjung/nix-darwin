@@ -21,6 +21,7 @@
     ./dank-material-shell.nix
     ./hyprland.nix
     ./leetgpu.nix
+    ./pi.nix
     ./git.nix
     ./ssh.nix
     ./rclone.nix
