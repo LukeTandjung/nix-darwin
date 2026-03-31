@@ -1,6 +1,12 @@
 {
+  config,
+  lib,
+  pkgs,
   ...
 }:
+let
+  zenConfigPath = "${config.xdg.configHome}/zen";
+in
 {
   programs.zen-browser = {
     enable = true;
@@ -81,5 +87,36 @@
       };
     };
   };
+
   stylix.targets.zen-browser.profileNames = [ "luke" ];
+
+  home.activation.zen-profile-bridge = lib.hm.dag.entryAfter [ "linkGeneration" ] (
+    lib.optionalString pkgs.stdenv.isLinux ''
+      mkdir -p "$HOME/.zen"
+
+      if [ -e "$HOME/.zen/profiles.ini" ] && [ ! -e "$HOME/.zen/profiles.ini.pre-hm-backup" ]; then
+        cp -a "$HOME/.zen/profiles.ini" "$HOME/.zen/profiles.ini.pre-hm-backup"
+      fi
+
+      if [ -d "$HOME/.zen/luke" ] && [ ! -L "$HOME/.zen/luke" ]; then
+        mv "$HOME/.zen/luke" "$HOME/.zen/luke.pre-hm-backup"
+      elif [ -e "$HOME/.zen/luke" ] && [ ! -L "$HOME/.zen/luke" ]; then
+        rm -f "$HOME/.zen/luke"
+      fi
+
+      ln -sfn "${zenConfigPath}/luke" "$HOME/.zen/luke"
+
+      cat > "$HOME/.zen/profiles.ini" <<'EOF'
+[General]
+StartWithLastProfile=1
+Version=2
+
+[Profile0]
+Default=1
+IsRelative=1
+Name=luke
+Path=luke
+EOF
+    ''
+  );
 }
