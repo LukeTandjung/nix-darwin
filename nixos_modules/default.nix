@@ -18,7 +18,6 @@
     ./evince.nix
     ./home_manager.nix
     ./nix-ld.nix
-    ./fancy-cat.nix
 
     ./docker.nix
   ];
