@@ -11,7 +11,6 @@
     ripgrep
     tree
 
-    fancy-cat
     gdal
   ];
 }
