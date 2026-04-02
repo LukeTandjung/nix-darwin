@@ -11,6 +11,7 @@
     package = pkgs.kitty;
     settings = {
       macos_option_as_alt = "yes";
+      enabled_layouts = "horizontal";
     };
   };
 }
