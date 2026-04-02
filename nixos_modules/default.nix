@@ -20,5 +20,6 @@
     ./nix-ld.nix
 
     ./docker.nix
+    ./homebrew.nix
   ];
 }

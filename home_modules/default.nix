@@ -28,7 +28,6 @@
     ./lazygit.nix
     ./mise.nix
     ./claude-code.nix
-    ./fancy-cat.nix
     ./hyprshot.nix
   ];
 }
