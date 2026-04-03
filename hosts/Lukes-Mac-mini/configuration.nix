@@ -45,11 +45,13 @@
     ];
   };
 
-  fonts.packages = with pkgs; [
+  fonts.packages = [
+    inputs.luke-pkgs.packages.${pkgs.system}.terminal_grotesque
+  ] ++ (with pkgs; [
     font-awesome
     jetbrains-mono
     ibm-plex
-  ];
+  ]);
 
   system.stateVersion = 6;
 }
