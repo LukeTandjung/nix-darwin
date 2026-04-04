@@ -2,7 +2,6 @@
 {
   imports = [
     ./dbeaver.nix
-    ./git.nix
     ./home_manager.nix
     ./nix-homebrew.nix
     ./notion.nix

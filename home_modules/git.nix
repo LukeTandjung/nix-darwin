@@ -1,8 +1,5 @@
 {
-  config,
   pkgs,
-  lib,
-  inputs,
   ...
 }:
 {
@@ -14,6 +11,11 @@
         name = "LukeTandjung";
         email = "lukelucus123@gmail.com";
       };
+    };
+
+    lfs = {
+      enable = true;
+      package = pkgs.git-lfs;
     };
   };
 }
