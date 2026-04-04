@@ -11,7 +11,7 @@ let
 in
 nixpkgs.lib.nixosSystem {
   system = "x86_64-linux";
-  specialArgs = { inherit rnote-nixpkgs sharedHomeModules; };
+  specialArgs = { inherit inputs rnote-nixpkgs sharedHomeModules; };
   modules = [
     ./configuration.nix
     ./hardware-configuration.nix
