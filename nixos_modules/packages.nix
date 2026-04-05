@@ -3,7 +3,6 @@
 {
   # Core system packages
   environment.systemPackages = with pkgs; [
-    git
     wget
     upower
   ];
@@ -11,7 +10,8 @@
   # Fonts
   fonts.packages = [
     inputs.luke-pkgs.packages.${pkgs.system}.terminal_grotesque
-  ] ++ (with pkgs; [
+  ]
+  ++ (with pkgs; [
     font-awesome
     jetbrains-mono
     ibm-plex
