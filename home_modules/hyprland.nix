@@ -33,7 +33,6 @@ lib.mkIf pkgs.stdenv.isLinux {
       # Environment
       env = [
         "XCURSOR_SIZE,24"
-        "HYPRCURSOR_SIZE,24"
         "XCURSOR_THEME,Adwaita"
       ];
 
@@ -113,7 +112,7 @@ lib.mkIf pkgs.stdenv.isLinux {
 
       cursor = {
         enable_hyprcursor = false;
-        no_hardware_cursors = 1;
+        no_hardware_cursors = 0;
       };
 
       input = {
