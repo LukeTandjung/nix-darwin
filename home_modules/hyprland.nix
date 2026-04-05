@@ -142,6 +142,7 @@ lib.mkIf pkgs.stdenv.isLinux {
         "$mainMod, X, killactive,"
         "$mainMod, E, exec, $fileManager"
         "$mainMod, V, togglefloating,"
+        "$mainMod, F, fullscreen, 0"
         "$mainMod, R, exec, $menu"
         "$mainMod, J, togglesplit,"
 
