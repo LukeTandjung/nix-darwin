@@ -10,7 +10,5 @@
     jq
     ripgrep
     tree
-
-    gdal
   ];
 }
