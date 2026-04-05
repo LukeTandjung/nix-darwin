@@ -9,7 +9,7 @@
   programs.pi = {
     enable = true;
     settings = {
-      defaultProvider = "openai";
+      defaultProvider = "openai-codex";
       defaultModel = "gpt-5.4";
       defaultThinkingLevel = "medium";
       theme = "dark";

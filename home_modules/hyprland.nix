@@ -6,6 +6,10 @@
   ...
 }:
 lib.mkIf pkgs.stdenv.isLinux {
+  # Home Manager's Hyprland module also manages xdg-desktop-portal.
+  # Add the GTK portal here so the active user portal dir includes OpenURI.
+  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+
   wayland.windowManager.hyprland = {
     enable = true;
     settings = {
