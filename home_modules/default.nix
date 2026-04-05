@@ -29,5 +29,6 @@
     ./mise.nix
     ./claude-code.nix
     ./hyprshot.nix
+    ./bookokrat.nix
   ];
 }

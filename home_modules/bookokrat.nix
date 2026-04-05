@@ -1,0 +1,6 @@
+{ ... }:
+{
+  programs.bookokrat = {
+    enable = true;
+  };
+}
