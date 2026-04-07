@@ -27,7 +27,6 @@
 
       "bash"
       "coreutils"
-      "fancy-cat"
       "gdal"
     ];
     casks = [
