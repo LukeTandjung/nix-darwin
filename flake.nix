@@ -45,6 +45,10 @@
       url = "github:AvengeMedia/DankMaterialShell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    dms-plugin-registry = {
+      url = "github:AvengeMedia/dms-plugin-registry";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     dsearch = {
       url = "github:AvengeMedia/danksearch";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -69,6 +73,7 @@
       zen-browser,
       spicetify-nix,
       dankMaterialShell,
+      dms-plugin-registry,
       dsearch,
       luke-pkgs,
       ...
@@ -79,6 +84,7 @@
         spicetify-nix.homeManagerModules.spicetify
         luke-pkgs.homeManagerModules.default
         dankMaterialShell.homeModules.dank-material-shell
+        dms-plugin-registry.modules.default
         dsearch.homeModules.default
       ];
     in

@@ -1,8 +1,4 @@
-{
-  pkgs,
-  lib,
-  ...
-}:
+{ pkgs, lib, ... }:
 lib.mkIf pkgs.stdenv.isLinux {
   programs = {
     dsearch.enable = true;
@@ -139,14 +135,7 @@ lib.mkIf pkgs.stdenv.isLinux {
         vpnLastConnected = "";
         configVersion = 3;
       };
-      plugins.dms-power-usage = {
-        src = pkgs.fetchFromGitHub {
-          owner = "Daniel-42-z";
-          repo = "dms-power-usage";
-          rev = "main";
-          hash = "sha256-9lMWVCiAW+0fAZD4dXGhE+6f8d1/4DHejfUumfoHY2s=";
-        };
-      };
+      plugins.powerUsagePlugin.enable = true;
     };
   };
 }
