@@ -17,6 +17,87 @@ Not only did I choose to rice my NixOS setup, I also decided to undo the billion
 To install, you need Nix and nix-darwin. Clone the repo and symlink appropriately.
 For example, if you clone to `~/nix-darwin`, create the symlink `/etc/nix-darwin -> ~/nix-darwin`.
 
+### Manual Steps (Fresh NixOS Install)
+
+Assumes `flake.nix` and `hosts/Lukes-Um790/default.nix` are already configured in the repo.
+
+1. **Get networking up**
+
+   On ethernet, it should just work. Test with:
+   ```bash
+   ping google.com
+   ```
+   If you need Wi-Fi:
+   ```bash
+   sudo systemctl start wpa_supplicant
+   wpa_cli
+   > add_network 0
+   > set_network 0 ssid "YOUR_WIFI_NAME"
+   > set_network 0 psk "YOUR_WIFI_PASSWORD"
+   > enable_network 0
+   > quit
+   ```
+
+2. **Find your disk**
+   ```bash
+   lsblk
+   ```
+   You'll see your NVMe drive, probably `nvme0n1`.
+
+3. **Partition the disk**
+   ```bash
+   sudo parted /dev/nvme0n1 -- mklabel gpt
+   sudo parted /dev/nvme0n1 -- mkpart ESP fat32 1MiB 512MiB
+   sudo parted /dev/nvme0n1 -- set 1 esp on
+   sudo parted /dev/nvme0n1 -- mkpart primary 512MiB 100%
+   ```
+   This gives you a 512MB EFI partition and the rest for root.
+
+4. **Format the partitions**
+   ```bash
+   sudo mkfs.fat -F 32 -n BOOT /dev/nvme0n1p1
+   sudo mkfs.ext4 -L nixos /dev/nvme0n1p2
+   ```
+
+5. **Mount the partitions**
+   ```bash
+   sudo mount /dev/disk/by-label/nixos /mnt
+   sudo mkdir -p /mnt/boot
+   sudo mount /dev/disk/by-label/BOOT /mnt/boot
+   ```
+
+6. **Generate hardware config**
+   ```bash
+   sudo nixos-generate-config --root /mnt
+   cp /mnt/etc/nixos/hardware-configuration.nix /tmp/hw-config.nix
+   ```
+
+7. **Clone the repo and drop in the hardware config**
+   ```bash
+   sudo mkdir -p /mnt/home/luke/nix-darwin
+   sudo git clone https://github.com/LukeTandjung/nix-darwin.git /mnt/home/luke/nix-darwin
+   cp /tmp/hw-config.nix /mnt/home/luke/nix-darwin/hosts/Lukes-Um790/hardware-configuration.nix
+   ```
+
+8. **Symlink flake into `/etc/nixos`**
+   ```bash
+   sudo mkdir -p /mnt/etc/nixos
+   sudo ln -s /home/luke/nix-darwin/flake.nix /mnt/etc/nixos/flake.nix
+   ```
+
+9. **Stage the hardware config**
+   ```bash
+   cd /mnt/home/luke/nix-darwin
+   git add -A
+   ```
+
+10. **Install**
+   ```bash
+   sudo nixos-install --flake /mnt/home/luke/nix-darwin#Lukes-Um790
+   ```
+
+---
+
 ### Manual Steps (Fresh Mac)
 
 These cannot be automated through nix-darwin and must be done once per fresh macOS install.
