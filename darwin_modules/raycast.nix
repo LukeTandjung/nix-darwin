@@ -1,5 +1,8 @@
-{ pkgs, lib, config, ... }:
-lib.mkIf (config.networking.hostName == "Lukes-Mac-mini") {
+{ pkgs, lib, ... }:
+let
+  enable = false;
+in
+lib.mkIf enable {
   environment.systemPackages = with pkgs; [
     raycast
   ];
