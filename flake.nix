@@ -87,7 +87,7 @@
         inherit inputs sharedHomeModules;
       };
 
-      darwinConfigurations.Lukes-Mac-mini = import ./hosts/Lukes-Mac-mini {
+      nixosConfigurations.Lukes-Um790 = import ./hosts/Lukes-Um790 {
         inherit inputs sharedHomeModules;
       };
 
