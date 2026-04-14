@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, osConfig, ... }:
 lib.mkIf pkgs.stdenv.isLinux {
   programs = {
     dsearch.enable = true;
@@ -136,6 +136,7 @@ lib.mkIf pkgs.stdenv.isLinux {
         configVersion = 3;
       };
       plugins.powerUsagePlugin.enable = true;
+      plugins.linuxWallpaperEngine.enable = osConfig.networking.hostName == "Lukes-Um790";
     };
   };
 }
