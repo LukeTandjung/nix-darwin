@@ -1,6 +1,8 @@
 { pkgs, ... }:
 
 {
+  users.mutableUsers = false;
+
   users.users.luke = {
     isNormalUser = true;
     description = "Luke";
