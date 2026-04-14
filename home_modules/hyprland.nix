@@ -9,7 +9,6 @@
 let
   hostName = osConfig.networking.hostName;
   isUm790 = hostName == "Lukes-Um790";
-  # Framework laptop uses a specific backlight device; desktop omits it for DMS auto-detect
   brightnessDevice = if hostName == "Lukes-Mac-air" then " backlight:intel_backlight" else "";
 in
 lib.mkIf pkgs.stdenv.isLinux {
@@ -148,11 +147,13 @@ lib.mkIf pkgs.stdenv.isLinux {
         "$mainMod, Q, exec, $terminal"
         "$mainMod, X, killactive,"
         "$mainMod, E, exec, $fileManager"
+        "$mainMod, V, togglefloating,"
         "$mainMod, F, fullscreen, 0"
         "$mainMod, R, exec, $menu"
         "$mainMod, J, togglesplit,"
 
         # DankMaterialShell specific binds
+        "$mainMod, C, exec, dms ipc call clipboard toggle"
         "$mainMod, N, exec, dms ipc call notifications toggle"
         "$mainMod, comma, exec, dms ipc call settings toggle"
         "$mainMod, M, exec, dms ipc call notepad toggle"
@@ -195,12 +196,12 @@ lib.mkIf pkgs.stdenv.isLinux {
         "$mainMod SHIFT, PRINT, exec, hyprshot -m region"
       ]
       # Apple Magic Keyboard special keys (Um790 only)
-      # Search key (F4/Spotlight) → DMS spotlight, Lock key → DMS lock
       # If these don't work, verify keycodes with `wev` or `sudo keyd monitor`
       ++ lib.optionals isUm790 [
         ", XF86Search, exec, dms ipc call spotlight toggle"
         ", XF86LaunchA, exec, dms ipc call spotlight toggle"
-        ", XF86Lock, exec, dms ipc call lock lock"
+        ", XF86ScreenSaver, exec, dms ipc call lock lock"
+        ", Scroll_Lock, exec, hyprctl switchxkblayout all next"
       ];
 
       bindm = [
