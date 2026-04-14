@@ -23,6 +23,6 @@
     ./keyd.nix
     ./wallpaper-engine.nix
     ./steam.nix
-    ./ratbagd.nix
+    ./solaar.nix
   ];
 }
