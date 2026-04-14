@@ -36,6 +36,7 @@ lib.mkIf pkgs.stdenv.isLinux {
               "systemTray"
               "cpuUsage"
               "memUsage"
+              "mpvpaperWallpaper"
               "notificationButton"
               "battery"
               "controlCenterButton"
