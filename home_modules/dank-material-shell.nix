@@ -136,7 +136,7 @@ lib.mkIf pkgs.stdenv.isLinux {
         configVersion = 3;
       };
       plugins.powerUsagePlugin.enable = true;
-      plugins.linuxWallpaperEngine.enable = osConfig.networking.hostName == "Lukes-Um790";
+      plugins.mpvpaperWallpaper.enable = osConfig.networking.hostName == "Lukes-Um790";
     };
   };
 }

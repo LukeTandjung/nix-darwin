@@ -21,7 +21,6 @@
     ./docker.nix
     ./agents.nix
     ./keyd.nix
-    ./wallpaper-engine.nix
     ./steam.nix
     ./solaar.nix
   ];
