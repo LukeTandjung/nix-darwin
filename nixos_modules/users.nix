@@ -6,6 +6,7 @@
     description = "Luke";
     extraGroups = [ "wheel" "networkmanager" "docker" ];
     shell = pkgs.zsh;
+    initialPassword = "changeme";
   };
 
   # Even though this option is enabled by HM, this only enables zsh for the user level;
