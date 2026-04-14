@@ -24,7 +24,6 @@
     ./pi.nix
     ./git.nix
     ./ssh.nix
-    ./rclone.nix
     ./lazygit.nix
     ./mise.nix
     ./claude-code.nix
