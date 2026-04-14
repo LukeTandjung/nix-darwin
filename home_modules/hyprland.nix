@@ -1,5 +1,6 @@
 {
   config,
+  osConfig,
   pkgs,
   lib,
   inputs,
@@ -22,7 +23,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       "$terminal" = "kitty";
       "$fileManager" = "nautilus";
       "$menu" = "dms ipc call spotlight toggle";
-      "$mainMod" = "ALT";
+      "$mainMod" = if osConfig.networking.hostName == "Lukes-Mac-air" then "ALT" else "SUPER";
 
       # Autostart
       "exec-once" = [

@@ -1,6 +1,8 @@
 { config, lib, pkgs, ... }:
 
 {
+  networking.hostName = "Lukes-Um790";
+
   # System settings
   time.timeZone = "Europe/London";
   i18n.defaultLocale = "en_US.UTF-8";
