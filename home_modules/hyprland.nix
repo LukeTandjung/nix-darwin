@@ -6,6 +6,12 @@
   inputs,
   ...
 }:
+let
+  hostName = osConfig.networking.hostName;
+  isUm790 = hostName == "Lukes-Um790";
+  # Framework laptop uses a specific backlight device; desktop omits it for DMS auto-detect
+  brightnessDevice = if hostName == "Lukes-Mac-air" then " backlight:intel_backlight" else "";
+in
 lib.mkIf pkgs.stdenv.isLinux {
   # Home Manager's Hyprland module also manages xdg-desktop-portal.
   # Add the GTK portal here so the active user portal dir includes OpenURI.
@@ -142,13 +148,11 @@ lib.mkIf pkgs.stdenv.isLinux {
         "$mainMod, Q, exec, $terminal"
         "$mainMod, X, killactive,"
         "$mainMod, E, exec, $fileManager"
-        "$mainMod, V, togglefloating,"
         "$mainMod, F, fullscreen, 0"
         "$mainMod, R, exec, $menu"
         "$mainMod, J, togglesplit,"
 
         # DankMaterialShell specific binds
-        "$mainMod, C, exec, dms ipc call clipboard toggle"
         "$mainMod, N, exec, dms ipc call notifications toggle"
         "$mainMod, comma, exec, dms ipc call settings toggle"
         "$mainMod, M, exec, dms ipc call notepad toggle"
@@ -189,6 +193,14 @@ lib.mkIf pkgs.stdenv.isLinux {
         "$mainMod, PRINT, exec, hyprshot -m window"
         ", PRINT, exec, hyprshot -m output"
         "$mainMod SHIFT, PRINT, exec, hyprshot -m region"
+      ]
+      # Apple Magic Keyboard special keys (Um790 only)
+      # Search key (F4/Spotlight) → DMS spotlight, Lock key → DMS lock
+      # If these don't work, verify keycodes with `wev` or `sudo keyd monitor`
+      ++ lib.optionals isUm790 [
+        ", XF86Search, exec, dms ipc call spotlight toggle"
+        ", XF86LaunchA, exec, dms ipc call spotlight toggle"
+        ", XF86Lock, exec, dms ipc call lock lock"
       ];
 
       bindm = [
@@ -201,8 +213,8 @@ lib.mkIf pkgs.stdenv.isLinux {
         ",XF86AudioLowerVolume, exec, dms ipc call audio decrement 5"
         ",XF86AudioMute, exec, dms ipc call audio mute"
         ",XF86AudioMicMute, exec, dms ipc call audio micmute"
-        ",XF86MonBrightnessUp, exec, dms ipc call brightness increment 5 backlight:intel_backlight"
-        ",XF86MonBrightnessDown, exec, dms ipc call brightness decrement 5 backlight:intel_backlight"
+        ",XF86MonBrightnessUp, exec, dms ipc call brightness increment 5${brightnessDevice}"
+        ",XF86MonBrightnessDown, exec, dms ipc call brightness decrement 5${brightnessDevice}"
       ];
 
       bindl = [
