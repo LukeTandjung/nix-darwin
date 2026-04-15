@@ -1,9 +1,7 @@
 {
-  config,
   osConfig,
   pkgs,
   lib,
-  inputs,
   ...
 }:
 let
@@ -201,9 +199,12 @@ lib.mkIf pkgs.stdenv.isLinux {
       # If these don't work, verify keycodes with `wev` or `sudo keyd monitor`
       ++ lib.optionals isUm790 [
         ", XF86Search, exec, dms ipc call spotlight toggle"
-        ", XF86LaunchA, exec, dms ipc call spotlight toggle"
         ", XF86ScreenSaver, exec, dms ipc call lock lock"
-        ", Scroll_Lock, exec, hyprctl switchxkblayout all next"
+
+        # XF86LaunchA mirrors PRINT for hyprshot on the Um790
+        "$mainMod, XF86LaunchA, exec, hyprshot -m window"
+        ", XF86LaunchA, exec, hyprshot -m output"
+        "$mainMod SHIFT, XF86LaunchA, exec, hyprshot -m region"
       ];
 
       bindm = [
