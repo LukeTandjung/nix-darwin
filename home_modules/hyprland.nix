@@ -46,7 +46,7 @@ lib.mkIf pkgs.stdenv.isLinux {
         gaps_out = 5;
         border_size = 1;
         resize_on_border = false;
-        allow_tearing = false;
+        allow_tearing = true;
         layout = "dwindle";
       };
 
@@ -113,6 +113,8 @@ lib.mkIf pkgs.stdenv.isLinux {
       misc = {
         force_default_wallpaper = -1;
         disable_hyprland_logo = false;
+        vfr = false;
+        vrr = 2;
       };
 
       cursor = {
@@ -231,6 +233,8 @@ lib.mkIf pkgs.stdenv.isLinux {
       # Window and workspace rules
       windowrule = [
         "no_focus on, match:class ^$, match:title ^$, match:xwayland true, match:float true, match:fullscreen false, match:pin false"
+        # Allow screen tearing for CS2 to reduce input latency
+        "immediate, class:^(cs2)$"
       ];
     };
   };
