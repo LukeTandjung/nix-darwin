@@ -18,11 +18,7 @@ lib.mkIf (config.networking.hostName == "Lukes-Um790") {
       ids = [ "*" ];
       settings = {
         main = {
-          fn = "overload(globe, scrolllock)";
-        };
-        "globe+shift" = {
-          c = "C-c";
-          v = "C-v";
+          fn = "leftcontrol"
         };
       };
     };
