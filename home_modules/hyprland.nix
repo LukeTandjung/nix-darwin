@@ -22,6 +22,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       monitor = [
         "eDP-1,preferred,auto,auto"
         "DP-3,preferred,auto,auto,mirror,eDP-1"
+        "HDMI-A-1,1920x1080@144,0x0,1"
       ];
 
       # Variables
