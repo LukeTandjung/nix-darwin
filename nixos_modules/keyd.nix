@@ -18,7 +18,7 @@ lib.mkIf (config.networking.hostName == "Lukes-Um790") {
       ids = [ "*" ];
       settings = {
         main = {
-          fn = "leftcontrol"
+          fn = "leftcontrol";
         };
       };
     };
