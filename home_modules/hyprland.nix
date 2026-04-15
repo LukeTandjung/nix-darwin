@@ -234,7 +234,7 @@ lib.mkIf pkgs.stdenv.isLinux {
       windowrule = [
         "no_focus on, match:class ^$, match:title ^$, match:xwayland true, match:float true, match:fullscreen false, match:pin false"
         # Allow screen tearing for CS2 to reduce input latency
-        "immediate, class:^(cs2)$"
+        "immediate on, class:^(cs2)$"
       ];
     };
   };
