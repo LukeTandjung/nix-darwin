@@ -23,5 +23,6 @@
     ./keyd.nix
     ./steam.nix
     ./solaar.nix
+    ./kew.nix
   ];
 }
