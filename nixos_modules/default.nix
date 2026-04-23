@@ -24,5 +24,6 @@
     ./steam.nix
     ./solaar.nix
     ./kew.nix
+    ./nvidia.nix
   ];
 }
