@@ -1,7 +1,10 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, ... }:
 
 lib.mkIf (config.networking.hostName == "Lukes-Um790") {
-  services.xserver.videoDrivers = [ "nvidia" ];
+  services.xserver.videoDrivers = [
+    "amdgpu"
+    "nvidia"
+  ];
 
   hardware = {
     graphics = {
@@ -15,8 +18,20 @@ lib.mkIf (config.networking.hostName == "Lukes-Um790") {
       open = true;
       nvidiaSettings = true;
       # Blackwell needs >= 570; beta tracks the newest upstream driver.
-      package = config.boot.kernelPackages.nvidiaPackages.beta;
+      package = config.boot.kernelPackages.nvidiaPackages.stable;
       powerManagement.enable = false;
+      powerManagement.finegrained = false;
+
+      prime = {
+        offload = {
+          enable = true;
+          enableOffloadCmd = true;
+        };
+
+        # PRIME Bus IDs use decimal PCI addresses, not the hex shown by lspci.
+        amdgpuBusId = "PCI:196@0:0:0";
+        nvidiaBusId = "PCI:102@0:0:0";
+      };
     };
   };
 
@@ -25,9 +40,6 @@ lib.mkIf (config.networking.hostName == "Lukes-Um790") {
 
   # Render GL/Vulkan apps on the 5090 by default; compositor stays on amdgpu.
   environment.sessionVariables = {
-    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-    __NV_PRIME_RENDER_OFFLOAD = "1";
-    __VK_LAYER_NV_optimus     = "NVIDIA_only";
-    LIBVA_DRIVER_NAME         = "nvidia";
+    LIBVA_DRIVER_NAME = "nvidia";
   };
 }
