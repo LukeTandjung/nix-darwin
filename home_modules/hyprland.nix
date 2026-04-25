@@ -170,6 +170,12 @@ lib.mkIf pkgs.stdenv.isLinux {
         "$mainMod, up, movefocus, u"
         "$mainMod, down, movefocus, d"
 
+        # Move active window within workspace
+        "$mainMod SHIFT, left, movewindow, l"
+        "$mainMod SHIFT, right, movewindow, r"
+        "$mainMod SHIFT, up, movewindow, u"
+        "$mainMod SHIFT, down, movewindow, d"
+
         # Workspaces 1-10
         "$mainMod, 1, workspace, 1"
         "$mainMod, 2, workspace, 2"
