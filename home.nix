@@ -22,6 +22,8 @@ in
 
     sessionVariables = {
       EDITOR = "hx";
+    }
+    // lib.optionalAttrs isDarwin {
       DOCKER_HOST = "unix:///Users/luketandjung/.orbstack/run/docker.sock";
     };
   };
