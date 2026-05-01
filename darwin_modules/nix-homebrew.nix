@@ -24,6 +24,7 @@
       "jq"
       "ripgrep"
       "tree"
+      "mkcert"
 
       "bash"
       "coreutils"
