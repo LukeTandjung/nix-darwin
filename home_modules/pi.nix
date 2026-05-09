@@ -13,6 +13,7 @@
       defaultModel = "gpt-5.4";
       defaultThinkingLevel = "medium";
       theme = "dark";
+      packages = [ "npm:pi-web-access" ];
       compaction = {
         enabled = true;
         keepRecentTokens = true;
