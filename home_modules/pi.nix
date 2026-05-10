@@ -10,15 +10,18 @@
     enable = true;
     settings = {
       defaultProvider = "openai-codex";
-      defaultModel = "gpt-5.4";
-      defaultThinkingLevel = "medium";
+      defaultModel = "gpt-5.5";
+      defaultThinkingLevel = "low";
       theme = "dark";
       npmCommand = [
         "${pkgs.nodejs}/bin/npm"
         "--prefix"
         "${config.home.homeDirectory}/.pi/npm-global"
       ];
-      packages = [ "npm:pi-web-access" ];
+      packages = [
+        "npm:pi-web-access"
+        "npm:@feniix/pi-notion"
+      ];
       compaction = {
         enabled = true;
         keepRecentTokens = true;
