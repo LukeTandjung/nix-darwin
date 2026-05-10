@@ -13,6 +13,11 @@
       defaultModel = "gpt-5.5";
       defaultThinkingLevel = "low";
       theme = "dark";
+      npmCommand = [
+        "npm"
+        "--prefix"
+        "${config.home.homeDirectory}/.pi/npm-global"
+      ];
       packages = [
         "npm:pi-web-access"
         "npm:@feniix/pi-notion"
