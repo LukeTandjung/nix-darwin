@@ -77,10 +77,10 @@ in
           position = 6;
           isEssential = true;
         };
-        t3chat = {
+        chat = {
           id = "a1b2c3d4-7777-4444-8888-777777777777";
-          title = "Claude";
-          url = "https://claude.ai";
+          title = "Chat.com";
+          url = "https://chat.com";
           position = 7;
           isEssential = true;
         };
