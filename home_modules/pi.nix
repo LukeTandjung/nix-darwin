@@ -21,6 +21,7 @@
       packages = [
         "npm:pi-web-access"
         "npm:@feniix/pi-notion"
+        "npm:pi-docparser"
       ];
       compaction = {
         enabled = true;
