@@ -10,6 +10,7 @@
     ./users.nix
     ./packages.nix
     ./typst.nix
+    ./rust.nix
     ./stylix.nix
     ./nix.nix
     ./flatpak.nix
