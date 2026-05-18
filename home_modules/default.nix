@@ -30,5 +30,6 @@
     ./hyprshot.nix
     ./bookokrat.nix
     ./mpvpaper.nix
+    ./pencil.nix
   ];
 }
