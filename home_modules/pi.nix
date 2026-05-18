@@ -1,13 +1,23 @@
 {
   config,
   pkgs,
-  lib,
   inputs,
   ...
 }:
+let
+  pencil = inputs.luke-pkgs.packages.${pkgs.stdenv.hostPlatform.system}.pencil;
+
+  pencilMcpServer = {
+    x86_64-linux = "${pencil}/opt/pencil/resources/app.asar.unpacked/out/mcp-server-linux-x64";
+    aarch64-linux = "${pencil}/opt/pencil/resources/app.asar.unpacked/out/mcp-server-linux-arm64";
+    x86_64-darwin = "${pencil}/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-x64";
+    aarch64-darwin = "${pencil}/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64";
+  }.${pkgs.stdenv.hostPlatform.system};
+in
 {
   programs.pi = {
     enable = true;
+
     settings = {
       defaultProvider = "openai-codex";
       defaultModel = "gpt-5.5";
@@ -20,7 +30,6 @@
       ];
       packages = [
         "npm:pi-web-access"
-        "npm:@feniix/pi-notion"
         "npm:pi-docparser"
       ];
       compaction = {
@@ -30,6 +39,50 @@
       retry = {
         enabled = true;
         maxRetries = 3;
+      };
+    };
+
+    mcp = {
+      enable = true;
+
+      settings = {
+        toolPrefix = "server";
+        idleTimeout = 10;
+        directTools = false;
+      };
+
+      servers = {
+        effect = {
+          command = "npx";
+          args = [
+            "-y"
+            "effect-mcp@latest"
+          ];
+        };
+
+        typst = {
+          command = "docker";
+          args = [
+            "run"
+            "--rm"
+            "-i"
+            "ghcr.io/johannesbrandenburger/typst-mcp:latest"
+          ];
+        };
+
+        notion = {
+          url = "https://mcp.notion.com/mcp";
+          auth = "oauth";
+        };
+
+        pencil = {
+          command = pencilMcpServer;
+          args = [
+            "--app"
+            "desktop"
+          ];
+          env = { };
+        };
       };
     };
   };
