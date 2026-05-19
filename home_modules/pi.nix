@@ -2,6 +2,7 @@
   config,
   pkgs,
   inputs,
+  lib,
   ...
 }:
 let
@@ -29,8 +30,9 @@ in
         "${config.home.homeDirectory}/.pi/npm-global"
       ];
       packages = [
-        "npm:pi-web-access"
         "npm:pi-docparser"
+      ] ++ lib.optionals (!pkgs.stdenv.isDarwin) [
+        "npm:pi-web-access"
       ];
       compaction = {
         enabled = true;
