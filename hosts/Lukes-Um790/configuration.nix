@@ -11,13 +11,21 @@
     allowUnfree = true;
   };
 
-  # Test eGPU/USB4 stability by disabling PCIe ASPM.
+  # Keep kernel logs across hard reboots while diagnosing eGPU crashes. The
+  # failing Vulkan path rebooted the machine before user-space logs could flush,
+  # so persistent journald is necessary for post-mortem `journalctl -b -1`.
+  services.journald.extraConfig = ''
+    Storage=persistent
+    SyncIntervalSec=1s
+  '';
+
+  # eGPU/USB4 stability: disable PCIe power management. ASPM/port PM can push
+  # Thunderbolt PCIe devices through low-power transitions that are unsafe for
+  # this Blackwell eGPU setup. NVIDIA DRM/KMS params are intentionally absent;
+  # the AMD iGPU owns display and nvidia.nix keeps NVIDIA compute/offload-only.
   boot.kernelParams = [
-    "pcie_ports=native"
     "pcie_aspm=off"
     "pcie_port_pm=off"
-    "pcie=assign-busses,realloc"
-    "thunderbolt.clx=0"
   ];
 
   system.copySystemConfiguration = false;

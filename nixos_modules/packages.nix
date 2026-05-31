@@ -1,10 +1,14 @@
 { pkgs, inputs, ... }:
 
 {
-  # Core system packages
+  # Core system packages. pciutils gives us lspci/setpci for eGPU PCIe link
+  # diagnosis and the Gen3 bridge cap service; usbutils is useful for USB4/TB
+  # enclosure debugging.
   environment.systemPackages = with pkgs; [
     wget
     upower
+    pciutils
+    usbutils
   ];
 
   # Fonts
