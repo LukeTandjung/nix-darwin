@@ -36,7 +36,8 @@ in
       ];
       compaction = {
         enabled = true;
-        keepRecentTokens = true;
+        reserveTokens = 16384;
+        keepRecentTokens = 20000;
       };
       retry = {
         enabled = true;
