@@ -44,7 +44,7 @@
   };
 
   fonts.packages = [
-    inputs.luke-pkgs.packages.${pkgs.system}.terminal_grotesque
+    inputs.luke-pkgs.packages.${pkgs.stdenv.hostPlatform.system}.terminal_grotesque
   ] ++ (with pkgs; [
     font-awesome
     jetbrains-mono

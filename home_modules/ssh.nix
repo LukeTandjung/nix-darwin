@@ -10,10 +10,10 @@
     enable = true;
     enableDefaultConfig = false;
     # Set agent behavior for all hosts
-    matchBlocks."*" = {
-      addKeysToAgent = "yes";
-      identityFile = [ "~/secrets/id_ed25519" ];
-      identitiesOnly = true;
+    settings."*" = {
+      AddKeysToAgent = "yes";
+      IdentityFile = [ "~/secrets/id_ed25519" ];
+      IdentitiesOnly = true;
     };
   };
 

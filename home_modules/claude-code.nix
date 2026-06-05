@@ -56,7 +56,7 @@ in
         url = "https://docs.dedaluslabs.ai/mcp";
       };
     };
-    memory.text = ''
+    context = ''
       # Typescript Rules
       - In tsconfig.json, under compilerOptions, the paths key must always be the value { "*": [ "./app/*" ] }.
       - Always use ES modules syntax (import .../export ...).
