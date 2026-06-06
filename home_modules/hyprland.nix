@@ -16,6 +16,9 @@ lib.mkIf pkgs.stdenv.isLinux {
 
   wayland.windowManager.hyprland = {
     enable = true;
+    # Home Manager 26.05+ defaults Hyprland config generation to Lua. Keep the
+    # existing hyprlang config until we explicitly migrate it.
+    configType = "hyprlang";
     settings = {
       monitor = [
         "eDP-1,preferred,auto,auto"
