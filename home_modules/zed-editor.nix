@@ -6,6 +6,11 @@
   ...
 }:
 {
+  # Zed now rejects the Stylix-generated theme when tinted-zed receives an
+  # unspecified scheme variant. Our inline Kanagawa scheme is dark, so make that
+  # explicit for this target while keeping Stylix in charge of colors/fonts.
+  stylix.targets.zed.colors.override.scheme-variant = "dark";
+
   programs.zed-editor = {
     enable = true;
     package = pkgs.zed-editor;
