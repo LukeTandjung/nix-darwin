@@ -35,6 +35,7 @@
       "claude"
       "figma"
       "font-jetbrains-mono-nerd-font"
+      "ngrok"
       "tailscale-app"
       "yaak"
       "mocki-toki/formulae/barik"
