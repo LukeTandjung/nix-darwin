@@ -363,11 +363,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1779181681,
-        "narHash": "sha256-80IEsaUmlp0BzEAzzG/jnvzrhPl63fL2/5e4eyK16X0=",
+        "lastModified": 1781268291,
+        "narHash": "sha256-N9Mg6QSyiYj6/2ctP+HadEqsaGqX0jvcuGZZzcNNgi4=",
         "owner": "LukeTandjung",
         "repo": "luke-nix-emporium",
-        "rev": "b0ad94a869bf70dca1a89926bb6fdc65c532efaf",
+        "rev": "a1310cada9f85d72b88adfdecca68a6f60c58b59",
         "type": "github"
       },
       "original": {
