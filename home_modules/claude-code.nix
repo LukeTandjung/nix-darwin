@@ -3,18 +3,18 @@
   ...
 }:
 let
-  version = "2.1.63";
+  version = "2.1.170";
 
   baseUrl = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases";
 
   platforms = {
     "aarch64-darwin" = {
       slug = "darwin-arm64";
-      hash = "sha256:2e8667322e0bd104087df2a8857f176acc75d7091aa02828825dfeb4a5708531";
+      hash = "sha256-6QNkbYt6MYgqgOzSdWmifYrFezcIdF80lwljLIQRf98=";
     };
     "x86_64-linux" = {
       slug = "linux-x64";
-      hash = "sha256:734447e461bb92f0ffd5f683bb6216c35a3c16e8dd84be8d150b43605d39b0d1";
+      hash = "sha256-hJ4AcnegRCqydXDT49bUN4dQeUZZDo3RlH5aObcIH54=";
     };
   };
 
