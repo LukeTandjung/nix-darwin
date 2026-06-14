@@ -39,6 +39,7 @@
 
   # Desktop packages
   environment.systemPackages = with pkgs; [
+    adwaita-icon-theme
     nautilus
     wl-clipboard
     cliphist
