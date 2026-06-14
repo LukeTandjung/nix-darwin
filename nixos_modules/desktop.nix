@@ -34,6 +34,9 @@
     XDG_DATA_DIRS = "/run/current-system/sw/share";
   };
 
+  # Hyprland still probes /var/lib/flatpak icon paths; allow the greeter to traverse them.
+  users.users.dms-greeter.extraGroups = [ "users" ];
+
   # Hyprland
   programs.hyprland = {
     enable = true;
