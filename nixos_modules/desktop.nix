@@ -28,6 +28,12 @@
     };
   };
 
+  # Prevent greeter Hyprland from probing Flatpak icon paths that dms-greeter cannot access.
+  systemd.services.greetd.environment = {
+    XCURSOR_PATH = "/run/current-system/sw/share/icons";
+    XDG_DATA_DIRS = "/run/current-system/sw/share";
+  };
+
   # Hyprland
   programs.hyprland = {
     enable = true;
