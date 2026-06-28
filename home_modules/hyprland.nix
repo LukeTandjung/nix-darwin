@@ -263,6 +263,16 @@ lib.mkIf pkgs.stdenv.isLinux {
         no_focus = true,
       })
 
+      -- Keep Waydroid isolated on its own workspace for Android apps.
+      hl.window_rule({
+        name = "waydroid-workspace",
+        match = { class = "^(Waydroid)$" },
+        workspace = "6",
+        float = true,
+        size = { "(monitor_w*0.90)", "(monitor_h*0.90)" },
+        center = true,
+      })
+
       -- Allow screen tearing for CS2 to reduce input latency
       hl.window_rule({
         name = "cs2-immediate",
