@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }:
+{ config, inputs, pkgs, ... }:
 
 let
   waydroidScript = inputs.nur.legacyPackages.${pkgs.stdenv.hostPlatform.system}.repos.ataraxiasjel.waydroid-script;
@@ -22,6 +22,10 @@ in
     wants = [ "network-online.target" ];
     after = [ "network-online.target" ];
     before = [ "waydroid-container.service" ];
+
+    path = [
+      config.virtualisation.waydroid.package
+    ];
 
     serviceConfig = {
       Type = "oneshot";
