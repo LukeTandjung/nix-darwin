@@ -26,5 +26,6 @@
     ./solaar.nix
     ./kew.nix
     ./nvidia.nix
+    ./waydroid.nix
   ];
 }
