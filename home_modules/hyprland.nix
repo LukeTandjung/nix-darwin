@@ -200,8 +200,8 @@ lib.mkIf pkgs.stdenv.isLinux {
       hl.bind(mainMod .. " + SHIFT + up", hl.dsp.window.move({ direction = "up" }))
       hl.bind(mainMod .. " + SHIFT + down", hl.dsp.window.move({ direction = "down" }))
 
-      -- Workspaces 1-6
-      for i = 1, 6 do
+      -- Workspaces 1-5
+      for i = 1, 5 do
         local key = tostring(i)
         hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i }))
         hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
@@ -263,15 +263,6 @@ lib.mkIf pkgs.stdenv.isLinux {
         no_focus = true,
       })
 
-      -- Keep Waydroid isolated on its own workspace for Android apps.
-      hl.window_rule({
-        name = "waydroid-workspace",
-        match = { class = "^(Waydroid)$" },
-        workspace = "6",
-        float = true,
-        size = { "monitor_w", "monitor_h" },
-        center = true,
-      })
 
       -- Allow screen tearing for CS2 to reduce input latency
       hl.window_rule({
