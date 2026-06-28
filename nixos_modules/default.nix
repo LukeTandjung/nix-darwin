@@ -17,6 +17,7 @@
     ./inkscape.nix
     ./rnote.nix
     ./evince.nix
+    ./fwupd.nix
     ./home_manager.nix
     ./nix-ld.nix
     ./docker.nix
