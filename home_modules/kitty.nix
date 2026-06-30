@@ -14,7 +14,7 @@
       # Stylix generates kitty theme includes in /nix/store; kitty's watcher can
       # recursively watch large parts of the store and exhaust inotify watches.
       # Config is managed by Nix/Home Manager, so manual reloads or new windows are enough.
-      auto_reload_config = -1;
+      auto_reload_config = "no";
     };
   };
 }
