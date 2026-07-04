@@ -10,7 +10,7 @@
     enable = true;
     package = pkgs.zsh;
     initContent = ''
-      export PATH="/opt/homebrew/bin:$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
+      export PATH="${lib.optionalString pkgs.stdenv.isDarwin "/opt/homebrew/bin:"}$HOME/.cargo/bin:$PATH:$HOME/.local/bin"
     '';
   };
 }
