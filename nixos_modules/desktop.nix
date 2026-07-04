@@ -43,6 +43,10 @@
     xwayland.enable = true;
   };
 
+  # Provides Secret Service storage so Claude Desktop/Electron apps can save sign-ins.
+  services.gnome.gnome-keyring.enable = true;
+  programs.seahorse.enable = true;
+
   # Terminal
   environment.sessionVariables.TERMINAL = "kitty";
 
