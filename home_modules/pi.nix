@@ -21,7 +21,7 @@ in
 
     settings = {
       defaultProvider = "openai-codex";
-      defaultModel = "gpt-5.5";
+      defaultModel = "gpt-5.6-sol";
       defaultThinkingLevel = "low";
       theme = "dark";
       npmCommand = [
@@ -31,6 +31,9 @@ in
       ];
       packages = [
         "npm:pi-docparser"
+        "npm:pi-subagents"
+        "npm:pi-autoresearch"
+        "npm:@pi-unipi/notify"
       ] ++ lib.optionals (!pkgs.stdenv.isDarwin) [
         "npm:pi-web-access"
       ];
@@ -47,6 +50,7 @@ in
 
     mcp = {
       enable = true;
+      packageSource = "npm:pi-mcp-adapter@latest";
 
       settings = {
         toolPrefix = "server";
