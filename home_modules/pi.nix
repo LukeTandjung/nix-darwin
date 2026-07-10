@@ -34,6 +34,7 @@ in
         "npm:pi-subagents"
         "npm:pi-autoresearch"
         "npm:@pi-unipi/notify"
+        "npm:@juicesharp/rpiv-ask-user-question"
       ] ++ lib.optionals (!pkgs.stdenv.isDarwin) [
         "npm:pi-web-access"
       ];
