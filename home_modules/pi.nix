@@ -31,7 +31,6 @@ in
       ];
       packages = [
         "npm:pi-docparser"
-        "npm:pi-subagents"
         "npm:pi-autoresearch"
         "npm:@pi-unipi/notify"
         "npm:@juicesharp/rpiv-ask-user-question"
