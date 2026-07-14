@@ -9,6 +9,12 @@
 
   nixpkgs.config = {
     allowUnfree = true;
+
+    # Build CUDA consumers specifically for the RTX 5090 (Blackwell, SM 12.0).
+    # Keep the patched NVIDIA kernel/userspace package in nvidia.nix unchanged;
+    # these settings only control Nix CUDA package builds.
+    cudaSupport = true;
+    cudaCapabilities = [ "12.0" ];
   };
 
   # Keep kernel logs across hard reboots while diagnosing eGPU crashes. The

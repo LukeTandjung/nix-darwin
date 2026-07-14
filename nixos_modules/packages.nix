@@ -9,6 +9,8 @@
     upower
     pciutils
     usbutils
+    # Phase 0 local-LLM prerequisite: verify that RADV exposes the 780M.
+    vulkan-tools
   ];
 
   # Fonts
