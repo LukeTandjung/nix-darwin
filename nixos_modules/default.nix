@@ -27,5 +27,6 @@
     ./solaar.nix
     ./kew.nix
     ./nvidia.nix
+    ./llm.nix
   ];
 }
