@@ -26,20 +26,20 @@ let
     globalTTL: 86400
     startPort: 5800
     models:
-      qwen-root:
+      qwen-27b-dense-thinking:
         ttl: 86400
         concurrencyLimit: 1
         cmd: >-
           ${llamaCpp}/bin/llama-server
           --port ''${PORT}
           --model ${modelPath}
-          --alias qwen-root
+          --alias qwen-27b-dense-thinking
           --n-gpu-layers 999
           --parallel 1
-          --ctx-size 131072
+          --ctx-size 204800
           --flash-attn on
-          --cache-type-k q8_0
-          --cache-type-v q8_0
+          --cache-type-k q4_0
+          --cache-type-v q4_0
           --spec-type draft-mtp
           --spec-draft-n-max 2
           --slot-save-path /dev/shm/llm-slots
@@ -50,43 +50,6 @@ let
           --top-k 20
           --min-p 0.0
           --presence-penalty 1.5
-      qwen-leaf:
-        ttl: 86400
-        concurrencyLimit: 4
-        filters:
-          setParams:
-            chat_template_kwargs:
-              enable_thinking: false
-              preserve_thinking: true
-        cmd: >-
-          ${llamaCpp}/bin/llama-server
-          --port ''${PORT}
-          --model ${modelPath}
-          --alias qwen-leaf
-          --n-gpu-layers 999
-          --parallel 4
-          --ctx-size 131072
-          --flash-attn on
-          --cache-type-k q8_0
-          --cache-type-v q8_0
-          --spec-type draft-mtp
-          --spec-draft-n-max 2
-          --jinja
-          --temp 0.7
-          --top-p 0.8
-          --top-k 20
-          --min-p 0.0
-    routing:
-      router:
-        use: group
-        settings:
-          groups:
-            qwen-profiles:
-              swap: true
-              exclusive: true
-              members:
-                - qwen-root
-                - qwen-leaf
   '';
 in
 lib.mkIf (config.networking.hostName == "Lukes-Um790") {

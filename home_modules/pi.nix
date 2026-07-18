@@ -107,20 +107,12 @@ in
       };
       models = [
         {
-          id = "qwen-root";
-          name = "Qwen3.6 27B Root (Local Q6_K MTP)";
+          id = "qwen-27b-dense-thinking";
+          name = "Qwen3.6 27B Dense Thinking (Local Q6_K MTP)";
           reasoning = true;
           input = [ "text" ];
-          contextWindow = 131072;
+          contextWindow = 204800;
           maxTokens = 16384;
-        }
-        {
-          id = "qwen-leaf";
-          name = "Qwen3.6 27B Leaf (Local Q6_K MTP)";
-          reasoning = false;
-          input = [ "text" ];
-          contextWindow = 32768;
-          maxTokens = 4096;
         }
       ];
     };
