@@ -93,4 +93,36 @@ in
       };
     };
   };
+
+  home.file.".pi/agent/models.json".text = builtins.toJSON {
+    providers.local-llamacpp = {
+      baseUrl = "http://127.0.0.1:8080/v1";
+      api = "openai-completions";
+      apiKey = "none";
+      compat = {
+        supportsDeveloperRole = false;
+        supportsReasoningEffort = false;
+        maxTokensField = "max_tokens";
+        thinkingFormat = "qwen-chat-template";
+      };
+      models = [
+        {
+          id = "qwen-root";
+          name = "Qwen3.6 27B Root (Local Q6_K MTP)";
+          reasoning = true;
+          input = [ "text" ];
+          contextWindow = 131072;
+          maxTokens = 16384;
+        }
+        {
+          id = "qwen-leaf";
+          name = "Qwen3.6 27B Leaf (Local Q6_K MTP)";
+          reasoning = false;
+          input = [ "text" ];
+          contextWindow = 32768;
+          maxTokens = 4096;
+        }
+      ];
+    };
+  };
 }
