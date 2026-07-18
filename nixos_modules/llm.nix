@@ -23,11 +23,11 @@ let
 
   llamaSwapConfig = pkgs.writeText "llama-swap.yaml" ''
     healthCheckTimeout: 300
-    globalTTL: 86400
+    globalTTL: 300
     startPort: 5800
     models:
       qwen-27b-dense-thinking:
-        ttl: 86400
+        ttl: 300
         concurrencyLimit: 1
         cmd: >-
           ${llamaCpp}/bin/llama-server
