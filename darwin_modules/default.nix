@@ -1,8 +1,8 @@
-{ ... }:
-{
+{...}: {
   imports = [
     ./dbeaver.nix
     ./home_manager.nix
+    ./nix.nix
     ./nix-homebrew.nix
     ./notion.nix
     ./orbstack.nix
