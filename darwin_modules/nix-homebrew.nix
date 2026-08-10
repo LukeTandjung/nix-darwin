@@ -1,5 +1,8 @@
-{ inputs, config, ... }:
 {
+  inputs,
+  config,
+  ...
+}: {
   nix-homebrew = {
     enable = true;
     enableRosetta = true;
@@ -7,7 +10,6 @@
     taps = {
       "homebrew/homebrew-core" = inputs.homebrew-core;
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
-      "mocki-toki/homebrew-formulae" = inputs.homebrew-formulae;
     };
     mutableTaps = false;
   };
@@ -38,7 +40,6 @@
       "ngrok"
       "tailscale-app"
       "yaak"
-      "mocki-toki/formulae/barik"
     ];
   };
 }

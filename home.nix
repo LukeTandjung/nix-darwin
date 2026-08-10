@@ -4,28 +4,33 @@
   lib,
   inputs,
   ...
-}:
-let
+}: let
   isDarwin = pkgs.stdenv.isDarwin;
-in
-{
+in {
   programs.home-manager.enable = true;
 
   home = {
-    username = if isDarwin then "luketandjung" else "luke";
-    homeDirectory = if isDarwin then "/Users/luketandjung" else "/home/luke";
+    username =
+      if isDarwin
+      then "luketandjung"
+      else "luke";
+    homeDirectory =
+      if isDarwin
+      then "/Users/luketandjung"
+      else "/home/luke";
     stateVersion = "26.05";
-    packages = [ ];
+    packages = [];
 
     # This suppresses the login message that appears for Kitty!
     file.".hushlogin".text = "";
 
-    sessionVariables = {
-      EDITOR = "hx";
-    }
-    // lib.optionalAttrs isDarwin {
-      DOCKER_HOST = "unix:///Users/luketandjung/.orbstack/run/docker.sock";
-    };
+    sessionVariables =
+      {
+        EDITOR = "hx";
+      }
+      // lib.optionalAttrs isDarwin {
+        DOCKER_HOST = "unix:///Users/luketandjung/.orbstack/run/docker.sock";
+      };
   };
 
   imports = [

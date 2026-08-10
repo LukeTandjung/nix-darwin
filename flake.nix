@@ -37,6 +37,11 @@
     };
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
     luke-pkgs.url = "github:LukeTandjung/luke-nix-emporium";
+    autolith.url = "github:luciusmagn/autolith";
+    neosicht = {
+      url = "github:LukeTandjung/neosicht";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     dgop = {
       url = "github:AvengeMedia/dgop";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -62,43 +67,36 @@
       url = "github:homebrew/homebrew-cask";
       flake = false;
     };
-    homebrew-formulae = {
-      url = "github:mocki-toki/homebrew-formulae";
-      flake = false;
-    };
   };
 
-  outputs =
-    inputs@{
-      zen-browser,
-      spicetify-nix,
-      dankMaterialShell,
-      dms-plugin-registry,
-      dsearch,
-      luke-pkgs,
-      ...
-    }:
-    let
-      sharedHomeModules = [
-        zen-browser.homeModules.beta
-        spicetify-nix.homeManagerModules.spicetify
-        luke-pkgs.homeManagerModules.default
-        dankMaterialShell.homeModules.dank-material-shell
-        dms-plugin-registry.modules.default
-        dsearch.homeModules.default
-      ];
-    in
-    {
-      nixosConfigurations.Lukes-Mac-air = import ./hosts/Lukes-Mac-air {
-        inherit inputs sharedHomeModules;
-      };
-
-      nixosConfigurations.Lukes-Um790 = import ./hosts/Lukes-Um790 {
-        inherit inputs sharedHomeModules;
-      };
-
-      darwinConfigurations.Lukes-MacBook-Pro = import ./hosts/Lukes-MacBook-Pro {
-        inherit inputs sharedHomeModules;
-      };
+  outputs = inputs @ {
+    zen-browser,
+    spicetify-nix,
+    dankMaterialShell,
+    dms-plugin-registry,
+    dsearch,
+    luke-pkgs,
+    ...
+  }: let
+    sharedHomeModules = [
+      zen-browser.homeModules.beta
+      spicetify-nix.homeManagerModules.spicetify
+      luke-pkgs.homeManagerModules.default
+      dankMaterialShell.homeModules.dank-material-shell
+      dms-plugin-registry.modules.default
+      dsearch.homeModules.default
+    ];
+  in {
+    nixosConfigurations.Lukes-Mac-air = import ./hosts/Lukes-Mac-air {
+      inherit inputs sharedHomeModules;
     };
+
+    nixosConfigurations.Lukes-Um790 = import ./hosts/Lukes-Um790 {
+      inherit inputs sharedHomeModules;
+    };
+
+    darwinConfigurations.Lukes-MacBook-Pro = import ./hosts/Lukes-MacBook-Pro {
+      inherit inputs sharedHomeModules;
+    };
+  };
 }
