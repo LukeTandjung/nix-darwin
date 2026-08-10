@@ -32,10 +32,10 @@ in
       packages = [
         "npm:pi-docparser"
         "npm:pi-autoresearch"
-        "npm:pi-goal-x"
         "npm:@pi-unipi/notify"
         "npm:@juicesharp/rpiv-ask-user-question"
-      ] ++ lib.optionals (!pkgs.stdenv.isDarwin) [
+      ] ++ lib.optionals pkgs.stdenv.isLinux [
+        "npm:pi-goal-x"
         "npm:pi-web-access"
       ];
       compaction = {
