@@ -407,11 +407,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786401014,
-        "narHash": "sha256-FSUi9JspmSxDVLTdoFM2VmWCsdwo5VX0W3N5xCxSmyE=",
+        "lastModified": 1786403339,
+        "narHash": "sha256-LXBzPtthsn3A+/NWDup2XQnlfmHUeulzoK6HhBEtXw0=",
         "owner": "LukeTandjung",
         "repo": "neosicht",
-        "rev": "9acf06ca3ca87c91d1d54acaa22b1d8911ab4bd5",
+        "rev": "231d3acd36c0033eeaaff9122f99c3fd8c2e2583",
         "type": "github"
       },
       "original": {
