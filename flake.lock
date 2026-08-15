@@ -6,15 +6,15 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1786521552,
-        "narHash": "sha256-d/72NLfjYf0ys4uH9wMlQwFCVxvwPLAVX9IDQoBUmUU=",
-        "owner": "luciusmagn",
+        "lastModified": 1786821255,
+        "narHash": "sha256-Vli/RGdN8D6H1Uz8rin/mRoamvslUnkecD7sd3BHZTg=",
+        "owner": "lambda-symbolics",
         "repo": "autolith",
-        "rev": "2264b3bc554bf8fe14ce4dc6d2f794c9e9e3a65a",
+        "rev": "02242b4cf1855f73acfc0077f3258f79df5b61a4",
         "type": "github"
       },
       "original": {
-        "owner": "luciusmagn",
+        "owner": "lambda-symbolics",
         "repo": "autolith",
         "type": "github"
       }
