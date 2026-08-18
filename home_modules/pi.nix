@@ -15,7 +15,7 @@ let
     aarch64-darwin = "${pencil}/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64";
   }.${pkgs.stdenv.hostPlatform.system};
 in
-{
+lib.mkIf pkgs.stdenv.isLinux {
   programs.pi = {
     enable = true;
 
