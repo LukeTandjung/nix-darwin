@@ -8,14 +8,16 @@
 let
   pencil = inputs.luke-pkgs.packages.${pkgs.stdenv.hostPlatform.system}.pencil;
 
-  pencilMcpServer = {
-    x86_64-linux = "${pencil}/opt/pencil/resources/app.asar.unpacked/out/mcp-server-linux-x64";
-    aarch64-linux = "${pencil}/opt/pencil/resources/app.asar.unpacked/out/mcp-server-linux-arm64";
-    x86_64-darwin = "${pencil}/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-x64";
-    aarch64-darwin = "${pencil}/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64";
-  }.${pkgs.stdenv.hostPlatform.system};
+  pencilMcpServer =
+    {
+      x86_64-linux = "${pencil}/opt/pencil/resources/app.asar.unpacked/out/mcp-server-linux-x64";
+      aarch64-linux = "${pencil}/opt/pencil/resources/app.asar.unpacked/out/mcp-server-linux-arm64";
+      x86_64-darwin = "${pencil}/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-x64";
+      aarch64-darwin = "${pencil}/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64";
+    }
+    .${pkgs.stdenv.hostPlatform.system};
 in
-lib.mkIf pkgs.stdenv.isLinux {
+{
   programs.pi = {
     enable = true;
 
@@ -34,7 +36,8 @@ lib.mkIf pkgs.stdenv.isLinux {
         "npm:pi-autoresearch"
         "npm:@pi-unipi/notify"
         "npm:@juicesharp/rpiv-ask-user-question"
-      ] ++ lib.optionals pkgs.stdenv.isLinux [
+      ]
+      ++ lib.optionals pkgs.stdenv.isLinux [
         "npm:pi-goal-x"
         "npm:pi-web-access"
       ];
