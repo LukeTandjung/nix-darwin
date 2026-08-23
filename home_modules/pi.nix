@@ -32,6 +32,7 @@ in
         "${config.home.homeDirectory}/.pi/npm-global"
       ];
       packages = [
+        "npm:@hicaru/pi-rlm"
         "npm:pi-docparser"
         "npm:pi-autoresearch"
         "npm:@pi-unipi/notify"
