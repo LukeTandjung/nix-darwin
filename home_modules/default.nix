@@ -7,6 +7,7 @@
     ./direnv.nix
     ./fastfetch.nix
     ./helix.nix
+    ./herdr.nix
     ./htop.nix
     ./kitty.nix
     ./lazydocker.nix
