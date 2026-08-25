@@ -83,7 +83,7 @@
       spicetify-nix.homeManagerModules.spicetify
       luke-pkgs.homeManagerModules.default
       dankMaterialShell.homeModules.dank-material-shell
-      dms-plugin-registry.modules.default
+      dms-plugin-registry.homeModules.default
       dsearch.homeModules.default
     ];
   in {
