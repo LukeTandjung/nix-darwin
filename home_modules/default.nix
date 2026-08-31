@@ -30,8 +30,6 @@
     ./claude-code.nix
     ./claude-desktop.nix
     ./hyprshot.nix
-    ./bookokrat.nix
     ./mpvpaper.nix
-    ./pencil.nix
   ];
 }

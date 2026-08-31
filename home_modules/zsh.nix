@@ -12,7 +12,7 @@
     initContent = ''
       path=(
         $HOME/.cargo/bin
-        ${lib.optionalString pkgs.stdenv.isDarwin "/opt/homebrew/bin"}
+        ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin "/opt/homebrew/bin"}
         ''${path:#$HOME/.cargo/bin}
       )
       path=(''${path:#$HOME/.local/bin} $HOME/.local/bin)

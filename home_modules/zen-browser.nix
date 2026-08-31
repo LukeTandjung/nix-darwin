@@ -91,7 +91,7 @@ in
   stylix.targets.zen-browser.profileNames = [ "luke" ];
 
   home.activation.zen-profile-bridge = lib.hm.dag.entryAfter [ "linkGeneration" ] (
-    lib.optionalString pkgs.stdenv.isLinux ''
+    lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
       mkdir -p "$HOME/.zen"
 
       if [ -e "$HOME/.zen/profiles.ini" ] && [ ! -e "$HOME/.zen/profiles.ini.pre-hm-backup" ]; then

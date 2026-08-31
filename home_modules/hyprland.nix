@@ -10,8 +10,9 @@ let
   brightnessDevice = if hostName == "Lukes-Mac-air" then " backlight:intel_backlight" else "";
   mainMod = if hostName == "Lukes-Mac-air" then "ALT" else "SUPER";
 in
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.pointerCursor = {
+    enable = true;
     package = pkgs.adwaita-icon-theme;
     name = "Adwaita";
     size = 24;

@@ -15,7 +15,6 @@
     ./stylix.nix
     ./nix.nix
     ./flatpak.nix
-    ./inkscape.nix
     ./rnote.nix
     ./evince.nix
     ./fwupd.nix

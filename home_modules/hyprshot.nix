@@ -5,7 +5,7 @@
   inputs,
   ...
 }:
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   programs.hyprshot = {
     enable = true;
     package = pkgs.hyprshot;

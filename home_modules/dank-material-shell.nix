@@ -1,5 +1,5 @@
 { pkgs, lib, osConfig, ... }:
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   programs = {
     dsearch.enable = true;
 
@@ -137,6 +137,7 @@ lib.mkIf pkgs.stdenv.isLinux {
         configVersion = 3;
       };
       plugins.powerUsagePlugin.enable = true;
+      plugins.dankKDEConnect.enable = true;
       plugins.mpvpaperWallpaper.enable = osConfig.networking.hostName == "Lukes-Um790";
     };
   };

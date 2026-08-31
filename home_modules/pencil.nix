@@ -1,6 +1,0 @@
-{ ... }:
-{
-  programs.pencil = {
-    enable = true;
-  };
-}

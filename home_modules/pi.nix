@@ -5,18 +5,6 @@
   lib,
   ...
 }:
-let
-  pencil = inputs.luke-pkgs.packages.${pkgs.stdenv.hostPlatform.system}.pencil;
-
-  pencilMcpServer =
-    {
-      x86_64-linux = "${pencil}/opt/pencil/resources/app.asar.unpacked/out/mcp-server-linux-x64";
-      aarch64-linux = "${pencil}/opt/pencil/resources/app.asar.unpacked/out/mcp-server-linux-arm64";
-      x86_64-darwin = "${pencil}/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-x64";
-      aarch64-darwin = "${pencil}/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64";
-    }
-    .${pkgs.stdenv.hostPlatform.system};
-in
 {
   programs.pi = {
     enable = true;
@@ -38,7 +26,7 @@ in
         "npm:@pi-unipi/notify"
         "npm:@juicesharp/rpiv-ask-user-question"
       ]
-      ++ lib.optionals pkgs.stdenv.isLinux [
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
         "npm:pi-goal-x"
         "npm:pi-web-access"
       ];
@@ -87,14 +75,6 @@ in
           auth = "oauth";
         };
 
-        pencil = {
-          command = pencilMcpServer;
-          args = [
-            "--app"
-            "desktop"
-          ];
-          env = { };
-        };
       };
     };
   };
@@ -112,8 +92,8 @@ in
       };
       models = [
         {
-          id = "qwen-27b-dense-thinking";
-          name = "Qwen3.6 27B Dense Thinking (Local Q6_K MTP)";
+          id = "qwen-38-27b-uncensored-thinking";
+          name = "Qwen3.8 27B Uncensored Thinking (Local Q6_K MTP)";
           reasoning = true;
           input = [ "text" ];
           contextWindow = 204800;

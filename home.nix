@@ -5,7 +5,7 @@
   inputs,
   ...
 }: let
-  isDarwin = pkgs.stdenv.isDarwin;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
 in {
   programs.home-manager.enable = true;
 

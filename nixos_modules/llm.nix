@@ -19,21 +19,21 @@ let
         '';
       });
 
-  modelPath = "/var/lib/llm/models/qwen36-27b/Qwen3.6-27B-Q6_K.gguf";
+  modelPath = "/var/lib/llm/models/qwen38-27b-uncensored/Qwen3.8-27B-Uncensored-Q6_K.gguf";
 
   llamaSwapConfig = pkgs.writeText "llama-swap.yaml" ''
     healthCheckTimeout: 300
     globalTTL: 300
     startPort: 5800
     models:
-      qwen-27b-dense-thinking:
+      qwen-38-27b-uncensored-thinking:
         ttl: 300
         concurrencyLimit: 1
         cmd: >-
           ${llamaCpp}/bin/llama-server
           --port ''${PORT}
           --model ${modelPath}
-          --alias qwen-27b-dense-thinking
+          --alias qwen-38-27b-uncensored-thinking
           --n-gpu-layers 999
           --parallel 1
           --ctx-size 204800
