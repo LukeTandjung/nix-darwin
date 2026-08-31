@@ -37,6 +37,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
               "cpuUsage"
               "memUsage"
               "mpvpaperWallpaper"
+              "dankKDEConnect"
               "notificationButton"
               "battery"
               "controlCenterButton"
