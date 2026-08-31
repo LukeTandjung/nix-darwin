@@ -20,6 +20,8 @@ let
       });
 
   modelPath = "/var/lib/llm/models/qwen38-27b-uncensored/Qwen3.8-27B-Uncensored-Q6_K.gguf";
+  paddleOcrModelPath = "/var/lib/llm/models/paddleocr-vl-1.6/PaddleOCR-VL-1.6-GGUF.gguf";
+  paddleOcrProjectorPath = "/var/lib/llm/models/paddleocr-vl-1.6/PaddleOCR-VL-1.6-GGUF-mmproj.gguf";
 
   llamaSwapConfig = pkgs.writeText "llama-swap.yaml" ''
     healthCheckTimeout: 300
@@ -50,6 +52,21 @@ let
           --top-k 20
           --min-p 0.0
           --presence-penalty 1.5
+      paddleocr-vl-1.6:
+        ttl: 300
+        concurrencyLimit: 1
+        cmd: >-
+          ${llamaCpp}/bin/llama-server
+          --port ''${PORT}
+          --model ${paddleOcrModelPath}
+          --mmproj ${paddleOcrProjectorPath}
+          --alias paddleocr-vl-1.6
+          --n-gpu-layers 999
+          --parallel 1
+          --ctx-size 8192
+          --flash-attn on
+          --jinja
+          --temp 0
   '';
 in
 lib.mkIf (config.networking.hostName == "Lukes-Um790") {
@@ -71,6 +88,7 @@ lib.mkIf (config.networking.hostName == "Lukes-Um790") {
   systemd.tmpfiles.rules = [
     "d /var/lib/llm 0750 llm llm -"
     "d /var/lib/llm/models 0750 llm llm -"
+    "d /var/lib/llm/models/paddleocr-vl-1.6 0750 llm llm -"
     "d /dev/shm/llm-slots 0750 llm llm -"
   ];
 
