@@ -25,6 +25,7 @@
     ./keyd.nix
     ./steam.nix
     ./solaar.nix
+    ./valent.nix
     ./kew.nix
     ./nvidia.nix
     ./llm.nix

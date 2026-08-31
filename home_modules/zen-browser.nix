@@ -31,6 +31,7 @@ in
     profiles.luke = {
       isDefault = true;
       settings = {
+        "zen.view.window.scheme" = lib.mkForce 0;
         "zen.welcome-screen.seen" = true;
       };
       pinsForce = true;
