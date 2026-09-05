@@ -3,6 +3,7 @@
 }:
 {
   imports = [
+    ./autolith.nix
     ./btop.nix
     ./direnv.nix
     ./fastfetch.nix
