@@ -19,6 +19,26 @@
         "type": "github"
       }
     },
+    "autolith_2": {
+      "inputs": {
+        "flake-parts": "flake-parts_2",
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1787671081,
+        "narHash": "sha256-5RtNqSdaahweI9lgcBaEXhPfCtduVgNkTGOA0RcHyvE=",
+        "owner": "luciusmagn",
+        "repo": "autolith",
+        "rev": "83755ca231423831e75f5d9e61dbfa114e76fed1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "luciusmagn",
+        "ref": "v0.40.1",
+        "repo": "autolith",
+        "type": "github"
+      }
+    },
     "base16": {
       "inputs": {
         "fromYaml": "fromYaml"
@@ -258,6 +278,28 @@
     "flake-parts_2": {
       "inputs": {
         "nixpkgs-lib": [
+          "luke-pkgs",
+          "autolith",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1782949081,
+        "narHash": "sha256-vp6Y/Grm98ESt6ceOkWiHWyZRDV3J1RID4w+6NWK9yA=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "17c9d6cdfc60c64f4ee8d306f9bc0b4ccb51481e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "flake-parts_3": {
+      "inputs": {
+        "nixpkgs-lib": [
           "stylix",
           "nixpkgs"
         ]
@@ -403,14 +445,15 @@
     },
     "luke-pkgs": {
       "inputs": {
-        "nixpkgs": "nixpkgs_2"
+        "autolith": "autolith_2",
+        "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1788559959,
-        "narHash": "sha256-Xc0LXt5nr9WV4gVBzzPtEC+jeFrkVPbX9Wg+/7bazBY=",
+        "lastModified": 1788610247,
+        "narHash": "sha256-Skuzx9unii0+B497dg3dsPlHjX7UWyo+fhGF6ZN+PTo=",
         "owner": "LukeTandjung",
         "repo": "luke-nix-emporium",
-        "rev": "477a65f0ffd85c2ac845ed46cc1f7644ba5ea4b7",
+        "rev": "0d65479440638eef8c8b5d832f83b68230162490",
         "type": "github"
       },
       "original": {
@@ -480,7 +523,7 @@
     },
     "nixos-hardware": {
       "inputs": {
-        "nixpkgs": "nixpkgs_3"
+        "nixpkgs": "nixpkgs_4"
       },
       "locked": {
         "lastModified": 1787144466,
@@ -515,6 +558,22 @@
     },
     "nixpkgs_2": {
       "locked": {
+        "lastModified": 1786348146,
+        "narHash": "sha256-we5zDEFfn8TgzeWKjKDMIjeQZ59omEPl23NIF+13/ys=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "d482ef84049d9b7276b83a06e4e4d76983830097",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "d482ef84049d9b7276b83a06e4e4d76983830097",
+        "type": "github"
+      }
+    },
+    "nixpkgs_3": {
+      "locked": {
         "lastModified": 1761373498,
         "narHash": "sha256-Q/uhWNvd7V7k1H1ZPMy/vkx3F8C13ZcdrKjO7Jv7v0c=",
         "owner": "NixOS",
@@ -529,7 +588,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_3": {
+    "nixpkgs_4": {
       "locked": {
         "lastModified": 1767892417,
         "narHash": "sha256-8bW3q88CEg2u4hSP66Vf4lpbLonHz7hqDNBMcCY7E9U=",
@@ -542,7 +601,7 @@
         "url": "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz"
       }
     },
-    "nixpkgs_4": {
+    "nixpkgs_5": {
       "locked": {
         "lastModified": 1787498568,
         "narHash": "sha256-9i/VTdusq/+NM/tz+J1Re+ojkMB8MBf0QshnYfzHz30=",
@@ -558,7 +617,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_5": {
+    "nixpkgs_6": {
       "locked": {
         "lastModified": 1787360063,
         "narHash": "sha256-95aJfHyQTLWslCXFVNB0odgmVkpdmDezQwTg9mhqV1E=",
@@ -628,7 +687,7 @@
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs_4",
+        "nixpkgs": "nixpkgs_5",
         "rnote-nixpkgs": "rnote-nixpkgs",
         "spicetify-nix": "spicetify-nix",
         "stylix": "stylix",
@@ -637,7 +696,7 @@
     },
     "spicetify-nix": {
       "inputs": {
-        "nixpkgs": "nixpkgs_5",
+        "nixpkgs": "nixpkgs_6",
         "systems": "systems"
       },
       "locked": {
@@ -661,7 +720,7 @@
         "base16-helix": "base16-helix",
         "base16-vim": "base16-vim",
         "firefox-gnome-theme": "firefox-gnome-theme",
-        "flake-parts": "flake-parts_2",
+        "flake-parts": "flake-parts_3",
         "gnome-shell": "gnome-shell",
         "nixpkgs": [
           "nixpkgs"
