@@ -5,6 +5,7 @@
   imports = [
     ./autolith.nix
     ./btop.nix
+    ./delta.nix
     ./direnv.nix
     ./fastfetch.nix
     ./helix.nix
