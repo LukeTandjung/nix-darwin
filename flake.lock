@@ -25,16 +25,16 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1787671081,
-        "narHash": "sha256-5RtNqSdaahweI9lgcBaEXhPfCtduVgNkTGOA0RcHyvE=",
-        "owner": "luciusmagn",
+        "lastModified": 1787953892,
+        "narHash": "sha256-dearvhMFO9bVH0MpoUPyWBrEBzvynOP5Ziak99fTg3k=",
+        "owner": "lambda-symbolics",
         "repo": "autolith",
-        "rev": "83755ca231423831e75f5d9e61dbfa114e76fed1",
+        "rev": "91dc8d01ba2422497f03c42990f4afc5192cadeb",
         "type": "github"
       },
       "original": {
-        "owner": "luciusmagn",
-        "ref": "v0.40.1",
+        "owner": "lambda-symbolics",
+        "ref": "v0.43.0",
         "repo": "autolith",
         "type": "github"
       }
@@ -449,11 +449,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1788651886,
-        "narHash": "sha256-DrckmmnAoxTk44GX42Y0gyCury6h9Y2R6g6rNIJ5RLk=",
+        "lastModified": 1788685578,
+        "narHash": "sha256-RvRy6JCt3CefIzqGWi5zWR+t3jpQlwgU/IrJkN0W1CY=",
         "owner": "LukeTandjung",
         "repo": "luke-nix-emporium",
-        "rev": "5ad0c170a234bef9a9ee7047dc742d05c9ebea4a",
+        "rev": "ebef2f2bd66d3bd2a9a2a1b79b991a89ff4fcc4a",
         "type": "github"
       },
       "original": {
