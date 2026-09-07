@@ -6,7 +6,6 @@
     ast-grep
     fastmod
     fzf
-    gh
     jq
     ripgrep
     tree
