@@ -167,17 +167,17 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1788777902,
-        "narHash": "sha256-vIrVavQ2bpFlTEaUq5hDUcus1oyfSf10LQxebK0gXeI=",
-        "owner": "zed-industries",
-        "repo": "delta-nix-linux",
-        "rev": "992f9061856600c953d963f33e46e68a42f55b88",
-        "type": "github"
+        "lastModified": 1788808704,
+        "narHash": "sha256-OFycE3tcCclEww4OADNyKpZ9IEo5AB2HshWDcAILl2w=",
+        "ref": "refs/heads/main",
+        "rev": "7806be8d0255d3edfd2a59056bab5067d8e5b6e5",
+        "revCount": 842,
+        "type": "git",
+        "url": "ssh://git@github.com/zed-industries/delta-nix-linux.git"
       },
       "original": {
-        "owner": "zed-industries",
-        "repo": "delta-nix-linux",
-        "type": "github"
+        "type": "git",
+        "url": "ssh://git@github.com/zed-industries/delta-nix-linux.git"
       }
     },
     "dgop": {
