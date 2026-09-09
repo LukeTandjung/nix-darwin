@@ -17,6 +17,7 @@
     extraPackages = [ pkgs.nodejs_22 ]; # Ensure nodejs_22 is available on macOS
     extensions = [
       "nix"
+      "deno"
       "typst"
       "latex"
       "opencode"
