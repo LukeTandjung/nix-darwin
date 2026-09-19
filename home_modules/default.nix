@@ -11,6 +11,7 @@
     ./helix.nix
     ./herdr.nix
     ./htop.nix
+    ./keepassxc.nix
     ./kitty.nix
     ./lazydocker.nix
     ./oh-my-posh.nix
