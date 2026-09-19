@@ -7,15 +7,23 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       enable = true;
       enableCalendarEvents = false;
       settings = {
-        # Fonts and the custom theme file are supplied by Stylix.
+        # The custom theme file is supplied by Stylix.
+        fontFamily = lib.mkForce "IBM Plex Sans";
+        monoFontFamily = lib.mkForce "IBM Plex Sans";
         configVersion = 28;
         radiusStrength = 19;
         widgetBackgroundColor = "s";
         barElevationEnabled = false;
-        barInsetPaddingShared = 12;
+        barInsetPaddingShared = 4;
         barInsetPaddingSyncAll = true;
         launcherLogoMode = "os";
         launcherLogoColorOverride = "primary";
+        builtInPluginSettings = {
+          dms_settings_search.trigger = "?";
+          dms_clipboard_search.trigger = "cb";
+          dms_power.trigger = "pw";
+          dms_qr_generator.trigger = "qrg";
+        };
         barConfigs = [
           {
             id = "default";
@@ -35,7 +43,16 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
             showOnLastDisplay = true;
             leftWidgets = [
               "launcherButton"
-              { id = "workspaceSwitcher"; showWorkspaceApps = true; }
+              {
+                id = "workspaceSwitcher";
+                showWorkspaceApps = false;
+                showWorkspaceName = false;
+                showWorkspaceIndex = false;
+                workspaceFocusedBorderEnabled = false;
+                workspaceAppIconSizeOffset = 0;
+                showOccupiedWorkspacesOnly = false;
+                enabled = true;
+              }
               "focusedWindow"
             ];
             centerWidgets = [
@@ -46,12 +63,12 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
             rightWidgets = [
               "systemTray"
               "cpuUsage"
-              "memUsage"
               "mpvpaperWallpaper"
               "dankKDEConnect"
               "notificationButton"
-              "battery"
+              { id = "battery"; enabled = true; }
               "controlCenterButton"
+              { id = "vpn"; enabled = true; }
             ];
             spacing = 4;
             innerPadding = 4;
@@ -80,6 +97,13 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
             maximizeWidgetIcons = false;
             shadowIntensity = 0;
             attachToScreenEdge = false;
+            islandFloating = false;
+            islandAlongOffset = 0;
+            widgetStyle = "pills";
+            iconScale = 1;
+            islandReserveThickness = 40;
+            islandCompactThickness = 30;
+            islandHomeCompactTight = false;
           }
         ];
       };
