@@ -6,11 +6,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1787651456,
-        "narHash": "sha256-tAMFzzllkqsCUkIbl2uPEIBYUN62l5rIEcXuUh1OSA4=",
+        "lastModified": 1789823920,
+        "narHash": "sha256-tGFNxVOQ6RIG6RKr2Ijk0XL9X9qy3uD6VaIJ3PDPMSY=",
         "owner": "lambda-symbolics",
         "repo": "autolith",
-        "rev": "25cb0e859c2f243da273027b38447bc275a8d44e",
+        "rev": "b407707a895da6c767517c6619b15c24516e3055",
         "type": "github"
       },
       "original": {
@@ -167,11 +167,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1788808704,
-        "narHash": "sha256-OFycE3tcCclEww4OADNyKpZ9IEo5AB2HshWDcAILl2w=",
+        "lastModified": 1789802294,
+        "narHash": "sha256-rgs3R1oZvMfn6KXM2AEt+lH7lvMFcBrJJbphjWORIxc=",
         "ref": "refs/heads/main",
-        "rev": "7806be8d0255d3edfd2a59056bab5067d8e5b6e5",
-        "revCount": 842,
+        "rev": "74a64cc55151136249c7d1cece85959ace421476",
+        "revCount": 1045,
         "type": "git",
         "url": "ssh://git@github.com/zed-industries/delta-nix-linux.git"
       },
