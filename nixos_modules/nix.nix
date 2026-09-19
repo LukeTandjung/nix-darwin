@@ -1,5 +1,9 @@
-{...}: {
+{config, ...}: {
   nix = {
+    # Let root builds use Luke's private GitHub credential too.
+    extraOptions = ''
+      !include ${config.users.users.luke.home}/.config/nix/github-token.conf
+    '';
     settings = {
       # Enable experimental features
       experimental-features = [
