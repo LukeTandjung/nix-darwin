@@ -8,6 +8,6 @@
     "x86_64-linux"
     "aarch64-linux"
   ]) [
-    inputs.delta.packages.${pkgs.stdenv.hostPlatform.system}.delta-trunk
+    inputs.delta.packages.${pkgs.stdenv.hostPlatform.system}.delta-nightly
   ];
 }
