@@ -7,24 +7,35 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       enable = true;
       enableCalendarEvents = false;
       settings = {
-        fontFamily = "JetBrains Mono";
-        cornerRadius = 6;
-        showWorkspaceApps = true;
-        showClipboard = true;
+        # Fonts and the custom theme file are supplied by Stylix.
+        configVersion = 28;
+        radiusStrength = 19;
+        widgetBackgroundColor = "s";
+        barElevationEnabled = false;
+        barInsetPaddingShared = 12;
+        barInsetPaddingSyncAll = true;
         launcherLogoMode = "os";
         launcherLogoColorOverride = "primary";
-        wallpaperPath = "/home/luke/Pictures/Wallpapers/painting_in_balcony.jpeg";
         barConfigs = [
           {
             id = "default";
             name = "Main Bar";
+            island = true;
+            islandPalette = "dim";
+            islandHomeLayout = [
+              { id = "media"; enabled = true; }
+              { id = "clock"; enabled = true; }
+              { id = "weather"; enabled = true; }
+              { id = "notifications"; enabled = true; }
+            ];
+            followInterfaceStyle = true;
             enabled = true;
             position = 0;
             screenPreferences = [ "all" ];
             showOnLastDisplay = true;
             leftWidgets = [
               "launcherButton"
-              "workspaceSwitcher"
+              { id = "workspaceSwitcher"; showWorkspaceApps = true; }
               "focusedWindow"
             ];
             centerWidgets = [
@@ -63,79 +74,28 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
             visible = true;
             popupGapsAuto = true;
             popupGapsManual = 4;
+            widgetPadding = 8;
+            barInsetPadding = 4;
+            maximizeWidgetText = false;
+            maximizeWidgetIcons = false;
+            shadowIntensity = 0;
+            attachToScreenEdge = false;
           }
         ];
       };
       session = {
-        isLightMode = false;
-        doNotDisturb = false;
-        perMonitorWallpaper = false;
-        monitorWallpapers = { };
-        perModeWallpaper = false;
-        wallpaperPathLight = "";
-        wallpaperPathDark = "";
-        monitorWallpapersLight = { };
-        monitorWallpapersDark = { };
-        wallpaperTransition = "fade";
-        includedTransitions = [
-          "fade"
-          "wipe"
-          "disc"
-          "stripes"
-          "iris bloom"
-          "pixelate"
-          "portal"
-        ];
+        configVersion = 6;
+        isLightMode = true;
         wallpaperCyclingEnabled = true;
-        wallpaperCyclingMode = "interval";
         wallpaperCyclingInterval = 1800;
-        wallpaperCyclingTime = "06:00";
-        monitorCyclingSettings = { };
         nightModeEnabled = true;
-        nightModeTemperature = 4500;
-        nightModeHighTemperature = 6500;
         nightModeAutoEnabled = true;
-        nightModeAutoMode = "time";
         nightModeStartHour = 21;
-        nightModeStartMinute = 0;
-        nightModeEndHour = 6;
-        nightModeEndMinute = 0;
-        latitude = 0;
-        longitude = 0;
-        nightModeUseIPLocation = false;
-        nightModeLocationProvider = "";
-        themeModeAutoEnabled = false;
-        themeModeAutoMode = "time";
+        themeModeAutoEnabled = true;
         themeModeStartHour = 22;
-        themeModeStartMinute = 0;
-        themeModeEndHour = 6;
-        themeModeEndMinute = 0;
-        themeModeShareGammaSettings = true;
         weatherLocation = "London, UK";
         weatherCoordinates = "51.5074,-0.1278";
-        pinnedApps = [ ];
-        barPinnedApps = [ ];
-        dockLauncherPosition = 0;
-        hiddenTrayIds = [ ];
-        trayItemOrder = [ ];
-        recentColors = [ ];
-        showThirdPartyPlugins = false;
-        launchPrefix = "";
-        lastBrightnessDevice = "";
-        brightnessExponentialDevices = { };
-        brightnessUserSetValues = { };
-        brightnessExponentValues = { };
-        selectedGpuIndex = 0;
-        nvidiaGpuTempEnabled = false;
-        nonNvidiaGpuTempEnabled = false;
-        enabledGpuPciIds = [ ];
-        wifiDeviceOverride = "";
-        weatherHourlyDetailed = true;
-        hiddenApps = [ ];
-        appOverrides = { };
-        searchAppActions = true;
-        vpnLastConnected = "";
-        configVersion = 3;
+        # Launcher history is runtime state, not a declarative preference.
       };
       plugins.powerUsagePlugin.enable = true;
       plugins.dankKDEConnect.enable = true;

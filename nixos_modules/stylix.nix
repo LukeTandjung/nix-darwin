@@ -29,20 +29,20 @@
   # 3) Fonts
   stylix.fonts = {
     monospace = {
-      package = pkgs.jetbrains-mono;
-      name = "JetBrains Mono";
+      package = pkgs.ibm-plex;
+      name = "IBM Plex Sans";
     };
     sansSerif = {
-      package = pkgs.jetbrains-mono;
-      name = "JetBrains Mono";
+      package = pkgs.ibm-plex;
+      name = "IBM Plex Sans";
     };
     serif = {
-      package = pkgs.jetbrains-mono;
-      name = "JetBrains Mono";
+      package = pkgs.ibm-plex;
+      name = "IBM Plex Sans";
     };
     emoji = {
-      package = pkgs.nerd-fonts.jetbrains-mono;
-      name = "JetBrains Mono NF";
+      package = pkgs.ibm-plex;
+      name = "IBM Plex Sans";
     };
 
     sizes = {
