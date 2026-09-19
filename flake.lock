@@ -167,11 +167,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1789802294,
-        "narHash": "sha256-rgs3R1oZvMfn6KXM2AEt+lH7lvMFcBrJJbphjWORIxc=",
+        "lastModified": 1789827376,
+        "narHash": "sha256-sWZ8169jN5ESrWynBuhWIFB/A7phzebeJNiqjJFjXfs=",
         "ref": "refs/heads/main",
-        "rev": "74a64cc55151136249c7d1cece85959ace421476",
-        "revCount": 1045,
+        "rev": "3c82003e1d027e9c24a6a0cc453a737fea243232",
+        "revCount": 1046,
         "type": "git",
         "url": "ssh://git@github.com/zed-industries/delta-nix-linux.git"
       },
