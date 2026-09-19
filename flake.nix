@@ -38,7 +38,6 @@
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
     luke-pkgs.url = "github:LukeTandjung/luke-nix-emporium";
     delta.url = "github:zed-industries/delta-nix-linux";
-    autolith.url = "github:lambda-symbolics/autolith";
     neosicht = {
       url = "github:LukeTandjung/neosicht";
       inputs.nixpkgs.follows = "nixpkgs";

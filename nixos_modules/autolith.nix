@@ -4,6 +4,6 @@
   ...
 }: {
   environment.systemPackages = [
-    inputs.autolith.packages.${pkgs.stdenv.hostPlatform.system}.default
+    inputs.luke-pkgs.packages.${pkgs.stdenv.hostPlatform.system}.autolith
   ];
 }
