@@ -1,5 +1,6 @@
 {...}: {
   imports = [
+    ./chatgpt.nix
     ./dbeaver.nix
     ./home_manager.nix
     ./nix.nix

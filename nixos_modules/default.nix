@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./chatgpt.nix
     ./hardware.nix
     ./desktop.nix
     ./audio.nix

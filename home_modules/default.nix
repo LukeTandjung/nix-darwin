@@ -32,7 +32,6 @@
     ./lazygit.nix
     ./mise.nix
     ./claude-code.nix
-    ./claude-desktop.nix
     ./hyprshot.nix
     ./mpvpaper.nix
   ];

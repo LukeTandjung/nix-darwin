@@ -35,6 +35,10 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    codex-desktop-linux = {
+      url = "github:ilysenko/codex-desktop-linux";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
     luke-pkgs.url = "github:LukeTandjung/luke-nix-emporium";
     delta.url = "github:zed-industries/delta-nix-linux";
