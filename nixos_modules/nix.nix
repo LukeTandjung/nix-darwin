@@ -1,8 +1,10 @@
-{config, ...}: {
+{config, lib, ...}: {
+  # Keep the runtime credential path stable across activations.
+  users.users.luke.uid = lib.mkDefault 1000;
   nix = {
-    # Let root builds use Luke's private GitHub credential too.
+    # Read the session token exported from KeePassXC, including root builds.
     extraOptions = ''
-      !include ${config.users.users.luke.home}/.config/nix/github-token.conf
+      !include /run/user/${toString config.users.users.luke.uid}/nix-github/token.conf
     '';
     settings = {
       # Enable experimental features
