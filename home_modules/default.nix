@@ -14,6 +14,7 @@
     ./keepassxc.nix
     ./kitty.nix
     ./lazydocker.nix
+    ./nix-github.nix
     ./oh-my-posh.nix
     ./spicetify.nix
     ./vesktop.nix
