@@ -30,19 +30,19 @@
   stylix.fonts = {
     monospace = {
       package = pkgs.ibm-plex;
-      name = "IBM Plex Sans";
+      name = "IBM Plex Mono";
     };
     sansSerif = {
       package = pkgs.ibm-plex;
-      name = "IBM Plex Sans";
+      name = "IBM Plex Mono";
     };
     serif = {
       package = pkgs.ibm-plex;
-      name = "IBM Plex Sans";
+      name = "IBM Plex Mono";
     };
     emoji = {
       package = pkgs.ibm-plex;
-      name = "IBM Plex Sans";
+      name = "IBM Plex Mono";
     };
 
     sizes = {
