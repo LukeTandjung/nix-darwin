@@ -9,5 +9,10 @@
     "aarch64-linux"
   ]) [
     inputs.delta.packages.${pkgs.stdenv.hostPlatform.system}.delta-trunk
+    (pkgs.writeShellApplication {
+      name = "delta-update";
+      runtimeInputs = [ pkgs.nix ];
+      text = builtins.readFile ../scripts/delta-update.sh;
+    })
   ];
 }
