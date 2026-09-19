@@ -20,10 +20,10 @@
   # Keep kernel logs across hard reboots while diagnosing eGPU crashes. The
   # failing Vulkan path rebooted the machine before user-space logs could flush,
   # so persistent journald is necessary for post-mortem `journalctl -b -1`.
-  services.journald.extraConfig = ''
-    Storage=persistent
-    SyncIntervalSec=1s
-  '';
+  services.journald.settings.Journal = {
+    Storage = "persistent";
+    SyncIntervalSec = "1s";
+  };
 
   # eGPU/USB4 stability: disable PCIe power management. ASPM/port PM can push
   # Thunderbolt PCIe devices through low-power transitions that are unsafe for
