@@ -2,7 +2,6 @@
 
 {
   imports = [
-    ./autolith.nix
     ./hardware.nix
     ./desktop.nix
     ./audio.nix
