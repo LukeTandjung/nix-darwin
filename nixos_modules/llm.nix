@@ -6,6 +6,9 @@ let
   # the UM790's Zen 4 CPU rather than using nixpkgs' portable CPU variants.
   llamaCpp =
     (pkgs.llama-cpp.override {
+        # Node 26's file-mode test fails on setuid chmod in the Nix sandbox.
+        # Use Node 24 for the web UI build while keeping its tests enabled.
+        nodejs_latest = pkgs.nodejs_24;
       cudaSupport = true;
       vulkanSupport = true;
       blasSupport = true;
