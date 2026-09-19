@@ -5,7 +5,8 @@
   imports = [
     ./autolith.nix
     ./btop.nix
-    ./delta.nix
+    # Re-enable after KeePassXC and GitHub authentication are configured.
+    # ./delta.nix
     ./direnv.nix
     ./fastfetch.nix
     ./helix.nix
