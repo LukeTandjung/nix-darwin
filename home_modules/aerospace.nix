@@ -111,8 +111,8 @@ lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
         # Open kitty with yazi (cmd + e)
         cmd-e = "exec-and-forget open -na kitty --args zsh -lc yazi";
 
-        # Quit focused app (cmd + x)
-        cmd-x = "exec-and-forget osascript -e 'tell application (path to frontmost application as text) to quit'";
+        # Close focused window (cmd + x)
+        cmd-x = "close";
       };
     };
   };
