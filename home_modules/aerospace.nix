@@ -111,8 +111,8 @@ lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
         # Open kitty with yazi (cmd + e)
         cmd-e = "exec-and-forget open -na kitty --args zsh -lc yazi";
 
-        # Close focused window (cmd + x)
-        cmd-x = "close";
+        # Close focused window and quit its app instance when it is the last window
+        cmd-x = "close --quit-if-last-window";
       };
     };
   };
