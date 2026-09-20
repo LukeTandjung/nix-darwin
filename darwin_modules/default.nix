@@ -3,6 +3,7 @@
     ./chatgpt.nix
     ./dbeaver.nix
     ./home_manager.nix
+    ./jankyborders.nix
     ./nix.nix
     ./nix-homebrew.nix
     ./neosicht.nix
