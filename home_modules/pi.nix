@@ -37,7 +37,8 @@
       };
       retry = {
         enabled = true;
-        maxRetries = 3;
+        maxRetries = 100;
+        maxAgentDelayMs = 60000;
       };
     };
 
