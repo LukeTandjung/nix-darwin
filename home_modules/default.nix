@@ -4,6 +4,7 @@
 {
   imports = [
     ./autolith.nix
+    ./bend.nix
     ./btop.nix
     ./delta.nix
     ./direnv.nix

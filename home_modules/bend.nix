@@ -1,0 +1,4 @@
+{ ... }:
+{
+  programs.bend.enable = true;
+}
