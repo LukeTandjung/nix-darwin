@@ -98,10 +98,9 @@ lib.mkIf (config.networking.hostName == "Lukes-Um790") {
   systemd.services.llama-swap = {
     description = "llama-swap OpenAI-compatible model profile proxy";
     wantedBy = [ "multi-user.target" ];
-    wants = [ "egpu-pci-rescan.service" ];
+    wants = [ "nvidia-persistenced.service" ];
     after = [
       "network.target"
-      "egpu-pci-rescan.service"
       "nvidia-persistenced.service"
     ];
 

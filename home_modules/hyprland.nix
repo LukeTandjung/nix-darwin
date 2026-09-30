@@ -31,6 +31,12 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     settings = {
       monitor = [
         {
+          output = "desc:Microstep MSI G24C4 0x0000041C";
+          mode = "1920x1080@144";
+          position = "auto";
+          scale = 1;
+        }
+        {
           output = "eDP-1";
           mode = "preferred";
           position = "auto";
