@@ -6,16 +6,16 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1789816575,
-        "narHash": "sha256-t9WqHIxIY9iW5PqR68t2M+tKMbb8MN3A5lMlibKqu/A=",
+        "lastModified": 1790950569,
+        "narHash": "sha256-7ueWbPJJJiklSgRMECNK90WvVC8g/XHP5TS7cI9520s=",
         "owner": "lambda-symbolics",
         "repo": "autolith",
-        "rev": "14763146b5d263d33d13f183c19e791f164b7718",
+        "rev": "ef110edc66e04cc7c263bba3c9ce66845dc0a692",
         "type": "github"
       },
       "original": {
         "owner": "lambda-symbolics",
-        "ref": "v0.50.0",
+        "ref": "v0.55.0",
         "repo": "autolith",
         "type": "github"
       }
@@ -169,16 +169,16 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1789827376,
-        "narHash": "sha256-sWZ8169jN5ESrWynBuhWIFB/A7phzebeJNiqjJFjXfs=",
+        "lastModified": 1790966027,
+        "narHash": "sha256-LFxCHFz+V2x9hdAwg4UUymv5zLu7APMa+/B0u5JDvfs=",
         "owner": "zed-industries",
-        "repo": "delta-nix-linux",
-        "rev": "3c82003e1d027e9c24a6a0cc453a737fea243232",
+        "repo": "delta-nix",
+        "rev": "ee25507792552ce5b5b6779070731a935d67f35e",
         "type": "github"
       },
       "original": {
         "owner": "zed-industries",
-        "repo": "delta-nix-linux",
+        "repo": "delta-nix",
         "type": "github"
       }
     },
@@ -466,11 +466,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1790078670,
-        "narHash": "sha256-OUgIFi2FV0TVvyvDIXlO6JzlhUlKC//iLTsjB+b77dY=",
+        "lastModified": 1790976719,
+        "narHash": "sha256-clOMkhKYLRWqEg+7dKFCGkRXOXHsen4TFCqteLZcrfw=",
         "owner": "LukeTandjung",
         "repo": "luke-nix-emporium",
-        "rev": "0855d679f33b884d31e9a3e0ad469250e58ec864",
+        "rev": "327e46a3ffcffdb943f5da68db3ce9c3592627e7",
         "type": "github"
       },
       "original": {
