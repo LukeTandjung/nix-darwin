@@ -56,7 +56,8 @@ lib.mkIf (config.networking.hostName == "Lukes-Um790") {
       PrivateNetwork = false;
       # NVFP4 KV / DFlash2 K7 profile with two-session capacity. CUDA graphs stay enabled;
       # vision stays disabled. Use the artifact's template, not the frozen
-      # benchmark template. Host backing is not active-attention KV offload.
+      # benchmark template. Prefix reuse is enabled by default; allow 8 GiB
+      # of host backing for retained/paused contexts, not active-attention KV offload.
       ExecStart = lib.concatStringsSep " " [
         "${ninfer}/bin/ninfer-serve"
         "${model}"
@@ -65,7 +66,7 @@ lib.mkIf (config.networking.hostName == "Lukes-Um790") {
         "--max-context 180000 --kv-capacity 360000"
         "--max-concurrency 2 --max-pending-requests 1"
         "--prefill-chunk 1024 --kv-dtype nvfp4"
-        "--no-prefix-reuse --host-context-mib 0 --device-state-slots 0"
+        "--host-context-mib 8192 --device-state-slots 0"
         "--temperature 1 --top-p 0.95 --top-k 20 --min-p 0"
         "--presence-penalty 1.5 --frequency-penalty 0"
         "--default-max-tokens 32768 --preserve-thinking"
