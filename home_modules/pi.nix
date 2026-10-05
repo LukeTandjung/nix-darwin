@@ -88,6 +88,8 @@
       compat = {
         supportsDeveloperRole = false;
         supportsReasoningEffort = true;
+        # NInfer supports tool calls, but not schema-constrained decoding.
+        supportsStrictMode = false;
         maxTokensField = "max_tokens";
         thinkingFormat = "qwen-chat-template";
       };
