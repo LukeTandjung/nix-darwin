@@ -81,24 +81,24 @@
   };
 
   home.file.".pi/agent/models.json".text = builtins.toJSON {
-    providers.local-llamacpp = {
+    providers.local-ninfer = {
       baseUrl = "http://127.0.0.1:8080/v1";
       api = "openai-completions";
       apiKey = "none";
       compat = {
         supportsDeveloperRole = false;
-        supportsReasoningEffort = false;
+        supportsReasoningEffort = true;
         maxTokensField = "max_tokens";
         thinkingFormat = "qwen-chat-template";
       };
       models = [
         {
-          id = "qwen-38-27b-uncensored-thinking";
-          name = "Qwen3.8 27B Uncensored Thinking (Local Q6_K MTP)";
+          id = "swift-1.5";
+          name = "Swift-1.5 27B Uncensored (Local NVFP4 DFlash2)";
           reasoning = true;
           input = [ "text" ];
-          contextWindow = 204800;
-          maxTokens = 16384;
+          contextWindow = 180000;
+          maxTokens = 32768;
         }
       ];
     };

@@ -1,82 +1,17 @@
 { config, lib, pkgs, ... }:
 
 let
-  # Build one llama.cpp binary with CUDA for the RTX 5090 and Vulkan for the
-  # optional Radeon 780M experiment. CPU MoE work is compiled specifically for
-  # the UM790's Zen 4 CPU rather than using nixpkgs' portable CPU variants.
-  llamaCpp =
-    (pkgs.llama-cpp.override {
-        # Node 26's file-mode test fails on setuid chmod in the Nix sandbox.
-        # Use Node 24 for the web UI build while keeping its tests enabled.
-        nodejs_latest = pkgs.nodejs_24;
-      cudaSupport = true;
-      vulkanSupport = true;
-      blasSupport = true;
-      cpuArchDynamicDispatch = false;
-    }).overrideAttrs
-      (old: {
-        cmakeFlags = old.cmakeFlags ++ [ "-DGGML_NATIVE=ON" ];
-        preConfigure = ''
-          export NIX_ENFORCE_NO_NATIVE=0
-          ${old.preConfigure}
-        '';
-      });
-
-  modelPath = "/var/lib/llm/models/qwen38-27b-uncensored/Qwen3.8-27B-Uncensored-Q6_K.gguf";
-  paddleOcrModelPath = "/var/lib/llm/models/paddleocr-vl-1.6/PaddleOCR-VL-1.6-GGUF.gguf";
-  paddleOcrProjectorPath = "/var/lib/llm/models/paddleocr-vl-1.6/PaddleOCR-VL-1.6-GGUF-mmproj.gguf";
-
-  llamaSwapConfig = pkgs.writeText "llama-swap.yaml" ''
-    healthCheckTimeout: 300
-    globalTTL: 300
-    startPort: 5800
-    models:
-      qwen-38-27b-uncensored-thinking:
-        ttl: 300
-        concurrencyLimit: 1
-        cmd: >-
-          ${llamaCpp}/bin/llama-server
-          --port ''${PORT}
-          --model ${modelPath}
-          --alias qwen-38-27b-uncensored-thinking
-          --n-gpu-layers 999
-          --parallel 1
-          --ctx-size 204800
-          --flash-attn on
-          --cache-type-k q4_0
-          --cache-type-v q4_0
-          --spec-type draft-mtp
-          --spec-draft-n-max 2
-          --slot-save-path /dev/shm/llm-slots
-          --cache-reuse 256
-          --jinja
-          --temp 1.0
-          --top-p 0.95
-          --top-k 20
-          --min-p 0.0
-          --presence-penalty 1.5
-      paddleocr-vl-1.6:
-        ttl: 300
-        concurrencyLimit: 1
-        cmd: >-
-          ${llamaCpp}/bin/llama-server
-          --port ''${PORT}
-          --model ${paddleOcrModelPath}
-          --mmproj ${paddleOcrProjectorPath}
-          --alias paddleocr-vl-1.6
-          --n-gpu-layers 999
-          --parallel 1
-          --ctx-size 8192
-          --flash-attn on
-          --jinja
-          --temp 0
-  '';
+  ninfer = pkgs.callPackage ../packages/ninfer.nix { };
+  # Exact artifact used by inference_stack's accepted dflash7-nvfp4 run.
+  # Keep the weights out of Git and independent of the experiment directory.
+  model = pkgs.fetchurl {
+    name = "Swift_1_5_qwen3_8_27b_uncensored_nvfp4.ninfer";
+    url = "https://huggingface.co/2beng2/Swift-1.5-Qwen3.8-27B-Uncensored-NVFP4-NInfer/resolve/bc5f15343d55337d067756f40dc524ce6508ba1c/Swift_1_5_qwen3_8_27b_uncensored_nvfp4.ninfer";
+    sha256 = "3729a8a74358e0c1e9a729778fa3d44edad8375005594c0bc91a3dc95812354b";
+  };
 in
 lib.mkIf (config.networking.hostName == "Lukes-Um790") {
-  environment.systemPackages = [
-    llamaCpp
-    pkgs.llama-swap
-  ];
+  environment.systemPackages = [ ninfer ];
 
   users.groups.llm = { };
   users.users = {
@@ -91,26 +26,51 @@ lib.mkIf (config.networking.hostName == "Lukes-Um790") {
   systemd.tmpfiles.rules = [
     "d /var/lib/llm 0750 llm llm -"
     "d /var/lib/llm/models 0750 llm llm -"
-    "d /var/lib/llm/models/paddleocr-vl-1.6 0750 llm llm -"
-    "d /dev/shm/llm-slots 0750 llm llm -"
   ];
 
-  systemd.services.llama-swap = {
-    description = "llama-swap OpenAI-compatible model profile proxy";
+  systemd.services.ninfer = {
+    description = "Swift-1.5 NInfer OpenAI-compatible inference server";
     wantedBy = [ "multi-user.target" ];
     wants = [ "nvidia-persistenced.service" ];
     after = [
       "network.target"
       "nvidia-persistenced.service"
     ];
+    environment.CUDA_VISIBLE_DEVICES = "0";
 
     serviceConfig = {
       Type = "simple";
       User = "llm";
       Group = "llm";
       WorkingDirectory = "/var/lib/llm";
-      ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p /dev/shm/llm-slots";
-      ExecStart = "${pkgs.llama-swap}/bin/llama-swap -config ${llamaSwapConfig} -listen 127.0.0.1:8080";
+      # Host RAM limits do not cap VRAM; the engine's KV budget is explicit below.
+      MemoryHigh = "40G";
+      MemoryMax = "48G";
+      MemorySwapMax = 0;
+      NoNewPrivileges = true;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      PrivateTmp = true;
+      # Keep NVIDIA devices and the host's localhost endpoint accessible.
+      PrivateDevices = false;
+      PrivateNetwork = false;
+      # NVFP4 KV / DFlash2 K7 profile with two-session capacity. CUDA graphs stay enabled;
+      # vision stays disabled. Use the artifact's template, not the frozen
+      # benchmark template. Host backing is not active-attention KV offload.
+      ExecStart = lib.concatStringsSep " " [
+        "${ninfer}/bin/ninfer-serve"
+        "${model}"
+        "--host 127.0.0.1 --port 8080"
+        "--model-id swift-1.5"
+        "--max-context 180000 --kv-capacity 360000"
+        "--max-concurrency 2 --max-pending-requests 1"
+        "--prefill-chunk 1024 --kv-dtype nvfp4"
+        "--no-prefix-reuse --host-context-mib 0 --device-state-slots 0"
+        "--temperature 1 --top-p 0.95 --top-k 20 --min-p 0"
+        "--presence-penalty 1.5 --frequency-penalty 0"
+        "--default-max-tokens 32768 --preserve-thinking"
+        "--spec dflash2 --draft-tokens 7 --lm-head-draft"
+      ];
       Restart = "on-failure";
       RestartSec = 10;
       TimeoutStopSec = 120;

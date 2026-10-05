@@ -17,6 +17,52 @@ Not only did I choose to rice my NixOS setup, I also decided to undo the billion
 To install, you need Nix and nix-darwin. Clone the repo and symlink appropriately.
 For example, if you clone to `~/nix-darwin`, create the symlink `/etc/nix-darwin -> ~/nix-darwin`.
 
+### Local inference (Lukes-Um790)
+
+`nixos_modules/llm.nix` runs Swift-1.5 Qwen3.8-27B Uncensored NVFP4
+with the pinned NInfer package in `packages/ninfer.nix`. It replaces
+llama.cpp and llama-swap, including the old PaddleOCR profile.
+
+- Endpoint: `http://127.0.0.1:8080/v1`; model ID: `swift-1.5`.
+- Pi provider: `local-ninfer`. Select the new model in existing Pi sessions.
+- Serving capacity: 180,000 tokens per session and a shared 360,000-token KV pool,
+  two active requests and one pending request. Startup and two simultaneous
+  short requests passed on the RTX 5090 with this pool and the sandbox below.
+  Full-length sessions have not been tested; context includes input and output.
+- Retained experiment settings:
+  NVFP4 KV, DFlash2 with seven draft tokens and optimized proposal head,
+  1,024-token prefill chunks.
+- Sampling: temperature 1, top-p 0.95, top-k 20, min-p 0,
+  presence penalty 1.5, frequency penalty 0; output limit 32,768 tokens.
+- CUDA graphs and thinking retention are enabled. Vision, prefix reuse,
+  and host context backing are disabled. Normal use keeps the artifact's
+  chat template rather than the frozen benchmark template.
+- systemd host-memory limits: `MemoryHigh=40G`, `MemoryMax=48G`,
+  `MemorySwapMax=0`. These do not cap VRAM; NInfer's explicit KV pool
+  controls its KV allocation.
+- Filesystem sandboxing: `NoNewPrivileges`, `ProtectSystem=strict`,
+  `ProtectHome`, and `PrivateTmp`. NVIDIA devices and the host network
+  remain accessible; `PrivateDevices` and `PrivateNetwork` are disabled.
+
+The model is fetched by immutable revision and verified SHA-256 into the
+Nix store. The first build downloads approximately 22.78 GB; no weights
+are checked into Git. The artifact's [Swift Open License and notices](https://huggingface.co/2beng2/Swift-1.5-Qwen3.8-27B-Uncensored-NVFP4-NInfer/tree/bc5f15343d55337d067756f40dc524ce6508ba1c)
+apply, including its commercial-use conditions.
+
+After committing or staging new files, apply from this repository:
+
+```bash
+sudo nixos-rebuild switch --flake .#Lukes-Um790
+systemctl status ninfer
+curl --fail http://127.0.0.1:8080/health
+curl --fail http://127.0.0.1:8080/v1/models
+```
+
+Switching replaces the running llama-swap service with NInfer, which keeps
+the model resident rather than unloading it after llama-swap's idle timeout.
+Existing files under `/var/lib/llm/models` are not deleted; remove obsolete
+weights separately when rollback is no longer needed.
+
 ### Manual Steps (Fresh NixOS Install)
 
 Assumes `flake.nix` and `hosts/Lukes-Um790/default.nix` are already configured in the repo.
