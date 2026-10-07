@@ -44,13 +44,6 @@
 
     mcp = {
       enable = true;
-      packageSource = "npm:pi-mcp-adapter@latest";
-
-      settings = {
-        toolPrefix = "server";
-        idleTimeout = 10;
-        directTools = false;
-      };
 
       servers = {
         effect = {
@@ -71,38 +64,58 @@
           ];
         };
 
+        # OAuth happens automatically when the server answers 401; sign in with
+        # `/mcp login notion`. Tokens are stored in ~/.pi/agent/mcp-auth.json.
         notion = {
           url = "https://mcp.notion.com/mcp";
-          auth = "oauth";
         };
-
       };
     };
   };
 
-  home.file.".pi/agent/models.json".text = builtins.toJSON {
-    providers.local-ninfer = {
-      baseUrl = "http://127.0.0.1:8080/v1";
-      api = "openai-completions";
-      apiKey = "none";
-      compat = {
-        supportsDeveloperRole = false;
-        supportsReasoningEffort = true;
-        # NInfer supports tool calls, but not schema-constrained decoding.
-        supportsStrictMode = false;
-        maxTokensField = "max_tokens";
-        thinkingFormat = "qwen-chat-template";
-      };
-      models = [
-        {
-          id = "swift-1.5";
-          name = "Swift-1.5 27B Uncensored (Local NVFP4 DFlash2)";
-          reasoning = true;
-          input = [ "text" ];
-          contextWindow = 180000;
-          maxTokens = 32768;
+  # Written as literal JSON because "$var" is not a valid Nix attribute name.
+  #
+  # Qwen3.8's chat template only accepts enable_thinking plus a graded
+  # reasoning_effort of xhigh|medium|low (anything else raises a Jinja
+  # exception). pi maps its own thinking levels onto that scale via
+  # thinkingLevelMap, so each level changes the actual thinking depth.
+  home.file.".pi/agent/models.json".text = ''
+    {
+      "providers": {
+        "local-ninfer": {
+          "baseUrl": "http://127.0.0.1:8080/v1",
+          "api": "openai-completions",
+          "apiKey": "none",
+          "compat": {
+            "supportsDeveloperRole": false,
+            "supportsReasoningEffort": true,
+            "supportsStrictMode": false,
+            "maxTokensField": "max_tokens",
+            "thinkingFormat": "chat-template",
+            "chatTemplateKwargs": {
+              "enable_thinking": { "$var": "thinking.enabled" },
+              "preserve_thinking": true,
+              "reasoning_effort": { "$var": "thinking.effort" }
+            }
+          },
+          "models": [
+            {
+              "id": "swift-1.5",
+              "name": "Swift-1.5 27B Uncensored (Local NVFP4 DFlash2)",
+              "reasoning": true,
+              "input": ["text"],
+              "contextWindow": 180000,
+              "maxTokens": 32768,
+              "thinkingLevelMap": {
+                "minimal": null,
+                "low": "low",
+                "medium": "medium",
+                "high": "xhigh"
+              }
+            }
+          ]
         }
-      ];
-    };
-  };
+      }
+    }
+  '';
 }
