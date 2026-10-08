@@ -35,5 +35,6 @@
     ./claude-code.nix
     ./hyprshot.nix
     ./mpvpaper.nix
+    ./tern.nix
   ];
 }
