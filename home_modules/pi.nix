@@ -25,6 +25,7 @@
         "npm:pi-autoresearch"
         "npm:@pi-unipi/notify"
         "npm:@juicesharp/rpiv-ask-user-question"
+        "npm:pi-agent-browser-native"
       ]
       ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
         "npm:pi-goal-x"
