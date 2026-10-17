@@ -3,6 +3,7 @@
 }:
 {
   imports = [
+    ./agent-mcp.nix
     ./autolith.nix
     ./bend.nix
     ./btop.nix

@@ -43,27 +43,7 @@
       };
     };
 
-    mcp = {
-      enable = true;
-
-      servers = {
-        typst = {
-          command = "docker";
-          args = [
-            "run"
-            "--rm"
-            "-i"
-            "ghcr.io/johannesbrandenburger/typst-mcp:latest"
-          ];
-        };
-
-        # OAuth happens automatically when the server answers 401; sign in with
-        # `/mcp login notion`. Tokens are stored in ~/.pi/agent/mcp-auth.json.
-        notion = {
-          url = "https://mcp.notion.com/mcp";
-        };
-      };
-    };
+    mcp.enable = true;
   };
 
   # Written as literal JSON because "$var" is not a valid Nix attribute name.
