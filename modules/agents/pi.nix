@@ -136,7 +136,7 @@ in
   builders.pi = pkgs: pkgs.callPackage recipe { };
   perSystem = { pkgs, ... }: { packages.pi = flake.config.builders.pi pkgs; };
 
-  modules.home.pi-implementation =
+  modules.hjem.pi-implementation =
     {
       config,
       lib,
@@ -397,16 +397,9 @@ in
       };
 
       config = lib.mkIf cfg.enable {
-        # Remove the backup left when this skill changed from an unmanaged directory
-        # to a Home Manager-managed symlink. Pi scans backup directories as skills.
-        home.activation.removeStalePiSkillBackups = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
-          rm -rf "$HOME/.pi/agent/skills/feature-formal-planning.hm-backup"
-        '';
-
-        # Keep the formal-planning toolchain private to the user's Home Manager
-        # profile. The JRE is explicit so Apalache and `java` both work in pi
+        # Keep the formal-planning toolchain in the user's package profile. The JRE is explicit so Apalache and `java` both work in pi
         # sessions without a system-wide Java installation.
-        home.packages = [
+        packages = [
           cfg.package
           (flake.config.builders.effect_solutions pkgs)
           agentBrowser
@@ -414,7 +407,7 @@ in
         ]
         ++ lib.optionals cfg.mcp.enable (sharedMcp.packagesFor "pi");
 
-        home.file = lib.mergeAttrsList [
+        files = lib.mergeAttrsList [
           (lib.optionalAttrs (cfg.settings != { }) {
             ".pi/agent/settings.json".source = jsonFormat.generate "settings.json" cfg.settings;
           })
@@ -430,7 +423,7 @@ in
             else if builtins.pathExists (value + "/SKILL.md") then
               lib.nameValuePair ".pi/agent/skills/${name}" {
                 source = value;
-                force = true;
+                clobber = true;
               }
             else
               lib.nameValuePair ".pi/agent/skills/${name}/SKILL.md" { source = value; }
@@ -467,7 +460,13 @@ in
         # Keep npm extension packages current after every rebuild, then normalize
         # their manifests. Best effort: an offline rebuild must not fail because
         # of this step.
-        home.activation.updatePiExtensions = lib.hm.dag.entryAfter [ "checkLinkTargets" ] ''
+        activationScripts.updatePiExtensions = ''
+          # Darwin user agents can start alongside the Hjem linker.
+          for attempt in {1..30}; do
+            [ -e "$HOME/.pi/agent/settings.json" ] && break
+            sleep 1
+          done
+          [ -e "$HOME/.pi/agent/settings.json" ] || exit 1
           export PATH="${pkgs.nodejs}/bin:$PATH"
           if ! "${cfg.package}/bin/pi" update --extensions >"$HOME/.pi/agent/extensions-update.log" 2>&1; then
             echo "warning: pi extension update failed; see $HOME/.pi/agent/extensions-update.log" >&2
@@ -477,7 +476,7 @@ in
       };
     };
 
-  modules.home.pi =
+  modules.hjem.pi =
     {
       config,
       pkgs,
@@ -496,7 +495,7 @@ in
           npmCommand = [
             "npm"
             "--prefix"
-            "${config.home.homeDirectory}/.pi/npm-global"
+            "${config.directory}/.pi/npm-global"
           ];
           packages = [
             "npm:@hicaru/pi-rlm"
@@ -531,7 +530,7 @@ in
       # reasoning_effort of xhigh|medium|low (anything else raises a Jinja
       # exception). pi maps its own thinking levels onto that scale via
       # thinkingLevelMap, so each level changes the actual thinking depth.
-      home.file.".pi/agent/models.json".text = ''
+      files.".pi/agent/models.json".text = ''
         {
           "providers": {
             "local-ninfer": {

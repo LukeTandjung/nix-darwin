@@ -17,7 +17,7 @@ let
       };
       home = lib.mkOption {
         type = lib.types.deferredModule;
-        description = "Home Manager configuration required by the desktop.";
+        description = "Hjem configuration required by the desktop.";
       };
     };
   };

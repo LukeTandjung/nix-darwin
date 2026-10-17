@@ -28,11 +28,11 @@
         inherit system;
         modules = [
           config.modules.darwin.default
-          inputs.home-manager.darwinModules.home-manager
+          inputs.hjem.darwinModules.default
           host.settings.system
           host.desktop.system
           {
-            home-manager.sharedModules = [
+            hjem.users.luketandjung.imports = [
               host.settings.home
               host.desktop.home
             ];

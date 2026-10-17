@@ -1,15 +1,6 @@
-{ inputs, ... }:
+{ ... }:
 {
-  modules.home.mpvpaper =
-    {
-      pkgs,
-      lib,
-      osConfig,
-      ...
-    }:
-    lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-      programs.mpvpaper = {
-        enable = osConfig.networking.hostName == "Lukes-Um790";
-      };
-    };
+  modules.hjem.mpvpaper = { pkgs, lib, osConfig, ... }: {
+    packages = lib.optional (osConfig.networking.hostName == "Lukes-Um790") pkgs.mpvpaper;
+  };
 }

@@ -1,6 +1,6 @@
 flake@{ inputs, ... }:
 {
-  modules.home.delta-implementation =
+  modules.hjem.delta-implementation =
     {
       config,
       lib,
@@ -23,20 +23,20 @@ flake@{ inputs, ... }:
       };
 
       config = {
-        home.packages = lib.mkIf cfg.skills.enable (
+        packages = lib.mkIf cfg.skills.enable (
           [
             (flake.config.builders.effect_solutions pkgs)
           ]
           ++ sharedMcp.packagesFor "delta"
         );
 
-        xdg.configFile."agent-mcp/delta-setup.md" = lib.mkIf cfg.skills.enable {
+        xdg.config.files."agent-mcp/delta-setup.md" = lib.mkIf cfg.skills.enable {
           text = sharedMcp.deltaGuide;
         };
 
         # Delta reads AGENT.md before AGENTS.md; use the preferred name so an
         # existing fallback AGENTS.md cannot silently shadow the shared rules.
-        home.file = lib.mkMerge [
+        files = lib.mkMerge [
           (lib.mkIf cfg.context.enable {
             ".config/delta/AGENT.md".source = ./pi/context/AGENTS.md;
           })
@@ -55,14 +55,14 @@ flake@{ inputs, ... }:
       };
     };
 
-  modules.home.delta =
+  modules.hjem.delta =
     { lib, pkgs, ... }:
 
     {
       programs.zed-delta.skills.enable = true;
       programs.zed-delta.context.enable = true;
 
-      home.packages =
+      packages =
         lib.optionals
           (builtins.elem pkgs.stdenv.hostPlatform.system [
             "x86_64-linux"

@@ -1,22 +1,8 @@
-{ inputs, ... }:
+{ ... }:
 {
-  modules.home.zed-editor =
-    {
-      config,
-      pkgs,
-      lib,
-      ...
-    }:
-    {
-      # Zed now rejects the Stylix-generated theme when tinted-zed receives an
-      # unspecified scheme variant. Our inline Kanagawa scheme is dark, so make that
-      # explicit for this target while keeping Stylix in charge of colors/fonts.
-      stylix.targets.zed.colors.override.scheme-variant = "dark";
-
-      programs.zed-editor = {
-        enable = true;
-        package = pkgs.zed-editor;
-        extraPackages = [ pkgs.nodejs_22 ]; # Ensure nodejs_22 is available on macOS
+  modules.hjem.zed-editor = { pkgs, lib, theme, ... }:
+    let
+      cfg = {
         extensions = [
           "nix"
           "deno"
@@ -66,8 +52,8 @@
           };
           helix_mode = true;
           show_edit_predictions = false;
-          buffer_font_size = lib.mkForce 14.0;
-          ui_font_size = lib.mkForce 14.0;
+          buffer_font_size = 14.0;
+          ui_font_size = 14.0;
         };
         userKeymaps = [
           {
@@ -80,6 +66,30 @@
             };
           }
         ];
+      };
+      settings = (pkgs.formats.json { }).generate "zed-settings.json" (cfg.userSettings // {
+        buffer_font_family = theme.font;
+        ui_font_family = theme.font;
+        theme = "Base16 Kanagawa";
+        auto_install_extensions = lib.genAttrs cfg.extensions (_: true);
+      });
+      keymap = (pkgs.formats.json { }).generate "zed-keymap.json" cfg.userKeymaps;
+      zed = pkgs.symlinkJoin {
+        name = "zed-editor-wrapped-${pkgs.zed-editor.version}";
+        paths = [ pkgs.zed-editor ];
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+        postBuild = ''
+          wrapProgram "$out/bin/${pkgs.zed-editor.meta.mainProgram or "zeditor"}" --suffix PATH : ${lib.makeBinPath [ pkgs.nodejs_22 ]}
+        '';
+        inherit (pkgs.zed-editor) meta;
+      };
+    in {
+      packages = [ zed ];
+      xdg.config.files = {
+        "zed/themes/kanagawa.json".text = theme.render ./theme.mustache { };
+        # Replace mutable app settings through Hjem, retaining collision backups.
+        "zed/settings.json" = { source = settings; clobber = true; };
+        "zed/keymap.json" = { source = keymap; clobber = true; };
       };
     };
 }

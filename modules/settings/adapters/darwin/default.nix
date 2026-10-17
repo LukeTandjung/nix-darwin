@@ -1,15 +1,8 @@
-{ config, inputs, ... }:
+{ config, ... }:
 {
   adapters.settings.darwin = {
     platform = "darwin";
-    system.imports = [
-      inputs.stylix.darwinModules.stylix
-    ]
-    ++ (with config.modules.darwin; [
-      nix
-      stylix
-      system-defaults
-    ]);
-    home.imports = [ config.modules.home.ssh ];
+    system.imports = with config.modules.darwin; [ nix theme system-defaults keepassxc zen-browser ];
+    home.imports = [ config.modules.hjem.ssh config.modules.hjem.theme ];
   };
 }

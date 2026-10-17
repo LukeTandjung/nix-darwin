@@ -28,11 +28,11 @@
         inherit system;
         modules = [
           config.modules.nixos.default
-          inputs.home-manager.nixosModules.home-manager
+          inputs.hjem.nixosModules.default
           host.settings.system
           host.desktop.system
           {
-            home-manager.sharedModules = [
+            hjem.users.luke.imports = [
               host.settings.home
               host.desktop.home
             ];

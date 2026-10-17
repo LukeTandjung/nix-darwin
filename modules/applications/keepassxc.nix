@@ -1,59 +1,43 @@
 { ... }:
 {
-  modules.home.keepassxc =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
-    {
-      programs.keepassxc = {
-        enable = true;
-        # Home Manager owns application preferences; database contents remain writable.
-        settings = {
-          SSHAgent.Enabled = true;
-          # Preserve the existing Linux GitHub-token bridge through Secret Service.
-          FdoSecrets.Enabled = pkgs.stdenv.hostPlatform.isLinux;
-          Browser.UpdateBinaryPath = false;
-          GUI = {
-            MinimizeOnClose = true;
-            MinimizeToTray = true;
-            ShowTrayIcon = true;
+  modules.hjem.keepassxc = { pkgs, lib, ... }:
+    let
+      linux = pkgs.stdenv.hostPlatform.isLinux;
+      path = if linux then ".config/keepassxc/keepassxc.ini" else "Library/Application Support/KeePassXC/keepassxc.ini";
+    in {
+      packages = [ pkgs.keepassxc ];
+      # Application preferences are managed; the encrypted database stays writable.
+      files.${path}.source = (pkgs.formats.ini { }).generate "keepassxc.ini" {
+        SSHAgent.Enabled = true;
+        FdoSecrets.Enabled = linux;
+        Browser.UpdateBinaryPath = false;
+        GUI = { MinimizeOnClose = true; MinimizeToTray = true; ShowTrayIcon = true; };
+      };
+    } // lib.optionalAttrs linux {
+      systemd = {
+        services.keepassxc = {
+          description = "KeePassXC password manager";
+          partOf = [ "graphical-session.target" ];
+          after = [ "graphical-session.target" "ssh-agent.service" ];
+          requires = [ "ssh-agent.service" ];
+          wantedBy = [ "graphical-session.target" ];
+          serviceConfig = {
+            ExecStart = "${pkgs.keepassxc}/bin/keepassxc";
+            Environment = "SSH_AUTH_SOCK=%t/ssh-agent";
+            Restart = "on-failure";
+            RestartSec = 3;
           };
         };
       };
-
-      systemd.user.services.keepassxc = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-        Unit = {
-          Description = "KeePassXC password manager";
-          PartOf = [ "graphical-session.target" ];
-          After = [
-            "graphical-session.target"
-          ]
-          ++ lib.optional config.services.ssh-agent.enable "ssh-agent.service";
-          Requires = lib.optional config.services.ssh-agent.enable "ssh-agent.service";
-        };
-        Service = {
-          ExecStart = "${config.programs.keepassxc.package}/bin/keepassxc";
-          Environment = lib.optional config.services.ssh-agent.enable "SSH_AUTH_SOCK=%t/${config.services.ssh-agent.socket}";
-          Restart = "on-failure";
-          RestartSec = 3;
-        };
-        Install.WantedBy = [ "graphical-session.target" ];
-      };
-
-      launchd.agents.keepassxc = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
-        enable = true;
-        config = {
-          # nixpkgs installs the macOS GUI executable inside the application bundle.
-          ProgramArguments = [
-            "${config.programs.keepassxc.package}/Applications/KeePassXC.app/Contents/MacOS/KeePassXC"
-          ];
-          RunAtLoad = true;
-          KeepAlive.SuccessfulExit = false;
-          ProcessType = "Interactive";
-        };
-      };
     };
+
+  modules.darwin.keepassxc = { pkgs, ... }: {
+    launchd.user.agents.keepassxc.serviceConfig = {
+      Label = "org.hjem.keepassxc";
+      ProgramArguments = [ "${pkgs.keepassxc}/Applications/KeePassXC.app/Contents/MacOS/KeePassXC" ];
+      RunAtLoad = true;
+      KeepAlive.SuccessfulExit = false;
+      ProcessType = "Interactive";
+    };
+  };
 }

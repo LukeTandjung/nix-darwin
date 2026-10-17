@@ -1,6 +1,6 @@
 { config, ... }:
 {
-  modules.home.default.imports = with config.modules.home; [
+  modules.hjem.default.imports = with config.modules.hjem; [
     home-base
     agents
     quint
@@ -30,7 +30,7 @@
     typst
     rust
     evince
-    home-manager
+    hjem
     docker
     steam
     solaar
@@ -40,7 +40,7 @@
   ];
   modules.darwin.default.imports = with config.modules.darwin; [
     chatgpt
-    home-manager
+    hjem
     homebrew
     orbstack
     postgresql

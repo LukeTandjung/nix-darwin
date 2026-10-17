@@ -1,8 +1,8 @@
 { ... }:
 {
   # Shared user-level tools for every harness, on both Linux and macOS.
-  modules.home.agent-tools = { pkgs, ... }: {
-    home.packages = with pkgs; [
+  modules.hjem.agent-tools = { pkgs, ... }: {
+    packages = with pkgs; [
       ast-grep
       fastmod
       fzf

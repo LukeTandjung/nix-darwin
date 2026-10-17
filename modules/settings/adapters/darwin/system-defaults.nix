@@ -29,9 +29,9 @@
           enable-spring-load-actions-on-all-items = true;
 
           persistent-apps = [
-            { app = "/Users/luketandjung/Applications/Home Manager Apps/kitty.app"; }
+            { app = "/Users/luketandjung/Applications/Nix User Apps/kitty.app"; }
             { app = "/Applications/Wallper.app"; }
-            { app = "/Users/luketandjung/Applications/Home Manager Apps/Zen Browser (Beta).app"; }
+            { app = "/Users/luketandjung/Applications/Nix User Apps/Zen Browser (Beta).app"; }
             { app = "/Applications/1Password.app"; }
           ];
         };

@@ -6,13 +6,10 @@
       config.modules.nixos.desktop-session
     ];
     home.imports = [
-      inputs.dankMaterialShell.homeModules.dank-material-shell
-      inputs.dms-plugin-registry.homeModules.default
-      inputs.dsearch.homeModules.default
-      config.modules.home.dank-material-shell
-      config.modules.home.hyprland
-      config.modules.home.hyprshot
-      config.modules.home.mpvpaper
+      config.modules.hjem.dank-material-shell
+      config.modules.hjem.hyprland
+      config.modules.hjem.hyprshot
+      config.modules.hjem.mpvpaper
     ];
   };
 }

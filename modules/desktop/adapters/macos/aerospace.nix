@@ -1,17 +1,15 @@
 { inputs, ... }:
 {
-  modules.home.aerospace =
+  modules.hjem.aerospace =
     {
       pkgs,
       lib,
       ...
     }:
     lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
-      programs.aerospace = {
-        enable = true;
-        launchd.enable = true;
-
-        settings = {
+      packages = [ pkgs.aerospace ];
+      files = {
+        ".aerospace.toml".source = (pkgs.formats.toml { }).generate "aerospace.toml" {
           config-version = 2;
           start-at-login = true;
 
@@ -120,4 +118,15 @@
         };
       };
     };
+
+  modules.darwin.aerospace = { pkgs, ... }: {
+    launchd.user.agents.aerospace.serviceConfig = {
+      Label = "org.hjem.aerospace";
+      Program = "${pkgs.aerospace}/Applications/AeroSpace.app/Contents/MacOS/AeroSpace";
+      RunAtLoad = true;
+      KeepAlive = true;
+      StandardOutPath = "/tmp/aerospace.log";
+      StandardErrorPath = "/tmp/aerospace.err.log";
+    };
+  };
 }

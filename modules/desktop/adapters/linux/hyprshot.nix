@@ -1,17 +1,7 @@
-{ inputs, ... }:
+{ ... }:
 {
-  modules.home.hyprshot =
-    {
-      config,
-      pkgs,
-      lib,
-      ...
-    }:
-    lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-      programs.hyprshot = {
-        enable = true;
-        package = pkgs.hyprshot;
-        saveLocation = "$HOME/Screenshots";
-      };
-    };
+  modules.hjem.hyprshot = { pkgs, ... }: {
+    packages = [ pkgs.hyprshot ];
+    environment.sessionVariables.HYPRSHOT_DIR = "$HOME/Screenshots";
+  };
 }

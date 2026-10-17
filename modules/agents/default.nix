@@ -1,7 +1,7 @@
 { config, ... }:
 {
   # Ordinary module composition: hosts do not select an agents adapter.
-  modules.home.agents.imports = with config.modules.home; [
+  modules.hjem.agents.imports = with config.modules.hjem; [
     agent-tools
     agent-mcp-implementation
     autolith-implementation

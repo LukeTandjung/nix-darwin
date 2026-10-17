@@ -1,6 +1,6 @@
-{ inputs, ... }:
+{ ... }:
 {
-  modules.home.herdr = { ... }: {
-    programs.herdr.enable = true;
+  modules.hjem.herdr = { pkgs, ... }: {
+    packages = [ pkgs.herdr ];
   };
 }

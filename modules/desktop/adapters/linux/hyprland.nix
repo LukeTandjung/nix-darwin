@@ -1,35 +1,11 @@
-{ inputs, ... }:
+{ ... }:
 {
-  modules.home.hyprland =
-    {
-      osConfig,
-      pkgs,
-      lib,
-      ...
-    }:
+  modules.hjem.hyprland = { config, osConfig, pkgs, lib, theme, ... }:
     let
       hostName = osConfig.networking.hostName;
       isUm790 = hostName == "Lukes-Um790";
       brightnessDevice = if hostName == "Lukes-Mac-air" then " backlight:intel_backlight" else "";
       mainMod = if hostName == "Lukes-Mac-air" then "ALT" else "SUPER";
-    in
-    lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-      home.pointerCursor = {
-        enable = true;
-        package = pkgs.adwaita-icon-theme;
-        name = "Adwaita";
-        size = 24;
-        gtk.enable = true;
-        x11.enable = true;
-      };
-
-      # Home Manager's Hyprland module also manages xdg-desktop-portal.
-      # Add the GTK portal here so the active user portal dir includes OpenURI.
-      xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-
-      wayland.windowManager.hyprland = {
-        enable = true;
-        configType = "lua";
 
         settings = {
           monitor = [
@@ -116,6 +92,8 @@
               gaps_in = 5;
               gaps_out = 5;
               border_size = 1;
+              "col.active_border" = "rgb(${theme.palette.base0D})";
+              "col.inactive_border" = "rgb(${theme.palette.base03})";
               resize_on_border = false;
               allow_tearing = true;
               layout = "dwindle";
@@ -127,6 +105,7 @@
               inactive_opacity = 0.8;
 
               shadow = {
+                color = "rgba(${theme.palette.base00}99)";
                 enabled = true;
                 range = 4;
                 render_power = 3;
@@ -148,7 +127,18 @@
               new_status = "master";
             };
 
+            group = {
+              "col.border_active" = "rgb(${theme.palette.base0D})";
+              "col.border_inactive" = "rgb(${theme.palette.base03})";
+              "col.border_locked_active" = "rgb(${theme.palette.base0C})";
+              groupbar = {
+                "col.active" = "rgb(${theme.palette.base0D})";
+                "col.inactive" = "rgb(${theme.palette.base03})";
+                text_color = "rgb(${theme.palette.base05})";
+              };
+            };
             misc = {
+              background_color = "rgb(${theme.palette.base00})";
               force_default_wallpaper = -1;
               disable_hyprland_logo = false;
               vrr = 2;
@@ -176,6 +166,7 @@
 
           };
         };
+
 
         extraConfig = ''
           local terminal = "kitty"
@@ -321,6 +312,45 @@
             immediate = true,
           })
         '';
+
+      toLua = lib.generators.toLua { };
+      renderArgs = value: if builtins.isAttrs value && value ? _args
+        then lib.concatMapStringsSep ", " toLua value._args else toLua value;
+      calls = settings
+        |> lib.mapAttrsToList (name: value:
+          value
+          |> lib.toList
+          |> lib.concatMapStringsSep "\n" (argument: "hl.${name}(${renderArgs argument})")
+        )
+        |> lib.concatStringsSep "\n";
+    in {
+      packages = [ osConfig.programs.hyprland.package pkgs.xdg-desktop-portal-gtk pkgs.xdg-desktop-portal-hyprland ];
+      environment.sessionVariables.NIX_XDG_DESKTOP_PORTAL_DIR =
+        "/etc/profiles/per-user/${config.user}/share/xdg-desktop-portal/portals";
+      xdg.config.files."hypr/.luarc.json".source = (pkgs.formats.json { }).generate "hypr-luarc.json" {
+        diagnostics.globals = [ "hl" ];
+        workspace.library = [ "${osConfig.programs.hyprland.package}/share/hypr/stubs" ];
+      };
+      xdg.config.files."hypr/hyprland.lua".text = calls + ''
+        hl.on("hyprland.start", function()
+          hl.exec_cmd("${pkgs.dbus}/bin/dbus-update-activation-environment --systemd DISPLAY HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE && systemctl --user stop hyprland-session.target && systemctl --user start hyprland-session.target")
+        end)
+        hl.on("hyprland.shutdown", function()
+          os.execute("systemctl --user stop hyprland-session.target && sleep 0.1")
+        end)
+      '' + extraConfig;
+      systemd.targets = {
+        hyprland-session = {
+          description = "Hyprland compositor session";
+          after = [ "graphical-session-pre.target" ];
+          wants = [ "graphical-session-pre.target" ];
+          bindsTo = [ "graphical-session.target" ];
+          unitConfig.PropagatesStopTo = [ "graphical-session.target" ];
+        };
+        tray = {
+          description = "System tray";
+          requires = [ "graphical-session-pre.target" ];
+        };
       };
     };
 }

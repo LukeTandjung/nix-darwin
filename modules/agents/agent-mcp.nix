@@ -1,6 +1,6 @@
 flake@{ inputs, ... }:
 {
-  modules.home.agent-mcp-implementation =
+  modules.hjem.agent-mcp-implementation =
     {
       config,
       lib,
@@ -165,7 +165,7 @@ flake@{ inputs, ... }:
       };
     };
 
-  modules.home.agent-mcp =
+  modules.hjem.agent-mcp =
     { pkgs, ... }:
     {
       # REA is built by the local agent tools module. Keep personal shared servers here rather than

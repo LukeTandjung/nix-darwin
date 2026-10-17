@@ -207,7 +207,7 @@ in
   builders.tern = pkgs: pkgs.callPackage recipe { };
   perSystem = { pkgs, ... }: { packages.tern = flake.config.builders.tern pkgs; };
 
-  modules.home.tern-implementation =
+  modules.hjem.tern-implementation =
     {
       config,
       lib,
@@ -230,11 +230,11 @@ in
       };
 
       config = lib.mkIf cfg.enable {
-        home.packages = [ cfg.package ];
+        packages = [ cfg.package ];
       };
     };
 
-  modules.home.tern =
+  modules.hjem.tern =
     { ... }:
     {
       programs.tern.enable = true;

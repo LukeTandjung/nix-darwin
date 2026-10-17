@@ -21,7 +21,7 @@
 
         serviceConfig = {
           ExecStart = "${lib.getExe pkgs.valent} --gapplication-service";
-          # Inherit the agent socket exported by Home Manager, like other GUI apps.
+          # Inherit the native user SSH-agent socket, like other GUI apps.
           Restart = "on-failure";
         };
       };

@@ -1,23 +1,11 @@
 { inputs, ... }:
 {
-  modules.home.dank-material-shell =
-    {
-      pkgs,
-      lib,
-      osConfig,
-      ...
-    }:
-    lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-      programs = {
-        dsearch.enable = true;
-
-        dank-material-shell = {
-          enable = true;
-          enableCalendarEvents = false;
+  modules.hjem.dank-material-shell = { pkgs, lib, osConfig, theme, ... }:
+    let
           settings = {
-            # The custom theme file is supplied by Stylix.
-            fontFamily = lib.mkForce "IBM Plex Sans";
-            monoFontFamily = lib.mkForce "IBM Plex Sans";
+            # The custom theme file is generated from our shared palette.
+            fontFamily = "IBM Plex Sans";
+            monoFontFamily = "IBM Plex Sans";
             configVersion = 28;
             radiusStrength = 19;
             widgetBackgroundColor = "s";
@@ -147,9 +135,52 @@
             weatherCoordinates = "51.5074,-0.1278";
             # Launcher history is runtime state, not a declarative preference.
           };
-          plugins.powerUsagePlugin.enable = true;
-          plugins.dankKDEConnect.enable = true;
-          plugins.mpvpaperWallpaper.enable = osConfig.networking.hostName == "Lukes-Um790";
+
+      dms = inputs.dankMaterialShell.lib.mkDmsShell pkgs;
+      dsearch = inputs.dsearch.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      plugins = inputs.dms-plugin-registry.packages.${pkgs.stdenv.hostPlatform.system};
+      selectedPlugins = [ "powerUsagePlugin" "dankKDEConnect" ]
+        ++ lib.optional (osConfig.networking.hostName == "Lukes-Um790") "mpvpaperWallpaper";
+      colors = with theme.colors; {
+        name = "Kanagawa"; primary = base0D; primaryText = base00; primaryContainer = base0C;
+        secondary = base0E; surface = base01; surfaceText = base05; surfaceVariant = base02;
+        surfaceVariantText = base04; surfaceTint = base0D; background = base00;
+        backgroundText = base05; outline = base03; surfaceContainer = base01;
+        surfaceContainerHigh = base02; surfaceContainerHighest = base03; error = base08;
+        warning = base0A; info = base0C;
+      };
+      customTheme = (pkgs.formats.json { }).generate "dms-kanagawa.json" { dark = colors; light = colors; };
+    in {
+      packages = [ dms dsearch pkgs.quickshell pkgs.glib pkgs.networkmanager pkgs.matugen pkgs.cava ];
+      xdg.config.files = {
+        "DankMaterialShell/settings.json" = {
+          clobber = true;
+          source = (pkgs.formats.json { }).generate "dms-settings.json" (settings // {
+            currentThemeName = "custom";
+            customThemeFile = customTheme;
+            popupTransparency = 1.0;
+            dockTransparency = 1.0;
+          });
+        };
+      } // lib.genAttrs (map (name: "DankMaterialShell/plugins/${name}") selectedPlugins)
+        (path: { source = plugins.${lib.last (lib.splitString "/" path)}; });
+      xdg.state.files."DankMaterialShell/session.json" = {
+        clobber = true;
+        source = (pkgs.formats.json { }).generate "dms-session.json" session;
+      };
+      systemd.services.dsearch = {
+        description = "dsearch - Fast filesystem search service";
+        wantedBy = [ "default.target" ];
+        after = [ "network.target" ];
+        serviceConfig = {
+          Type = "simple";
+          ExecStart = "${dsearch}/bin/dsearch serve";
+          Restart = "on-failure";
+          RestartSec = "5s";
+          StandardOutput = "journal";
+          StandardError = "journal";
+          SyslogIdentifier = "dsearch";
+          TimeoutStopSec = "30s";
         };
       };
     };

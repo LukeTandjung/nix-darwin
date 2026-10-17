@@ -109,7 +109,7 @@ in
   builders.bend = pkgs: pkgs.callPackage recipe { };
   perSystem = { pkgs, ... }: { packages.bend = flake.config.builders.bend pkgs; };
 
-  modules.home.bend-implementation =
+  modules.hjem.bend-implementation =
     {
       config,
       lib,
@@ -132,11 +132,11 @@ in
       };
 
       config = lib.mkIf cfg.enable {
-        home.packages = [ cfg.package ];
+        packages = [ cfg.package ];
       };
     };
 
-  modules.home.bend =
+  modules.hjem.bend =
     { ... }:
     {
       programs.bend.enable = true;

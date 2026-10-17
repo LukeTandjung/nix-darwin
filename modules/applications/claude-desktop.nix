@@ -188,7 +188,7 @@ in
     };
   };
 
-  modules.home.claude-desktop-implementation =
+  modules.hjem.claude-desktop-implementation =
     {
       config,
       lib,
@@ -211,7 +211,7 @@ in
       };
 
       config = lib.mkIf cfg.enable {
-        home.packages = [ cfg.package ];
+        packages = [ cfg.package ];
       };
     };
 }

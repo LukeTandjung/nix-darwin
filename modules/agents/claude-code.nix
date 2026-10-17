@@ -63,42 +63,42 @@ in
   builders.claude_code = pkgs: pkgs.callPackage recipe { };
   perSystem = { pkgs, ... }: { packages.claude_code = flake.config.builders.claude_code pkgs; };
 
-  modules.home.claude-code-implementation =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
-
+  modules.hjem.claude-code-implementation = { config, lib, pkgs, ... }:
     let
-      cfg = config.programs.claude-code;
       sharedMcp = flake.config.agentSupport.renderMcp {
         inherit lib pkgs;
         servers = config.programs.agent-mcp.servers;
       };
-    in
-    {
-
-      config = lib.mkIf cfg.enable {
-        home.packages = [
+      mcp = (pkgs.formats.json { }).generate "claude-code-mcp.json" {
+        mcpServers = lib.mapAttrs (_: server: server // {
+          type = if server ? url then "http" else "stdio";
+        }) (sharedMcp.jsonFor "claude-code");
+      };
+      # Keep the existing plugin namespace so saved tool permissions still match.
+      manifest = pkgs.writeText "claude-plugin.json" (builtins.toJSON { name = "hm"; });
+      plugin = pkgs.runCommand "claude-personal-mcp-plugin" { } ''
+        install -Dm644 ${manifest} $out/.claude-plugin/plugin.json
+        install -Dm644 ${mcp} $out/.mcp.json
+      '';
+      skills = lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./shared/skills);
+    in {
+      options.programs.claude-code.enable = lib.mkEnableOption "Claude Code";
+      config = lib.mkIf config.programs.claude-code.enable {
+        packages = [
+          (flake.config.builders.claude_code pkgs)
           (flake.config.builders.effect_solutions pkgs)
-        ]
-        ++ sharedMcp.packagesFor "claude-code";
-
-        programs.claude-code = {
-          package = lib.mkDefault (flake.config.builders.claude_code pkgs);
-
-          mcpServers = lib.mapAttrs (_: lib.mkDefault) (sharedMcp.jsonFor "claude-code");
-
-          # Keep skills and agent instructions in one place for all agents.
-          skills = ./shared/skills;
-          context = builtins.readFile ./pi/context/AGENTS.md;
-        };
+        ] ++ sharedMcp.packagesFor "claude-code";
+        files = {
+          ".claude/CLAUDE.md".source = ./pi/context/AGENTS.md;
+          # Retain the old path to avoid leaving a duplicate personal plugin behind.
+          ".claude/skills/claude-code-home-manager".source = plugin;
+        } // lib.mapAttrs' (name: _: lib.nameValuePair ".claude/skills/${name}" {
+          source = ./shared/skills + "/${name}";
+        }) skills;
       };
     };
 
-  modules.home.claude-code =
+  modules.hjem.claude-code =
     { ... }:
     {
       programs.claude-code.enable = true;

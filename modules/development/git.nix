@@ -8,7 +8,7 @@
     '';
   };
 
-  modules.home.git =
+  modules.hjem.git =
     {
       config,
       lib,
@@ -17,7 +17,7 @@
       ...
     }:
     let
-      uid = toString osConfig.users.users.${config.home.username}.uid;
+      uid = toString osConfig.users.users.${config.user}.uid;
       credential = "/run/user/${uid}/nix-github/token.conf";
       exportToken = pkgs.writeShellApplication {
         name = "nix-github-token";
@@ -43,39 +43,46 @@
     in
     lib.mkMerge [
       {
-        programs.gh = {
-          enable = true;
-          settings.git_protocol = "ssh";
-          gitCredentialHelper.enable = true;
-        };
-        programs.git = {
-          enable = true;
-          package = pkgs.git;
-          settings.user = {
-            name = "LukeTandjung";
-            email = "lukelucus123@gmail.com";
-          };
-          lfs = {
-            enable = true;
-            package = pkgs.git-lfs;
+        packages = [ pkgs.git pkgs.git-lfs pkgs.gh ];
+        xdg.config.files."gh/config.yml".text = ''
+          version: "1"
+          git_protocol: ssh
+        '';
+        xdg.config.files."git/config".text = lib.generators.toGitINI {
+          user = { name = "LukeTandjung"; email = "lukelucus123@gmail.com"; };
+          credential."https://github.com".helper = "${pkgs.gh}/bin/gh auth git-credential";
+          credential."https://gist.github.com".helper = "${pkgs.gh}/bin/gh auth git-credential";
+          filter.lfs = {
+            clean = "${pkgs.git-lfs}/bin/git-lfs clean -- %f";
+            smudge = "${pkgs.git-lfs}/bin/git-lfs smudge -- %f";
+            process = "${pkgs.git-lfs}/bin/git-lfs filter-process";
+            required = true;
           };
         };
       }
-      (lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-        nix.extraOptions = ''
+      (lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+        # Account metadata only. gh reads the token from KeePassXC Secret Service
+        # using service=gh:github.com and username=LukeTandjung.
+        xdg.config.files."gh/hosts.yml" = {
+          clobber = true;
+          text = ''
+            github.com:
+              git_protocol: ssh
+              user: LukeTandjung
+              users:
+                LukeTandjung: {}
+          '';
+        };
+        xdg.config.files."nix/nix.conf".text = ''
           !include ${credential}
         '';
-        systemd.user.services.nix-github-token = {
-          Unit = {
-            Description = "Read the Nix GitHub token from KeePassXC Secret Service";
-            After = [
-              "graphical-session.target"
-              "dbus.service"
-            ];
-            PartOf = [ "graphical-session.target" ];
-            StartLimitIntervalSec = 0;
-          };
-          Service = {
+        systemd.services.nix-github-token = {
+          description = "Read the Nix GitHub token from KeePassXC Secret Service";
+          after = [ "graphical-session.target" "dbus.service" ];
+          partOf = [ "graphical-session.target" ];
+          unitConfig.StartLimitIntervalSec = 0;
+          wantedBy = [ "graphical-session.target" ];
+          serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = "${exportToken}/bin/nix-github-token";
@@ -87,7 +94,6 @@
             RestartSec = 60;
             TimeoutStartSec = 45;
           };
-          Install.WantedBy = [ "graphical-session.target" ];
         };
       })
     ];

@@ -61,8 +61,8 @@ in
 
   # Quint is available independently of any agent harness. Skills teaching agents
   # to use it are owned and installed by modules/agents/shared/skills.
-  modules.home.quint = { pkgs, ... }: {
-    home.packages = [
+  modules.hjem.quint = { pkgs, ... }: {
+    packages = [
       (flake.config.builders.quint pkgs)
       pkgs.temurin-jre-bin-17
     ];

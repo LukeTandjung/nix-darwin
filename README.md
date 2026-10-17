@@ -11,7 +11,7 @@ Not only did I choose to rice my NixOS setup, I also decided to undo the billion
 - **Terminal Emulator**: kitty
 - **IDE**: Zed and Helix (will transition to Helix as soon as I figure out its keybinds in time...)
 - **zsh Styling**: oh-my-posh
-- **System-wide Styling**: DankMaterialShell and Stylix for NixOS, just Stylix for OSX
+- **System-wide Styling**: owned Kanagawa templates on NixOS and macOS
 - **Program Launcher**: Raycast
 
 To install, you need Nix and nix-darwin. Clone the repo and symlink appropriately.
@@ -47,16 +47,16 @@ configuration layer:
   list order. Discovery registers features; it does **not** enable them everywhere.
   Deferred-module nesting can still change merge order relative to upstream
   modules; use explicit ordering priorities for order-sensitive settings.
-- `modules/core/home-manager.nix`: shared Home Manager integration and upstream
-  application modules. Home Manager remains the home configuration manager.
+- `modules/core/hjem.nix`: native Hjem integration and platform-specific
+  application setup.
 - `modules/hosts/ports/`: the host constructor contract.
 - `modules/hosts/adapters/`: NixOS and Darwin constructors that compose the
-  selected settings and desktop with Home Manager.
+  selected settings and desktop with Hjem.
 - `modules/hosts/machines/`: per-machine adapter selections, settings and hardware.
 - `assets/`: non-Nix configuration data and images.
 
 Feature modules capture `inputs` from the outer flake-parts scope. Keep `pkgs`,
-`lib`, and application `config` inside the relevant NixOS/Darwin/Home Manager
+`lib`, and application `config` inside the relevant NixOS/Darwin/Hjem
 module so they refer to that host's environment. Use an outer alias such as
 `flake@{ inputs, ... }` when also accessing top-level `flake.config`.
 
@@ -66,7 +66,9 @@ Keep package recipes in that module's `let` block. Reusable builders are exposed
 as `builders.<name>` functions accepting the consuming host's `pkgs`; the same
 module can export a public package through `perSystem.packages`.
 
-Non-Nix assets live beside their owning modules. There is no separate source
+Features with assets use `<feature>/default.nix`, with templates beside it.
+Hjem deploys rendered styles directly to each application’s expected config path.
+There is no separate source
 or package repository to maintain. Every `.nix` file in `modules/` remains a
 top-level dendritic module, including shared helpers.
 
@@ -77,12 +79,12 @@ launcher, or decorations. An implementation is a typed record containing:
 
 - `platform`: `nixos` or `darwin`.
 - `system`: a deferred system module.
-- `home`: a deferred Home Manager module.
+- `home`: a deferred Hjem module.
 
 Adapters register complete implementations without enabling them:
 
 - `adapters.desktop.linux`: Hyprland, DMS, greeter/portals, screenshots and
-  wallpaper support. Owns the DMS, plugin-registry and dsearch module imports.
+  wallpaper support. Owns native DMS configuration, plugins and the dsearch service.
 - `adapters.desktop.macos`: AeroSpace, JankyBorders and Raycast.
 
 Each host explicitly fills its desktop slot, for example:
@@ -93,7 +95,7 @@ hosts.Lukes-MacBook-Pro.desktop = config.adapters.desktop.macos;
 ```
 
 The host constructor imports the selected `system` module and adds `home` to
-Home Manager. It rejects adapters from the wrong platform before importing
+Hjem. It rejects adapters from the wrong platform before importing
 system settings. Adapter components are no longer enabled by the common
 profiles. macOS system defaults, including Touch ID and reduced motion, belong
 to the settings adapter rather than the desktop. Applications remain in the
@@ -108,10 +110,11 @@ contract; its programs need not correspond one-to-one with another adapter.
 
 Each machine selects three implementations: `adapter` (its NixOS or Darwin
 constructor), `settings`, and `desktop`. Constructors reject settings or desktops
-for the wrong platform and compose their system and Home Manager modules.
+for the wrong platform and compose their system and Hjem modules.
 Machine-specific configuration stays under `modules/hosts/machines/<name>/`.
 
-Settings adapters own the platform settings lists and the upstream Stylix module.
+Settings adapters own the platform settings lists and shared styling. Stylix is
+no longer an input; licensed templates live beside their owning domains.
 Homebrew lives in `modules/applications/homebrew.nix`, including its upstream
 nix-homebrew import. Settings do not select a desktop.
 
@@ -119,7 +122,7 @@ nix-homebrew import. Settings do not select a desktop.
 
 Ports/adapters are used for hosts, settings and desktops, not imposed on every
 concern. Agents and languages are ordinary dendritic modules selected by the
-common profiles. `modules/agents/default.nix` composes the Home Manager agent
+common profiles. `modules/agents/default.nix` composes the Hjem agent
 modules, including shared `agent-tools` CLI dependencies on Linux and macOS.
 `modules/agents/tools/cli/default.nix` owns ast-grep, fastmod, fzf, gh, jq,
 ripgrep, tree, mkcert, Bash and GNU coreutils. Each agent tool has its own
@@ -154,8 +157,9 @@ The imported code originated at Emporium revision
 `licenses/EMPORIUM-MIT.txt`, alongside the assets' own provenance notices.
 These domain modules are now the source of truth for the migrated tools, not
 copies to keep synchronized with Emporium. No build depends on that repository.
-Home Manager still handles
-user deployment until the separate Hjem migration.
+Hjem handles user files and packages on both platforms. Native systemd and
+launchd retain the platform services. See [the migration notes](docs/hjem-migration.md)
+for file ownership, rollback and the runtime checks needed after switching.
 
 Public build targets remain available, for example `nix build --no-link .#pi`,
 `.#bend` or `.#tern`, but their definitions live with their owning features.
@@ -171,7 +175,7 @@ SSH uses keys loaded by KeePassXC into an existing agent, instead of reading a
 private key from `~/secrets`. KeePassXC is installed on Linux **and macOS**.
 See [the one-time setup instructions](docs/keepassxc-ssh.md) before applying:
 the database entry still needs configuring in KeePassXC. SSH integration and
-close-to-tray behavior are enabled through Home Manager. Application preferences
+close-to-tray behavior are enabled through Hjem. Application preferences
 are read-only; the database remains writable. No existing key file is deleted.
 
 ### Local inference (Lukes-Um790)

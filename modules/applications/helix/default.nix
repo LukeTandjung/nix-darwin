@@ -1,16 +1,17 @@
 { inputs, ... }:
 {
-  modules.home.helix =
+  modules.hjem.helix =
     {
       pkgs,
       lib,
+      theme,
       ...
     }:
     {
-      programs.helix = {
-        package = pkgs.helix;
-        enable = true;
-        languages = {
+      packages = [ pkgs.helix ];
+      xdg.config.files = {
+        "helix/themes/kanagawa.toml".text = theme.render ./theme.mustache { };
+        "helix/languages.toml".source = (pkgs.formats.toml { }).generate "helix-languages.toml" {
           language-server = {
             nixd.command = "${pkgs.nixd}/bin/nixd";
             typescript-language-server = {
@@ -107,7 +108,8 @@
             }
           ];
         };
-        settings = {
+        "helix/config.toml".source = (pkgs.formats.toml { }).generate "helix-config.toml" {
+          theme = "kanagawa";
           keys.normal = {
             "C-y" = [
               ":sh rm -f /tmp/unique-file"

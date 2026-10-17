@@ -89,7 +89,7 @@ in
     };
   perSystem = { pkgs, ... }: { packages.autolith = flake.config.builders.autolith pkgs; };
 
-  modules.home.autolith-implementation =
+  modules.hjem.autolith-implementation =
     {
       config,
       lib,
@@ -203,7 +203,7 @@ in
           }
         ];
 
-        home.packages = [ cfg.package ] ++ cfg.extraPackages ++ sharedMcp.packagesFor "autolith";
+        packages = [ cfg.package ] ++ cfg.extraPackages ++ sharedMcp.packagesFor "autolith";
 
         # Keep existing PaddleOCR options working, but register the result through
         # the same catalogue as every other server. Explicit shared values win.
@@ -225,7 +225,7 @@ in
           };
         };
 
-        xdg.configFile = lib.mkMerge [
+        xdg.config.files = lib.mkMerge [
           (lib.optionalAttrs (cfg.init != null) {
             "autolith/init.lisp" = fileValue cfg.init;
           })
@@ -236,7 +236,6 @@ in
               if builtins.isPath value && builtins.pathExists (value + "/SKILL.md") then
                 {
                   source = value;
-                  recursive = true;
                 }
               else
                 {
@@ -257,7 +256,7 @@ in
       };
     };
 
-  modules.home.autolith =
+  modules.hjem.autolith =
     { ... }:
     {
       programs.autolith.enable = true;
