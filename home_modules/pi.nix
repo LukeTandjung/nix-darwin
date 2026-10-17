@@ -47,14 +47,6 @@
       enable = true;
 
       servers = {
-        effect = {
-          command = "npx";
-          args = [
-            "-y"
-            "effect-mcp@latest"
-          ];
-        };
-
         typst = {
           command = "docker";
           args = [

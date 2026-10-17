@@ -6,16 +6,16 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1791840114,
-        "narHash": "sha256-6D83K4PvsFyp19Q8nEjKZevySb9zA52vAbyxS0UX8Zg=",
+        "lastModified": 1791981948,
+        "narHash": "sha256-jE4jFznQn1VR32L23YUNaO/7p2yiPHWwAZGXvFHmeuY=",
         "owner": "LukeTandjung",
         "repo": "autolith",
-        "rev": "de9a26a63d0bc5c14e4a26fdae68be5d6351ae67",
+        "rev": "7a60aa00bb3be78e02bafe5ee2e609d40f0c79dd",
         "type": "github"
       },
       "original": {
         "owner": "LukeTandjung",
-        "ref": "luke-v0.63.0-1",
+        "ref": "luke/v0.63.0-custom",
         "repo": "autolith",
         "type": "github"
       }
@@ -466,11 +466,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1791964018,
-        "narHash": "sha256-EKFp0uJG+jem6Gy+U/Ljo77flwUWIVX6yiqVhCl7f6c=",
+        "lastModified": 1792248722,
+        "narHash": "sha256-OiNaK4qwzEYMpEpmyWPdsVVxGbY6yqFLYzB8sfbMzh4=",
         "owner": "LukeTandjung",
         "repo": "luke-nix-emporium",
-        "rev": "efe0a0d1d0c9059bc1fa4697cae2cb6cb30d5f13",
+        "rev": "b6a316767a7c393b9ee572d9de1f7e0327de4400",
         "type": "github"
       },
       "original": {
