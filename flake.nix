@@ -15,10 +15,13 @@
   };
 
   inputs = {
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
     nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-unstable";
     rnote-nixpkgs.url = "github:nixos/nixpkgs/9da7f1cf7f8a6e2a7cb3001b048546c92a8258b4";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-    flatpaks.url = "github:in-a-dil-emma/declarative-flatpak/latest";
     stylix = {
       url = "github:nix-community/stylix/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -40,12 +43,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
-    luke-pkgs.url = "github:LukeTandjung/luke-nix-emporium";
+    # Preserve the agent source revision previously pinned through Emporium.
+    autolith.url = "github:LukeTandjung/autolith/5ed208fc2d56053e213dbfacba260e8318870bad";
     delta.url = "github:zed-industries/delta-nix";
-    neosicht = {
-      url = "github:LukeTandjung/neosicht";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     dgop = {
       url = "github:AvengeMedia/dgop";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -73,34 +73,17 @@
     };
   };
 
-  outputs = inputs @ {
-    zen-browser,
-    spicetify-nix,
-    dankMaterialShell,
-    dms-plugin-registry,
-    dsearch,
-    luke-pkgs,
-    ...
-  }: let
-    sharedHomeModules = [
-      zen-browser.homeModules.beta
-      spicetify-nix.homeManagerModules.spicetify
-      luke-pkgs.homeManagerModules.default
-      dankMaterialShell.homeModules.dank-material-shell
-      dms-plugin-registry.homeModules.default
-      dsearch.homeModules.default
-    ];
-  in {
-    nixosConfigurations.Lukes-Mac-air = import ./hosts/Lukes-Mac-air {
-      inherit inputs sharedHomeModules;
+  outputs =
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      # Every Nix file in modules/ is a top-level feature module. Importing a
+      # feature registers it; core/profiles.nix selects the enabled features.
+      imports = builtins.filter (path: inputs.nixpkgs.lib.hasSuffix ".nix" (toString path)) (
+        inputs.nixpkgs.lib.filesystem.listFilesRecursive ./modules
+      );
+      systems = [
+        "x86_64-linux"
+        "aarch64-darwin"
+      ];
     };
-
-    nixosConfigurations.Lukes-Um790 = import ./hosts/Lukes-Um790 {
-      inherit inputs sharedHomeModules;
-    };
-
-    darwinConfigurations.Lukes-MacBook-Pro = import ./hosts/Lukes-MacBook-Pro {
-      inherit inputs sharedHomeModules;
-    };
-  };
 }

@@ -1,0 +1,320 @@
+# Rust adaptation
+
+When assisting a learner, explain the direction, relevant traits/types, and
+documentation rather than supplying a finished implementation. The snippets here
+communicate boundaries only.
+
+## Crate boundary and layout
+
+Each crate represents one cohesive service or one cohesive product feature. Do
+not split a feature into separate core, port, adapter, FFI, or UI crates merely
+to enforce dependency direction; enforce those boundaries with modules inside
+the owning crate.
+
+```text
+crates/{service-or-feature}/
+├── Cargo.toml
+├── src/
+│   ├── api/          # when an external boundary exists
+│   ├── core/         # when pure decisions exist
+│   ├── ports/
+│   ├── app/
+│   ├── adapters/
+│   ├── impls/
+│   ├── lib.rs
+│   └── main.rs       # when executable
+└── tests/
+    ├── core/
+    ├── app/
+    ├── adapters/
+    └── impls/
+```
+
+Keep production code and tests physically separate: production modules under
+`src/` must not contain inline `#[cfg(test)] mod tests` blocks. Put tests under
+`tests/`, organized by the architectural layer they exercise. Omit directories
+for layers that do not earn their existence.
+
+## Mapping
+
+| Architecture     | Rust representation                                         |
+| ---------------- | ----------------------------------------------------------- |
+| Core             | pure functions, enums, newtypes                             |
+| Port             | application-owned trait                                     |
+| Adapter          | struct or closure implementing a port trait                 |
+| Use case         | function generic over narrow port traits                    |
+| API              | public trait plus API-facing boundary types                  |
+| Wiring           | `impls/` composition root constructing concrete adapters     |
+| Expected error   | explicit `Result<T, E>` with service-owned error enum       |
+| Broken invariant | panic only when truly unrecoverable/programmer error        |
+
+## Libraries and capability boundaries
+
+A Cargo dependency is not automatically an external architectural capability.
+A layer may directly import in-process parsers, compilers, UI libraries, codecs,
+algorithms, and similar libraries when that layer owns the responsibility. Do
+not create shallow port/adapter wrappers merely because implementation code
+comes from another crate.
+
+Use an application-owned port when the application needs to invert an external
+capability or runtime effect: clocks, filesystem access, system clipboard,
+network/RPC, databases, randomness or ID generation, environment access,
+queues, or workflow runtimes. Adapters implement those ports.
+
+Statements such as “App depends only on core and ports” describe architectural
+module direction; they do not prohibit ordinary Cargo library dependencies
+appropriate to that layer. For example:
+
+- Typst parsing or compilation needs no port solely because it uses Typst
+  crates.
+- GPUI rendering needs no port solely because it uses GPUI.
+- GPUI-backed system clipboard access crosses an application-owned clipboard
+  port because the clipboard is an external runtime capability.
+- Reading monotonic time crosses a `Clock` port. A `SystemClock` adapter may use
+  `Instant::now()`, while core receives the resulting timestamp explicitly.
+
+## API traits
+
+`api/` owns public interface traits and API-facing configuration, request,
+result, and error types. These caller-facing traits are not ports: ports are
+inward-facing contracts for capabilities app use cases need. `impls/` defines
+concrete types that implement API traits, maps API contracts into app
+operations, and constructs concrete adapters as the composition root.
+
+```text
+caller -> API trait
+             ^
+             | implements
+          Impl type
+             |
+             +-> app
+             +-> adapters
+```
+
+Reject API-to-implementation forwarding:
+
+```rust
+// api/
+pub fn create_editor(/* ... */) {
+    crate::impls::create_editor(/* ... */)
+}
+```
+
+Prefer an API-owned trait implemented in `impls/`:
+
+```rust
+// api/
+pub trait EditorApi {
+    fn create_editor(&self, config: EditorConfig) -> EditorResult;
+}
+
+// impls/
+pub struct EditorApiImpl;
+
+impl EditorApi for EditorApiImpl {
+    fn create_editor(&self, config: EditorConfig) -> EditorResult {
+        // Compose adapters and invoke app operations.
+    }
+}
+
+// lib.rs
+pub use api::*;
+pub use impls::EditorApiImpl;
+```
+
+`api/` must not import or call `impls/`. The crate root may re-export both the
+API traits and concrete implementation type or factory.
+
+## Core
+
+Core depends only on core data. Use enums for alternative decisions and newtypes
+for validated identifiers.
+
+```rust
+pub enum ScheduleDecision {
+    Schedule(PendingRun),
+    AlreadyRunning(RunId),
+}
+
+pub fn decide_schedule(
+    input: ScheduleInput,
+    current: Option<&AgentRun>,
+) -> ScheduleDecision {
+    // Pure decision only; time and IDs are already in input.
+}
+```
+
+Do not read system time, generate randomness, access environment variables,
+spawn tasks, or perform I/O in core. In particular, core must not call
+`Instant::now()` or otherwise read runtime time; a `Clock` port and
+`SystemClock` adapter provide an explicit time value to core.
+
+## Ports
+
+Traits belong to the app/ports side, not the adapter crate/module. Bundle
+operations by cohesive capability.
+
+```rust
+pub trait AgentRunStore {
+    type Error;
+
+    async fn find_active(
+        &self,
+        tx: &mut TransactionContext,
+        agent_id: &AgentId,
+    ) -> Result<Option<AgentRun>, Self::Error>;
+
+    async fn insert(
+        &self,
+        tx: &mut TransactionContext,
+        run: PendingRun,
+    ) -> Result<AgentRun, Self::Error>;
+}
+```
+
+Choose static dispatch (`impl Trait`/generics) by default. Use `dyn Trait` when
+runtime adapter selection or heterogeneous storage is a real requirement. Do not
+add `Arc`, `Box`, `Send`, or `Sync` reflexively; add them where
+runtime/concurrency boundaries require them.
+
+## Use cases
+
+Use cases are functions over the narrow traits they need. They load, call pure
+decisions, and persist state plus outbox within one real transaction.
+
+```rust
+pub async fn schedule_agent<S, C, I>(
+    store: &S,
+    clock: &C,
+    ids: &I,
+    tx: &mut TransactionContext,
+    input: ScheduleAgentInput,
+) -> Result<AgentRun, ScheduleAgentError>
+where
+    S: AgentRunStore,
+    C: Clock,
+    I: IdGenerator,
+{
+    // load -> decide -> write state and outbox
+}
+```
+
+This is an architectural signature, not a mandate to accumulate many generic
+parameters. If the dependency list grows, define one cohesive
+application-dependencies record only when it lowers cognitive load.
+
+## Persistence ports and adapters
+
+There is no separate repository layer. Application-owned port traits describe
+cohesive storage capabilities. Postgres adapters implement them directly and own
+SQL/query bindings, transaction-executor use, row decoding, and database-specific
+types. Query helpers stay private inside the adapter; driver shapes must not
+define app contracts.
+
+- Postgres adapters own SQL/driver knowledge and map rows into core/application
+  types.
+- Translate driver errors into adapter/service-owned error types at the
+  boundary.
+- RPC/HTTP/queue adapters translate transport shapes; internal layers never use
+  transport DTOs as domain types.
+- In-memory adapters implement the same traits and own state per test instance.
+- Avoid global mutable state.
+
+## Errors
+
+- Expected outcomes are enums or `Result` variants.
+- Port errors are associated or concrete service-owned error types.
+- Adapter internals may retain source errors for diagnostics without exposing
+  vendor APIs throughout app code.
+- Do not use `unwrap`/`expect` in request paths for recoverable conditions.
+- Panic only for impossible states or programmer defects.
+
+## Transactions and outbox
+
+Use the actual transaction type directly or hide it behind one concrete opaque
+context understood by Postgres adapters. Do not build a generic unit-of-work
+framework. Do not open one transaction per port operation when a use case
+requires atomicity.
+
+Cross-process effects follow the same persisted outbox policy as TypeScript
+services. The processor must claim safely, preserve idempotency keys, and
+tolerate at-least-once delivery.
+
+## Async and concurrency
+
+- Keep core synchronous and deterministic.
+- Async belongs in app orchestration, adapters, and wiring.
+- Spawn tasks only in wiring/process-management code unless task ownership and
+  shutdown semantics are explicit.
+- Cancellation, resource ownership, and graceful shutdown are wiring concerns.
+- Do not hold a database transaction across arbitrary external network calls;
+  commit an outbox event instead.
+
+## Impl and composition
+
+`src/impls/` is Rust's keyword-safe equivalent of `impl/`. It defines concrete
+implementations of traits owned by `api/`, constructs concrete adapters, chooses
+static or dynamic dispatch, opens transactions around app use cases, owns task
+lifecycle/shutdown, maps API contracts to app operations, and runs the outbox
+processor. It is the only module that imports both app and adapters. `api/`
+never imports `impls/` or reaches it through forwarding functions.
+
+Optional workflow activities are small wrappers over port operations. Durable
+orchestration must not move into one giant activity.
+
+## Events, publisher, and workflows
+
+- `core/events.rs` owns persisted outbox event variants.
+- `events/` owns portable queue schemas/conversion.
+- `publisher/` implements event publication.
+- `workflows/` contains only durable-runtime translation and sequencing.
+- Spawned outbox tasks are owned, cancelled, and drained by `impls/`; detached
+  tasks are forbidden.
+
+## Testing
+
+All tests live under the crate-level `tests/` directory, never inline with
+production modules under `src/`. Mirror architectural ownership without
+replicating every source file mechanically:
+
+- `tests/core/`: table-driven pure tests.
+- `tests/app/`: use-case tests with in-memory trait implementations; no database
+  or network.
+- `tests/adapters/`: integration tests against real dependencies.
+- `tests/impls/`: critical wiring/E2E paths only.
+
+Tests use valid newtype identifiers and deterministic clock/ID adapters. Avoid
+mocking concrete libraries when a port can be implemented in memory. Test
+in-process libraries directly in the owning layer; do not invent a port merely
+to mock a Cargo dependency. Expose the smallest necessary library surface to
+integration tests; do not make adapter internals public solely for trivial
+forwarding tests.
+
+## Rust-specific checks
+
+- [ ] Each crate represents one cohesive service or product feature.
+- [ ] Architectural layers and implementation technologies remain modules, not
+      separate crates.
+- [ ] Tests live under `tests/`; production modules contain no inline test
+      modules.
+- [ ] Public API traits and API-facing boundary types are owned by `api/` and
+      remain distinct from app-owned ports.
+- [ ] Concrete `impls/` types implement API traits and remain the composition
+      root; `api/` contains no forwarding calls into `impls/`.
+- [ ] Traits for external capabilities are owned by the application that
+      consumes them.
+- [ ] In-process Cargo libraries are imported by the responsible layer without
+      ceremonial ports or adapters.
+- [ ] Core remains synchronous and pure; runtime time enters through a `Clock`
+      port and explicit values.
+- [ ] Newtypes protect identifiers after parsing.
+- [ ] `Result`/enums model expected outcomes.
+- [ ] No recoverable-path `unwrap`/`expect`.
+- [ ] Generic bounds remain narrow and readable.
+- [ ] Dynamic dispatch appears only for a runtime need.
+- [ ] Async tasks have explicit ownership and shutdown.
+- [ ] Transactions do not span arbitrary network effects.
+- [ ] No repository layer exists; Postgres adapters implement app-owned
+      persistence traits and own queries and row decoding.
+- [ ] API DTOs do not leak into core/ports/app/adapters.
+- [ ] Outbox tasks have explicit ownership, cancellation, and shutdown draining.

@@ -1,4 +1,0 @@
-{ ... }:
-{
-  programs.autolith.enable = true;
-}

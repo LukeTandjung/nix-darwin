@@ -1,4 +1,0 @@
-{ ... }:
-{
-  programs.tern.enable = true;
-}

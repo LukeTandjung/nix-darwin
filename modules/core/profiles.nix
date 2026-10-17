@@ -1,0 +1,50 @@
+{ config, ... }:
+{
+  modules.home.default.imports = with config.modules.home; [
+    home-base
+    agents
+    quint
+    bend-implementation
+    bend
+    tern-implementation
+    tern
+    claude-desktop-implementation
+    direnv
+    helix
+    herdr
+    keepassxc
+    kitty
+    oh-my-posh
+    spicetify
+    vesktop
+    zed-editor
+    zen-browser
+    zsh
+    yazi
+    git
+    lazygit
+  ];
+  modules.nixos.default.imports = with config.modules.nixos; [
+    chatgpt
+    git
+    typst
+    rust
+    evince
+    home-manager
+    docker
+    steam
+    solaar
+    valent
+    kew
+    llm
+  ];
+  modules.darwin.default.imports = with config.modules.darwin; [
+    chatgpt
+    home-manager
+    homebrew
+    orbstack
+    postgresql
+    rust
+    typst
+  ];
+}

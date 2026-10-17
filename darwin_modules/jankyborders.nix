@@ -1,3 +1,0 @@
-{...}: {
-  services.jankyborders.enable = true;
-}

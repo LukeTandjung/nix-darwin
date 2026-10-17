@@ -1,0 +1,31 @@
+{ inputs, ... }:
+{
+  modules.nixos.users =
+    { pkgs, ... }:
+
+    {
+      users.mutableUsers = false;
+
+      users.users.luke = {
+        isNormalUser = true;
+        description = "Luke";
+        extraGroups = [
+          "wheel"
+          "networkmanager"
+          "docker"
+        ];
+        shell = pkgs.zsh;
+        hashedPassword = "$y$j9T$KKOs1l8fQ38OQBmJ/Q3lU0$Ae/FuaUdGTrL.ebuMZMAOzOn1LHFjSxV3gzUFVihOz/";
+      };
+
+      # Even though this option is enabled by HM, this only enables zsh for the user level;
+      # we need to enable zsh systemwide. Otherwise, zsh might miss systemwide nix directories.
+      programs.zsh.enable = true;
+
+      # Sudo without password for wheel users
+      security.sudo = {
+        enable = true;
+        wheelNeedsPassword = false;
+      };
+    };
+}
