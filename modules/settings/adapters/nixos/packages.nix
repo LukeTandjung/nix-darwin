@@ -12,6 +12,9 @@
         upower
         pciutils
         usbutils
+        # secret-tool reads entries shared via KeePassXC's Secret Service
+        # integration (single process, no master-key prompt).
+        libsecret
         # Phase 0 local-LLM prerequisite: verify that RADV exposes the 780M.
         vulkan-tools
       ];

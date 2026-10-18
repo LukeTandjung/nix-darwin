@@ -522,6 +522,10 @@ in
 
       # Written as literal JSON because "$var" is not a valid Nix attribute name.
       #
+      # The supernova apiKey uses pi's "!command" syntax: secret-tool reads
+      # the entry shared via KeePassXC's Secret Service integration, so the
+      # vault stays password+passkey protected and no unlock happens here.
+      #
       # Qwen3.8's chat template only accepts enable_thinking plus a graded
       # reasoning_effort of xhigh|medium|low (anything else raises a Jinja
       # exception). pi maps its own thinking levels onto that scale via
@@ -533,7 +537,7 @@ in
               "name": "Supernova",
               "baseUrl": "https://api.supernova-labs.ai/glm/v1",
               "api": "openai-completions",
-              "apiKey": "$SUPERNOVA_API_KEY",
+              "apiKey": "!secret-tool lookup Title 'SUPERNOVA_API_KEY'",
               "models": [
                 {
                   "id": "glm-5.3",
