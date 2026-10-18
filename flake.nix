@@ -43,7 +43,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     autolith.url = "github:LukeTandjung/autolith/5ed208fc2d56053e213dbfacba260e8318870bad";
-    delta.url = {
+    delta = {
       url = "github:zed-industries/delta-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
