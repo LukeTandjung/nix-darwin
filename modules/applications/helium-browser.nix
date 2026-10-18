@@ -363,7 +363,7 @@ in
   modules.hjem.helium-browser = { config, pkgs, theme, ... }:
     let
       mac = pkgs.stdenv.hostPlatform.isDarwin;
-      base = if mac then "Library/Application Support/net.imput.helium" else ".config/helium";
+      base = if mac then "Library/Application Support/net.imput.helium" else ".config/net.imput.helium";
       browser = inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default;
       # Original destinations from Luke's Zen pins, not their transient navigation history.
       # Seed once; Helium owns subsequent pin edits and session data.
