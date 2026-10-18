@@ -1,10 +1,10 @@
 (in-package #:autolith)
 
-;; One-way prewalk, adapted from https://github.com/lukeramsden/pi-prewalk.
+;; One-way prewalk, adapted from architect-eng/nightshade .pi/extensions/prewalk
+;; at 60bc55946331c82248bf7ad0e23b626f907da77e. Bare /prewalk selects a model.
 ;; Autolith's plan.update and resource.edit replace Pi's todo and edit/write.
 ;; This extension adds methods; it does not replace the native planner or tools.
 
-(defparameter *prewalk-default-executor* "glm-5.3-fast")
 (defvar *prewalk-states* (make-hash-table :test #'eq :weakness :key))
 (defvar *prewalk-lock* (make-lock "Prewalk session states"))
 ;; Optional startup arming: AUTOLITH_PREWALK_INTO=glm-5.3-fast autolith.
@@ -45,7 +45,7 @@
              :message "Authenticate the prewalk executor first; no fallback model will be selected."))
     (values configuration provider)))
 
-(defun prewalk-arm (application &optional (target *prewalk-default-executor*))
+(defun prewalk-arm (application target)
   "Arm this conversation only; the current model remains its planner."
   (let* ((agent (application-agent application))
          (conversation (agent-conversation agent))
@@ -171,14 +171,31 @@
     (:name "/prewalk"
      :argument "[MODEL|off|status]"
      :description "plan and make the first edit, then switch to the executor"
-     :tip "Defaults to glm-5.3-fast. Manual, one-way, per conversation; shell commands do not trigger it."
+     :tip "Pick an implementation model, or supply MODEL explicitly. One-way, per conversation; shell commands do not trigger it."
      :busy-behavior :apply
-     :terminal-behavior :shared
+     :terminal-behavior :exclusive-without-arguments
      :callable t)
-    (application &optional (argument *prewalk-default-executor*))
+    (application &optional argument)
   (let ((conversation (application-conversation application)))
     (cond
-      ((string-equal (string argument) "off")
+      ((null argument)
+       (let ((target
+               (and *application-command-interactive-p*
+                    (application--pick-identifier
+                     application
+                     :title "Prewalk into which model?"
+                     :items (remove (config :model (application-configuration application))
+                                    (application--model-items application)
+                                    :key (lambda (item) (getf item :name)) :test #'equal)
+                     :visible-count 15
+                     :search-p t
+                     :usage "Usage: /prewalk MODEL"
+                     :empty-notice "No other registered provider models exist."))))
+         (if target
+             (prewalk-arm application target)
+             (application-present application
+                                  "Prewalk: no model selected; selection unchanged. Use /prewalk MODEL."))))
+      ((member (string-downcase (string argument)) '("off" "disable") :test #'equal)
        (prewalk-disarm conversation))
       ((string-equal (string argument) "status"))
       (t (prewalk-arm application argument)))

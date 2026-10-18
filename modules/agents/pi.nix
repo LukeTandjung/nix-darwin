@@ -493,7 +493,6 @@ in
           defaultThinkingLevel = "low";
           theme = "dark";
           packages = [
-            "git:github.com/lukeramsden/pi-prewalk@v1.1.1"
             "npm:@hicaru/pi-rlm"
             "npm:pi-docparser"
             "npm:pi-autoresearch"

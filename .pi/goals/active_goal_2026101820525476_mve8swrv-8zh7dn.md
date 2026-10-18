@@ -1,0 +1,57 @@
+{
+  "version": 3,
+  "id": "mve8swrv-8zh7dn",
+  "objective": "Fix prewalk model-hijack and finish GLM/supernova + swift-1.5 configuration deployment in /home/luke/nix-darwin.\n\nOrdered steps (done criteria per step):\n1. Diagnose prewalk model-hijack: rg AUTOLITH_PREWALK in repo/shell configs + env; extract USER-OPERATION records w/ timestamps from ~/.local/share/autolith/conversations/A5QBtvj/*.sexp; correlate with prewalk switch; read autolith fork's /model flow from /nix/store/*autolith* if source ships. Done = concrete mechanism identified (env auto-arming vs prewalk--switch clobber vs unrelated /model picker issue).\n2. Fix user-precedence in modules/agents/autolith/prewalk.lisp: disarm prewalk when a /model user operation or model-selection change occurs while phase is :armed/:pending; remove/gate any global AUTOLITH_PREWALK_INTO export found in step 1. Done = lisp syntax check passes (sbcl if available, else manual paren-balance + minimal-diff review) and rg confirms guard in agent-before-provider-request.\n3. Change prewalk default executor: *prewalk-default-executor* \"glm-5.3-fast\" -> \"glm-5.3\" in prewalk.lisp, update :tip and startup comment. Done = rg \"glm-5.3-fast\" modules/agents/autolith/ shows no remaining defaults.\n4. Locate :REASONING-EFFORT \"max\" source (rg REASONING-EFFORT/reasoning-effort repo + autolith config). If repo-configured, set sane prewalk default; if user TUI choice, report only. Done = source located and decision recorded.\n5. Verify secret-tool lookup Title 'SUPERNOVA_API_KEY' returns the key (exit 0) after user renames the KeePassXC entry. Done = key retrieved non-interactively.\n6. Rebuild host Lukes-Um790 from the flake and verify deployed artifacts: ~/.pi/agent/models.json apiKey = \"!secret-tool lookup Title 'SUPERNOVA_API_KEY'\", context windows 300000; ~/.config/autolith/init.lisp new store hash with 300000; systemctl cat ninfer shows --max-context 300000 --max-concurrency 1. Done = all checks green.\n7. Post-rebuild functional checks: pi model list shows glm-5.3 + glm-5.3-fast with KeePassXC unlocked; ninfer service active and swift-1.5 listed at 127.0.0.1:8080/v1/models; fresh autolith session: /prewalk status not armed, /model selection sticks across a request. Done = all three green.\n\nConstraints: never modify the autolith fork, tests, or verification assets; fixes only in our prewalk.lisp plugin and repo configs. Already done (do not repeat): pi.nix apiKey secret-tool command + 300k windows, libsecret package, llm.nix ninfer flags, autolith init.lisp 300k windows.",
+  "status": "paused",
+  "autoContinue": false,
+  "usage": {
+    "tokensUsed": 97563,
+    "activeSeconds": 6
+  },
+  "sisyphus": false,
+  "createdAt": "2026-10-18T19:52:54.763Z",
+  "updatedAt": "2026-10-18T19:53:16.772Z",
+  "activePath": ".pi/goals/active_goal_2026101820525476_mve8swrv-8zh7dn.md",
+  "revision": 9,
+  "scheduler": {
+    "version": 1,
+    "owner": "01a15070-8557-7637-adb3-981a3377dbc2",
+    "generation": "3ba2d079-33b4-47a2-8389-f983dce5ba6a",
+    "used": 1,
+    "phase": "running",
+    "repairUsed": false,
+    "decision": {
+      "kind": "ready",
+      "purpose": "ready"
+    },
+    "dispatch": {
+      "id": "d2c4287b-ed65-42af-9147-ac8210a9f066",
+      "kind": "ready",
+      "claimedAt": 1792353174785
+    }
+  },
+  "stopReason": "user"
+}
+
+# Goal Prompt
+
+Fix prewalk model-hijack and finish GLM/supernova + swift-1.5 configuration deployment in /home/luke/nix-darwin.
+
+Ordered steps (done criteria per step):
+1. Diagnose prewalk model-hijack: rg AUTOLITH_PREWALK in repo/shell configs + env; extract USER-OPERATION records w/ timestamps from ~/.local/share/autolith/conversations/A5QBtvj/*.sexp; correlate with prewalk switch; read autolith fork's /model flow from /nix/store/*autolith* if source ships. Done = concrete mechanism identified (env auto-arming vs prewalk--switch clobber vs unrelated /model picker issue).
+2. Fix user-precedence in modules/agents/autolith/prewalk.lisp: disarm prewalk when a /model user operation or model-selection change occurs while phase is :armed/:pending; remove/gate any global AUTOLITH_PREWALK_INTO export found in step 1. Done = lisp syntax check passes (sbcl if available, else manual paren-balance + minimal-diff review) and rg confirms guard in agent-before-provider-request.
+3. Change prewalk default executor: *prewalk-default-executor* "glm-5.3-fast" -> "glm-5.3" in prewalk.lisp, update :tip and startup comment. Done = rg "glm-5.3-fast" modules/agents/autolith/ shows no remaining defaults.
+4. Locate :REASONING-EFFORT "max" source (rg REASONING-EFFORT/reasoning-effort repo + autolith config). If repo-configured, set sane prewalk default; if user TUI choice, report only. Done = source located and decision recorded.
+5. Verify secret-tool lookup Title 'SUPERNOVA_API_KEY' returns the key (exit 0) after user renames the KeePassXC entry. Done = key retrieved non-interactively.
+6. Rebuild host Lukes-Um790 from the flake and verify deployed artifacts: ~/.pi/agent/models.json apiKey = "!secret-tool lookup Title 'SUPERNOVA_API_KEY'", context windows 300000; ~/.config/autolith/init.lisp new store hash with 300000; systemctl cat ninfer shows --max-context 300000 --max-concurrency 1. Done = all checks green.
+7. Post-rebuild functional checks: pi model list shows glm-5.3 + glm-5.3-fast with KeePassXC unlocked; ninfer service active and swift-1.5 listed at 127.0.0.1:8080/v1/models; fresh autolith session: /prewalk status not armed, /model selection sticks across a request. Done = all three green.
+
+Constraints: never modify the autolith fork, tests, or verification assets; fixes only in our prewalk.lisp plugin and repo configs. Already done (do not repeat): pi.nix apiKey secret-tool command + 300k windows, libsecret package, llm.nix ninfer flags, autolith init.lisp 300k windows.
+
+## Progress
+
+- Status: paused
+- Auto-continue: off
+- Sisyphus mode: no
+- Time spent: 6s
+- Tokens used: 98K (97,563) tokens
