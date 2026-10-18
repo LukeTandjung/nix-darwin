@@ -6,8 +6,8 @@
  :name "supernova"
  :description "Supernova GLM-5.3 and GLM-5.3 Fast"
  :endpoint "https://api.supernova-labs.ai/glm/v1/chat/completions"
- :models '((:name "glm-5.3" :context-window 1000000)
-           (:name "glm-5.3-fast" :context-window 1000000)))
+ :models '((:name "glm-5.3" :context-window 300000)
+           (:name "glm-5.3-fast" :context-window 300000)))
 
 ;; Autolith 0.63.0 rejects Home Manager skill links into /nix/store.
 ;; Remove this override when upstream supports these user-installed links.

@@ -133,7 +133,7 @@ in
           # Keep NVIDIA devices and the host's localhost endpoint accessible.
           PrivateDevices = false;
           PrivateNetwork = false;
-          # NVFP4 KV / DFlash2 K7 profile with two-session capacity. CUDA graphs stay enabled;
+          # NVFP4 KV / DFlash2 K7 profile with single-session capacity. CUDA graphs stay enabled;
           # vision stays disabled. Use the artifact's template, not the frozen
           # benchmark template. Prefix reuse is enabled by default; allow 8 GiB
           # of host backing for retained/paused contexts, not active-attention KV offload.
@@ -142,8 +142,8 @@ in
             "${model}"
             "--host 127.0.0.1 --port 8080"
             "--model-id swift-1.5"
-            "--max-context 180000 --kv-capacity 360000"
-            "--max-concurrency 2 --max-pending-requests 1"
+            "--max-context 300000 --kv-capacity 300000"
+            "--max-concurrency 1 --max-pending-requests 1"
             "--prefill-chunk 1024 --kv-dtype nvfp4"
             "--host-context-mib 8192 --device-state-slots 0"
             "--temperature 1 --top-p 0.95 --top-k 20 --min-p 0"

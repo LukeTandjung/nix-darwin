@@ -544,7 +544,7 @@ in
                   "name": "Supernova GLM-5.3",
                   "reasoning": true,
                   "input": ["text"],
-                  "contextWindow": 1000000,
+                  "contextWindow": 300000,
                   "cost": {
                     "input": 0.63,
                     "output": 1.98,
@@ -557,7 +557,7 @@ in
                   "name": "Supernova GLM-5.3 Fast",
                   "reasoning": true,
                   "input": ["text"],
-                  "contextWindow": 1000000,
+                  "contextWindow": 300000,
                   "cost": {
                     "input": 2.80,
                     "output": 8.80,
@@ -589,7 +589,7 @@ in
                   "name": "Swift-1.5 27B Uncensored (Local NVFP4 DFlash2)",
                   "reasoning": true,
                   "input": ["text"],
-                  "contextWindow": 180000,
+                  "contextWindow": 300000,
                   "maxTokens": 32768,
                   "thinkingLevelMap": {
                     "minimal": null,
