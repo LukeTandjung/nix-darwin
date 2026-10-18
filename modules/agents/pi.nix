@@ -492,11 +492,6 @@ in
           defaultModel = "gpt-5.6-sol";
           defaultThinkingLevel = "low";
           theme = "dark";
-          npmCommand = [
-            "npm"
-            "--prefix"
-            "${config.directory}/.pi/npm-global"
-          ];
           packages = [
             "git:github.com/lukeramsden/pi-prewalk@v1.1.1"
             "npm:@hicaru/pi-rlm"
