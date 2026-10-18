@@ -297,6 +297,18 @@ let
     # TODO: Remove this comment when Helium on MacOS gets a toggle to disable these checks with an environment variable.
     RestoreOnStartup = 1;
 
+    # Original Zen destinations, maintained through Nix rather than session data.
+    ManagedBookmarks = [
+      { toplevel_name = "Luke T"; }
+      { name = "NixOS Packages"; url = "https://search.nixos.org/packages?channel=unstable"; }
+      { name = "NixOS Options"; url = "https://search.nixos.org/options?channel=unstable"; }
+      { name = "Home Manager Options"; url = "https://home-manager-options.extranix.com/?release=master"; }
+      { name = "Nix Darwin Options"; url = "https://options.nix-darwin.uz/?release=master"; }
+      { name = "WhatsApp"; url = "https://web.whatsapp.com"; }
+      { name = "GitHub"; url = "https://github.com"; }
+      { name = "Chat.com"; url = "https://chat.com"; }
+    ];
+
     # SEARCH
     DefaultSearchProviderEnabled = true;
     DefaultSearchProviderName = "Google";
@@ -315,7 +327,7 @@ let
     helium.browser.new_tab_next_to_active = false;
 
     bookmark_bar.show_on_all_tabs = true;
-    bookmark_bar.show_tab_groups = true;
+    bookmark_bar.show_tab_groups = false;
 
     download.prompt_for_download = true; # Ask where to save each time.
 
@@ -356,19 +368,7 @@ in
       mac = pkgs.stdenv.hostPlatform.isDarwin;
       base = if mac then "Library/Application Support/net.imput.helium" else ".config/net.imput.helium";
       browser = inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default;
-      # Original destinations from Luke's Zen pins, not their transient navigation history.
-      # Seed once; Helium owns subsequent pin edits and session data.
-      pinnedPages = [
-        "https://search.nixos.org/packages?channel=unstable"
-        "https://search.nixos.org/options?channel=unstable"
-        "https://home-manager-options.extranix.com/?release=master"
-        "https://options.nix-darwin.uz/?release=master"
-        "https://web.whatsapp.com"
-        "https://github.com"
-        "https://chat.com"
-      ];
       initialPreferences = lib.recursiveUpdate preferences {
-        pinned_tabs = map (url: { inherit url; }) pinnedPages;
         webkit.webprefs.fonts = lib.genAttrs [ "standard" "serif" "sansserif" "fixed" ] (_: {
           Zyyy = theme.font;
         });
