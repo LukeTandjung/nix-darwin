@@ -39,10 +39,13 @@
   (let* ((configuration (configuration-copy (agent-configuration agent) :model target))
          (provider (provider-create configuration
                                     :registration (provider-registration-for-model target))))
-    (when (and (typep provider 'openai-compatible-provider)
-               (not (api-key-credential-available-p (provider-credential-manager provider))))
-      (error 'configuration-error
-             :message "Authenticate the prewalk executor first; no fallback model will be selected."))
+    ;; OpenAI-compatible transports may use OAuth or no authentication (NInfer).
+    ;; The API-key probe accepts only API-key credential managers.
+    (let ((manager (provider-credential-manager provider)))
+      (when (and (typep manager 'api-key-credential-manager)
+                 (not (api-key-credential-available-p manager)))
+        (error 'configuration-error
+               :message "Authenticate the prewalk executor first; no fallback model will be selected.")))
     (values configuration provider)))
 
 (defun prewalk-arm (application target)
