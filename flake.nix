@@ -20,7 +20,6 @@
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
     nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-unstable";
-    rnote-nixpkgs.url = "github:nixos/nixpkgs/9da7f1cf7f8a6e2a7cb3001b048546c92a8258b4";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     hjem = {
       url = "github:feel-co/hjem/6b2cc57463bbbac3d7c61206ab365a2c928861a4";
@@ -39,10 +38,15 @@
       url = "github:ilysenko/codex-desktop-linux";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    spicetify-nix.url = "github:Gerg-L/spicetify-nix";
-    # Preserve the agent source revision previously pinned through Emporium.
+    spicetify-nix.url = {
+      url = "github:Gerg-L/spicetify-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     autolith.url = "github:LukeTandjung/autolith/5ed208fc2d56053e213dbfacba260e8318870bad";
-    delta.url = "github:zed-industries/delta-nix";
+    delta.url = {
+      url = "github:zed-industries/delta-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     dgop = {
       url = "github:AvengeMedia/dgop";
       inputs.nixpkgs.follows = "nixpkgs";

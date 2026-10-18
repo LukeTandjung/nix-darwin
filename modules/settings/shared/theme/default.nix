@@ -1,12 +1,25 @@
 { lib, ... }:
 let
-  palette = {
+  schemeAuthor = "Tommaso Laurenzi (https://github.com/rebelot)";
+  darkPalette = {
     base00 = "1F1F28"; base01 = "16161D"; base02 = "223249"; base03 = "54546D";
     base04 = "727169"; base05 = "DCD7BA"; base06 = "C8C093"; base07 = "717C7C";
     base08 = "C34043"; base09 = "FFA066"; base0A = "C0A36E"; base0B = "76946A";
     base0C = "6A9589"; base0D = "7E9CD8"; base0E = "957FB8"; base0F = "D27E99";
   };
-  terminalColors = with palette; [ base00 base08 base0B base0A base0D base0E base0C base05 base03 base08 base0B base0A base0D base0E base0C base07 ];
+  # Light colors consolidate the former theme.json palette. Additional ANSI
+  # accents use Kanagawa Lotus: github.com/rebelot/kanagawa.nvim.
+  lightPalette = {
+    base00 = "FFFEF9"; base01 = "F2ECBC"; base02 = "C9CBD1"; base03 = "8A8980";
+    base04 = "43436C"; base05 = "545464"; base06 = "716E61"; base07 = "43436C";
+    base08 = "C84053"; base09 = "CC6D00"; base0A = "77713F"; base0B = "6F894E";
+    base0C = "6693BF"; base0D = "4D699B"; base0E = "B35B79"; base0F = "624C83";
+  };
+  terminalColorsFor = palette:
+    with palette; [ base00 base08 base0B base0A base0D base0E base0C base05 base03 base08 base0B base0A base0D base0E base0C base07 ];
+  # Existing single-theme consumers keep their dark appearance.
+  palette = darkPalette;
+  terminalColors = terminalColorsFor palette;
   digits = builtins.listToAttrs (builtins.genList (n: {
     name = builtins.substring n 1 "0123456789abcdef";
     value = n;
@@ -14,12 +27,12 @@ let
   component = hex: offset:
     digits.${lib.toLower (builtins.substring offset 1 hex)} * 16
     + digits.${lib.toLower (builtins.substring (offset + 1) 1 hex)};
-  tokens = {
-    scheme-name = "Kanagawa";
-    scheme-author = "Tommaso Laurenzi (https://github.com/rebelot)";
-    scheme-description = "Kanagawa";
+  tokensFor = mode: palette: {
+    scheme-name = if mode == "dark" then "Kanagawa" else "Kanagawa Light";
+    scheme-author = schemeAuthor;
+    scheme-description = if mode == "dark" then "Kanagawa" else "Kanagawa Light";
     scheme-system = "base16";
-    scheme-variant = "dark";
+    scheme-variant = mode;
   } // lib.foldlAttrs (acc: name: value: acc // {
     "${name}-hex" = value;
     "${name}-rgb-r" = toString (component value 0);
@@ -29,20 +42,32 @@ let
     "${name}-dec-g" = toString (component value 2 / 256.0);
     "${name}-dec-b" = toString (component value 4 / 256.0);
   }) { } palette;
+  variant = mode: palette: {
+    inherit palette mode;
+    author = schemeAuthor;
+    rgb = lib.mapAttrs (_: value: map (component value) [ 0 2 4 ]) palette;
+    name = if mode == "dark" then "Kanagawa" else "Kanagawa Light";
+    colors = lib.mapAttrs (_: value: "#${value}") palette;
+    terminalColors = terminalColorsFor palette;
+    render = path: extra:
+      let values = tokensFor mode palette // extra;
+      in lib.replaceStrings
+        (map (name: "{{${name}}}") (builtins.attrNames values))
+        (builtins.attrValues values)
+        (builtins.readFile path);
+  };
+  variants = {
+    dark = variant "dark" darkPalette;
+    light = variant "light" lightPalette;
+  };
   forPkgs = pkgs:
     let
       mac = pkgs.stdenv.hostPlatform.isDarwin;
       font = if mac then "JetBrains Mono" else "IBM Plex Mono";
       fontSize = if mac then 14 else 12;
-      render = path: extra:
-        let values = tokens // extra;
-        in lib.replaceStrings
-          (map (name: "{{${name}}}") (builtins.attrNames values))
-          (builtins.attrValues values)
-          (builtins.readFile path);
     in {
-      inherit palette terminalColors font fontSize render;
-      colors = lib.mapAttrs (_: value: "#${value}") palette;
+      inherit font fontSize variants;
+      inherit (variants.dark) name author mode palette rgb terminalColors colors render;
       fontPackage = if mac then pkgs.jetbrains-mono else pkgs.ibm-plex;
       emojiFont = if mac then "JetBrains Mono NF" else "IBM Plex Mono";
       fontPackages = if mac then [ pkgs.jetbrains-mono pkgs.nerd-fonts.jetbrains-mono ] else [ pkgs.ibm-plex ];
@@ -53,7 +78,7 @@ in
     type = lib.types.functionTo lib.types.raw;
     readOnly = true;
     default = forPkgs;
-    description = "Shared Kanagawa palette and platform-specific typography for owned renderers.";
+    description = "Shared dark/light Kanagawa palettes and platform-specific typography for owned renderers.";
   };
 
   config.modules.nixos.theme = { pkgs, ... }: {
@@ -87,15 +112,6 @@ in
       theme = forPkgs pkgs;
       linux = pkgs.stdenv.hostPlatform.isLinux;
       ini = pkgs.formats.ini { };
-      kdeConfig = pkgs.runCommand "kanagawa-kde-config" { } ''
-        mkdir "$out"
-        cp ${pkgs.writeText "kdeglobals" (theme.render ./kdeglobals.mustache {
-          font-family = theme.font;
-          font-size = toString theme.fontSize;
-        })} "$out/kdeglobals"
-        cp ${./kded5rc} "$out/kded5rc"
-        printf '[Mouse]\ncursorSize[$i]=24\ncursorTheme[$i]=Adwaita\n' > "$out/kcminputrc"
-      '';
       gtkSettings.Settings = {
         gtk-theme-name = "adw-gtk3";
         gtk-font-name = "${theme.font} ${toString theme.fontSize}";
@@ -113,7 +129,6 @@ in
         QT_STYLE_OVERRIDE = "kvantum";
         XCURSOR_THEME = "Adwaita";
         XCURSOR_SIZE = 24;
-        XDG_CONFIG_DIRS = "${kdeConfig}\${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}";
       };
       files = {
         ".themes/adw-gtk3".source = "${pkgs.adw-gtk3}/share/themes/adw-gtk3";
@@ -141,10 +156,9 @@ in
       };
       xdg.data.files = lib.genAttrs
         (map (version: "${version}/styles/kanagawa.xml") [ "gedit" "gtksourceview-2.0" "gtksourceview-3.0" "gtksourceview-4" "gtksourceview-5" ])
-        (_: { text = theme.render ./gtksourceview.xml.mustache { }; })
+        (_: { text = theme.render ./gtk/gtksourceview.xml.mustache { }; })
         // lib.optionalAttrs linux {
-          "color-schemes/Kanagawa.colors".text = theme.render ./kde.colors.mustache { };
-          "plasma/look-and-feel/kanagawa".source = ./kde-look-and-feel;
+          "plasma/look-and-feel/kanagawa".source = ./kde/look-and-feel;
           "icons/Adwaita".source = "${pkgs.adwaita-icon-theme}/share/icons/Adwaita";
           "icons/default/index.theme".text = "[Icon Theme]\nInherits=Adwaita\n";
         };
@@ -168,8 +182,6 @@ in
       xdg.config.files = {
         "gtk-3.0/settings.ini".source = ini.generate "gtk3-settings.ini" gtkSettings;
         "gtk-4.0/settings.ini".source = ini.generate "gtk4-settings.ini" gtkSettings;
-        "gtk-3.0/gtk.css".text = theme.render ./gtk.css.mustache { };
-        "gtk-4.0/gtk.css".text = theme.render ./gtk.css.mustache { };
       } // lib.optionalAttrs linux {
         "fontconfig/conf.d/10-hjem-fonts.conf".text = ''
           <?xml version="1.0"?>
@@ -187,8 +199,8 @@ in
           </fontconfig>
         '';
         "Kvantum/kvantum.kvconfig".text = "[General]\ntheme=Base16Kvantum\n";
-        "Kvantum/Base16Kvantum/Base16Kvantum.kvconfig".text = theme.render ./kvconfig.mustache { };
-        "Kvantum/Base16Kvantum/Base16Kvantum.svg".text = theme.render ./kvantum.svg.mustache { };
+        "Kvantum/Base16Kvantum/Base16Kvantum.kvconfig".text = theme.render ./kvantum/config.mustache { };
+        "Kvantum/Base16Kvantum/Base16Kvantum.svg".text = theme.render ./kvantum/theme.svg.mustache { };
         "qt5ct/qt5ct.conf".source = ini.generate "qt5ct.conf" {
           Appearance = { style = "kvantum"; custom_palette = true; standard_dialogs = "default"; icon_theme = "Adwaita"; };
           Fonts = { fixed = ''"${theme.font},${toString theme.fontSize}"''; general = ''"${theme.font},${toString theme.fontSize}"''; };

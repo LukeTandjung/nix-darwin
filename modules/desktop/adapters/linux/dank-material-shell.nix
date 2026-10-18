@@ -141,15 +141,17 @@
       plugins = inputs.dms-plugin-registry.packages.${pkgs.stdenv.hostPlatform.system};
       selectedPlugins = [ "powerUsagePlugin" "dankKDEConnect" ]
         ++ lib.optional (osConfig.networking.hostName == "Lukes-Um790") "mpvpaperWallpaper";
-      colors = with theme.colors; {
-        name = "Kanagawa"; primary = base0D; primaryText = base00; primaryContainer = base0C;
+      dmsColors = variant: with variant.colors; {
+        name = variant.name; primary = base0D; primaryText = base00; primaryContainer = base0C;
         secondary = base0E; surface = base01; surfaceText = base05; surfaceVariant = base02;
         surfaceVariantText = base04; surfaceTint = base0D; background = base00;
         backgroundText = base05; outline = base03; surfaceContainer = base01;
         surfaceContainerHigh = base02; surfaceContainerHighest = base03; error = base08;
         warning = base0A; info = base0C;
       };
-      customTheme = (pkgs.formats.json { }).generate "dms-kanagawa.json" { dark = colors; light = colors; };
+      customTheme = theme.variants
+        |> lib.mapAttrs (_: variant: dmsColors variant)
+        |> (pkgs.formats.json { }).generate "dms-kanagawa.json";
     in {
       packages = [ dms dsearch pkgs.quickshell pkgs.glib pkgs.networkmanager pkgs.matugen pkgs.cava ];
       xdg.config.files = {
