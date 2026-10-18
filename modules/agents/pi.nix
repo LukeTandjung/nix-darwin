@@ -176,13 +176,23 @@ in
               extensionPath = extensionsDir + "/${name}";
               packagePath = extensionPath + "/package.nix";
             in
-            if type == "directory" then pkgs.callPackage packagePath { } else extensionPath
+            if type == "directory" && builtins.pathExists packagePath then
+              pkgs.callPackage packagePath { }
+            else
+              extensionPath
           )
           (
             lib.filterAttrs (
               name: type:
               type == "regular"
-              || (type == "directory" && builtins.pathExists (extensionsDir + "/${name}/package.nix"))
+              || (
+                type == "directory"
+                && (
+                  builtins.pathExists (extensionsDir + "/${name}/package.nix")
+                  || builtins.pathExists (extensionsDir + "/${name}/index.ts")
+                  || builtins.pathExists (extensionsDir + "/${name}/index.js")
+                )
+              )
             ) (builtins.readDir extensionsDir)
           );
 
