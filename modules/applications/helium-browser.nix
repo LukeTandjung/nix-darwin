@@ -1,4 +1,4 @@
-flake@{
+{
   inputs,
   lib,
   ...
@@ -259,9 +259,8 @@ let
 
   policy = {
     # EXTENSIONS
-    ExtensionInstallBlocklist = singleton "*";
-
-    ExtensionInstallAllowlist = policy.ExtensionInstallForcelist;
+    # Allow local unpacked themes. A wildcard blocklist blocks unpacked loading
+    # even when an extension ID appears in ExtensionInstallAllowlist.
     ExtensionInstallForcelist =
       extensions
       |> filterAttrs (_: extension: !(extension.preinstalled or false))
@@ -306,14 +305,6 @@ let
     SearchSuggestEnabled = true;
   };
 
-  # Stylix's current Chromium target uses this single generated-theme policy:
-  # https://github.com/nix-community/stylix/blob/2856c4c6a845b9bec98828ef197abe176e4806bb/modules/chromium/nixos.nix
-  # Chromium supports it on Linux AND macOS. Use the same palette as Hjem;
-  # platform modules only deploy the policy to the location each OS requires.
-  policyFor = pkgs: policy // {
-    BrowserThemeColor = (flake.config.styling.forPkgs pkgs).colors.base00;
-  };
-
   preferences = {
     helium.completed_onboarding = true;
     helium.services.user_consented = true;
@@ -333,13 +324,13 @@ let
   };
 in
 {
-  modules.nixos.helium-browser = { pkgs, ... }: {
-    environment.etc."chromium/policies/managed/helium.json".text = builtins.toJSON (policyFor pkgs);
+  modules.nixos.helium-browser = {
+    environment.etc."chromium/policies/managed/helium.json".text = builtins.toJSON policy;
   };
 
   modules.darwin.helium-browser = { pkgs, ... }:
     let
-      managed = { "net.imput.helium" = policyFor pkgs; }
+      managed = { "net.imput.helium" = policy; }
         // lib.mapAttrs' (id: value:
           lib.nameValuePair "net.imput.helium.extensions.${id}" value
         ) policy."3rdparty".extensions;
@@ -382,6 +373,40 @@ in
           Zyyy = theme.font;
         });
       };
+      # Unpacked theme: no signing key, executable code, or permissions.
+      # Colour assignments follow jschillem/kanagawa-chrome; unmatched colours
+      # use the agreed Stylix roles from our existing shared palette.
+      themeManifest = {
+        manifest_version = 3;
+        name = "Luke T — Kanagawa";
+        version = "1.0.0";
+        theme = {
+          colors = with theme.rgb; {
+            bookmark_text = base05;
+            frame = base01;
+            frame_inactive = base01;
+            toolbar = base01;
+            toolbar_button_icon = base05;
+            ntp_text = base05;
+            ntp_link = base0D;
+            ntp_background = base00;
+            ntp_section = base01;
+            tab_text = base05;
+            tab_background_text = base04;
+            tab_background_text_inactive = base01;
+            tab_background = base00;
+            button_background = base01;
+            control_background = base02;
+            omnibox_background = base00;
+            omnibox_text = base06;
+          };
+          tints.buttons = [ 0.71 0.15 0.6 ];
+          properties = {
+            ntp_background_alignment = "bottom";
+            ntp_background_repeat = "no-repeat";
+          };
+        };
+      };
       seed = pkgs.writeText "helium-initial-preferences.json" (builtins.toJSON initialPreferences);
       nativeHost = {
         name = "org.keepassxc.keepassxc_browser";
@@ -394,7 +419,10 @@ in
       };
     in {
       packages = [ browser ];
-      files."${base}/NativeMessagingHosts/org.keepassxc.keepassxc_browser.json".text = builtins.toJSON nativeHost;
+      files = {
+        "${base}/NativeMessagingHosts/org.keepassxc.keepassxc_browser.json".text = builtins.toJSON nativeHost;
+        "${base}/themes/kanagawa/manifest.json".text = builtins.toJSON themeManifest;
+      };
 
       # Never symlink Preferences into the store or overwrite an existing profile.
       # Atomic no-clobber publication also preserves regular and dangling symlinks.
