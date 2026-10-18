@@ -1,10 +1,6 @@
 { inputs, ... }:
 {
-  modules.nixos.kew =
-    { pkgs, ... }:
-    {
-      environment.systemPackages = [
-        pkgs.kew
-      ];
-    };
+  modules.nixos.kew = { pkgs, ... }: {
+    environment.systemPackages = [ pkgs.kew ];
+  };
 }

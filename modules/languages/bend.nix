@@ -1,15 +1,7 @@
 flake@{ inputs, ... }:
 let
   recipe =
-    {
-      lib,
-      stdenv,
-      fetchurl,
-      makeWrapper,
-      autoPatchelfHook,
-      clang,
-    }:
-
+    { lib, stdenv, fetchurl, makeWrapper, autoPatchelfHook, clang }:
     let
       version = "2.0.25";
       releases = {
@@ -44,10 +36,8 @@ let
         inherit (release) sha256;
       };
 
-      nativeBuildInputs = [
-        makeWrapper
-      ]
-      ++ lib.optionals stdenv.hostPlatform.isLinux [ autoPatchelfHook ];
+      nativeBuildInputs = [ makeWrapper ]
+        ++ lib.optionals stdenv.hostPlatform.isLinux [ autoPatchelfHook ];
       buildInputs = lib.optionals stdenv.hostPlatform.isLinux [ stdenv.cc.cc.lib ];
       dontBuild = true;
       # Preserve the embedded Bun executable.
@@ -109,14 +99,7 @@ in
   builders.bend = pkgs: pkgs.callPackage recipe { };
   perSystem = { pkgs, ... }: { packages.bend = flake.config.builders.bend pkgs; };
 
-  modules.hjem.bend-implementation =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
-
+  modules.hjem.bend-implementation = { config, lib, pkgs, ... }:
     let
       cfg = config.programs.bend;
     in
@@ -136,9 +119,5 @@ in
       };
     };
 
-  modules.hjem.bend =
-    { ... }:
-    {
-      programs.bend.enable = true;
-    };
+  modules.hjem.bend = { ... }: { programs.bend.enable = true; };
 }

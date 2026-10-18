@@ -1,7 +1,6 @@
-{ inputs, ... }:
+{ ... }:
 {
-  modules.nixos.keyboard =
-    { config, lib, ... }:
+  modules.nixos.keyboard = { config, lib, ... }:
     lib.mkIf (config.networking.hostName == "Lukes-Um790") {
       # Apple Magic Keyboard: make media keys (brightness, volume, etc.) the default
       # behavior for the function row. Hold Fn for F1-F12.

@@ -1,17 +1,7 @@
 flake@{ inputs, ... }:
 let
   recipe =
-    {
-      lib,
-      buildNpmPackage,
-      fetchFromGitHub,
-      fd,
-      ripgrep,
-      nodejs,
-      poppler-utils,
-      makeWrapper,
-    }:
-
+    { lib, buildNpmPackage, fetchFromGitHub, fd, ripgrep, nodejs, poppler-utils, makeWrapper }:
     let
       # Vendored snapshots of the model catalog APIs consumed by packages/ai's
       # generate-models script. The script normally fetches these at build time,
@@ -137,13 +127,7 @@ in
   perSystem = { pkgs, ... }: { packages.pi = flake.config.builders.pi pkgs; };
 
   modules.hjem.pi-implementation =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
-
+    { config, lib, pkgs, ... }:
     let
       cfg = config.programs.pi;
       jsonFormat = pkgs.formats.json { };
@@ -160,41 +144,39 @@ in
 
       agentBrowser = flake.config.builders.agent_browser pkgs;
 
-      defaultSkills = lib.mapAttrs (name: _: skillsDir + "/${name}") (
-        lib.filterAttrs (_: type: type == "directory") (builtins.readDir skillsDir)
-      );
+      defaultSkills =
+        builtins.readDir skillsDir
+        |> lib.filterAttrs (_: type: type == "directory")
+        |> lib.mapAttrs (name: _: skillsDir + "/${name}");
 
-      defaultPrompts = lib.mapAttrs (name: _: promptsDir + "/${name}/PROMPT.md") (
-        lib.filterAttrs (_: type: type == "directory") (builtins.readDir promptsDir)
-      );
+      defaultPrompts =
+        builtins.readDir promptsDir
+        |> lib.filterAttrs (_: type: type == "directory")
+        |> lib.mapAttrs (name: _: promptsDir + "/${name}/PROMPT.md");
 
+      # Extension directories may ship a package.nix (packaged via callPackage) or
+      # a bare entrypoint (index.ts / index.js) used directly.
       defaultExtensions =
-        lib.mapAttrs
-          (
-            name: type:
-            let
-              extensionPath = extensionsDir + "/${name}";
-              packagePath = extensionPath + "/package.nix";
-            in
-            if type == "directory" && builtins.pathExists packagePath then
-              pkgs.callPackage packagePath { }
-            else
-              extensionPath
-          )
-          (
-            lib.filterAttrs (
-              name: type:
-              type == "regular"
-              || (
-                type == "directory"
-                && (
-                  builtins.pathExists (extensionsDir + "/${name}/package.nix")
-                  || builtins.pathExists (extensionsDir + "/${name}/index.ts")
-                  || builtins.pathExists (extensionsDir + "/${name}/index.js")
-                )
-              )
-            ) (builtins.readDir extensionsDir)
-          );
+        builtins.readDir extensionsDir
+        |> lib.filterAttrs (name: type:
+          type == "regular"
+          || (
+            type == "directory"
+            && (
+              builtins.pathExists (extensionsDir + "/${name}/package.nix")
+              || builtins.pathExists (extensionsDir + "/${name}/index.ts")
+              || builtins.pathExists (extensionsDir + "/${name}/index.js")
+            )
+          ))
+        |> lib.mapAttrs (name: type:
+          let
+            extensionPath = extensionsDir + "/${name}";
+            packagePath = extensionPath + "/package.nix";
+          in
+          if type == "directory" && builtins.pathExists packagePath then
+            pkgs.callPackage packagePath { }
+          else
+            extensionPath);
 
       mcpServers = sharedMcp.jsonFor "pi" // cfg.mcp.servers;
       mcpConfig = lib.optionalAttrs cfg.mcp.enable (
@@ -251,7 +233,6 @@ in
       typebox = cfg.package + "/lib/pi-mono/node_modules/typebox";
     in
     {
-
       options.programs.pi = {
         enable = lib.mkEnableOption "pi coding agent";
 
@@ -487,12 +468,7 @@ in
     };
 
   modules.hjem.pi =
-    {
-      config,
-      pkgs,
-      lib,
-      ...
-    }:
+    { config, pkgs, lib, ... }:
     {
       programs.pi = {
         enable = true;
@@ -598,7 +574,7 @@ in
                   "name": "Swift-1.5 27B Uncensored (Local NVFP4 DFlash2)",
                   "reasoning": true,
                   "input": ["text"],
-                  "contextWindow": 300000,
+                  "contextWindow": 262144,
                   "maxTokens": 32768,
                   "thinkingLevelMap": {
                     "minimal": null,

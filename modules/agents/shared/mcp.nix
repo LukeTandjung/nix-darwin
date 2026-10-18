@@ -5,22 +5,15 @@
     description = "Render the shared MCP catalogue into each harness format.";
   };
   config.agentSupport.renderMcp =
-    {
-      lib,
-      pkgs,
-      servers,
-    }:
-
+    { lib, pkgs, servers }:
     let
       forClient =
         client: lib.filterAttrs (_: server: server.enable && builtins.elem client server.clients) servers;
       packagesFor =
-        client:
-        lib.unique (
-          lib.filter (package: package != null) (
-            lib.mapAttrsToList (_: server: server.package) (forClient client)
-          )
-        );
+        client: forClient client
+        |> lib.mapAttrsToList (_: server: server.package)
+        |> lib.filter (package: package != null)
+        |> lib.unique;
       environmentReference = variable: "\${${variable}}";
       references = lib.mapAttrs (_: environmentReference);
       jsonServer =

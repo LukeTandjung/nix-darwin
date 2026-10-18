@@ -1,13 +1,7 @@
 flake@{ inputs, ... }:
 let
   recipe =
-    {
-      lib,
-      stdenv,
-      fetchurl,
-      nodejs,
-      makeWrapper,
-    }:
+    { lib, stdenv, fetchurl, nodejs, makeWrapper }:
 
     stdenv.mkDerivation {
       pname = "agent-browser";

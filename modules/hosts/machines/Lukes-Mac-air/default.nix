@@ -6,28 +6,20 @@ flake@{ inputs, ... }:
     desktop = flake.config.adapters.desktop.linux;
   };
 
-  modules.nixos.Lukes-Mac-air =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
+  modules.nixos.Lukes-Mac-air = { ... }: {
+    networking.hostName = "Lukes-Mac-air";
 
-    {
-      networking.hostName = "Lukes-Mac-air";
+    # System settings
+    time.timeZone = "Europe/London";
+    i18n.defaultLocale = "en_US.UTF-8";
 
-      # System settings
-      time.timeZone = "Europe/London";
-      i18n.defaultLocale = "en_US.UTF-8";
-
-      nixpkgs.config = {
-        allowUnfree = true;
-      };
-
-      system.copySystemConfiguration = false;
-      system.stateVersion = "25.11";
+    nixpkgs.config = {
+      allowUnfree = true;
     };
+
+    system.copySystemConfiguration = false;
+    system.stateVersion = "25.11";
+  };
 
   flake.nixosConfigurations.Lukes-Mac-air = flake.config.hosts.Lukes-Mac-air.adapter.build {
     name = "Lukes-Mac-air";

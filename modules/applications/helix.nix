@@ -2,12 +2,7 @@
 {
   # Theme mapping adapted from Tinted Theming (https://github.com/tinted-theming).
   modules.hjem.helix =
-    {
-      pkgs,
-      theme,
-      lib,
-      ...
-    }:
+    { pkgs, theme, lib, ... }:
     let
       colors = theme.colors;
     in {
@@ -138,18 +133,14 @@
               language-servers = [ "nixd" ];
               auto-format = true;
               formatter.command = lib.getExe pkgs.nixfmt;
-              file-types = [
-                "nix"
-              ];
+              file-types = [ "nix" ];
             }
             {
               name = "typst";
               language-servers = [ "tinymist" ];
               auto-format = true;
               formatter.command = "typstyle";
-              file-types = [
-                "typ"
-              ];
+              file-types = [ "typ" ];
             }
             {
               name = "typescript";
@@ -161,14 +152,9 @@
               auto-format = true;
               formatter = {
                 command = "${pkgs.prettier}/bin/prettier";
-                args = [
-                  "--parser"
-                  "typescript"
-                ];
+                args = [ "--parser" "typescript" ];
               };
-              file-types = [
-                "ts"
-              ];
+              file-types = [ "ts" ];
             }
             {
               name = "tsx";
@@ -180,30 +166,21 @@
               auto-format = true;
               formatter = {
                 command = "${pkgs.prettier}/bin/prettier";
-                args = [
-                  "--parser"
-                  "typescript"
-                ];
+                args = [ "--parser" "typescript" ];
               };
-              file-types = [
-                "tsx"
-              ];
+              file-types = [ "tsx" ];
             }
             {
               name = "rust";
               language-servers = [ "rust-analyzer" ];
               auto-format = false;
-              file-types = [
-                "rs"
-              ];
+              file-types = [ "rs" ];
             }
             {
               name = "python";
               language-servers = [ "ty" ];
               auto-format = true;
-              file-types = [
-                "py"
-              ];
+              file-types = [ "py" ];
             }
           ];
         };

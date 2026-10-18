@@ -1,24 +1,23 @@
 { inputs, ... }:
 let
   policies = {
-          AutofillAddressEnabled = true;
-          AutofillCreditCardEnabled = false;
-          DisableAppUpdate = true;
-          DisableFeedbackCommands = true;
-          DisableFirefoxStudies = true;
-          DisablePocket = true;
-          DisableTelemetry = true;
-          DontCheckDefaultBrowser = true;
-          NoDefaultBookmarks = true;
-          OfferToSaveLogins = false;
-          EnableTrackingProtection = {
-            Value = true;
-            Locked = true;
-            Cryptomining = true;
-            Fingerprinting = true;
-          };
-        };
-
+    AutofillAddressEnabled = true;
+    AutofillCreditCardEnabled = false;
+    DisableAppUpdate = true;
+    DisableFeedbackCommands = true;
+    DisableFirefoxStudies = true;
+    DisablePocket = true;
+    DisableTelemetry = true;
+    DontCheckDefaultBrowser = true;
+    NoDefaultBookmarks = true;
+    OfferToSaveLogins = false;
+    EnableTrackingProtection = {
+      Value = true;
+      Locked = true;
+      Cryptomining = true;
+      Fingerprinting = true;
+    };
+  };
 in
 {
   modules.hjem.zen-browser = { config, pkgs, lib, theme, ... }:
@@ -31,13 +30,20 @@ in
       unwrapped = (import (inputs.zen-browser + "/default.nix") {
         pkgs = inputs.nixpkgs.legacyPackages.${system};
       }).beta-unwrapped;
-      browser = if mac then unwrapped.overrideAttrs (old: {
-        # Only adjust the external launcher; keep the signed .app untouched.
-        postInstall = (old.postInstall or "") + ''
-          ${pkgs.gnused}/bin/sed -i 's|Applications/Home Manager Apps/|Applications/Nix User Apps/|g' "$out/bin/zen-beta"
-        '';
-      }) else (import (inputs.zen-browser + "/wrap-zen.nix") pkgs.wrapFirefox)
-        (unwrapped.override { inherit policies; }) { icon = "zen-browser"; };
+      # Bind the wrap function and the policy-applied package separately so the
+      # branch below stays a single-line application (Nix's multi-line app
+      # indentation rules make the inline form fragile to reformatting).
+      wrapFirefox = import (inputs.zen-browser + "/wrap-zen.nix") pkgs.wrapFirefox;
+      wrapped = unwrapped.override { inherit policies; };
+      browser =
+        if mac then
+          unwrapped.overrideAttrs (old: {
+            # Only adjust the external launcher; keep the signed .app untouched.
+            postInstall = (old.postInstall or "") + ''
+              ${pkgs.gnused}/bin/sed -i 's|Applications/Home Manager Apps/|Applications/Nix User Apps/|g' "$out/bin/zen-beta"
+            '';
+          })
+        else wrapFirefox wrapped { icon = "zen-browser"; };
       preferences = {
         "zen.view.window.scheme" = 0;
         "zen.welcome-screen.seen" = true;
@@ -56,7 +62,8 @@ in
         General = { StartWithLastProfile = 1; Version = 2; };
         Profile0 = { Default = 1; IsRelative = 1; Name = "luke"; Path = relativeProfile; };
       };
-    in {
+    in
+    {
       packages = [ browser ];
       files = {
         "${base}/profiles.ini".source = profiles;

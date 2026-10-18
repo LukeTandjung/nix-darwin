@@ -1,8 +1,6 @@
-{ inputs, ... }:
+{ ... }:
 {
-  modules.nixos.nvidia =
-    { config, pkgs, ... }:
-
+  modules.nixos.nvidia = { config, pkgs, ... }:
     let
       # Retain the pinned Blackwell stability patches used with the former AORUS
       # eGPU setup. The RTX 5090 is now connected directly to the motherboard.
@@ -24,41 +22,38 @@
         settingsSha256 = "sha256-mXnf3jyvznfB3OfKd657rxv0rYHQb/dX/Riw/+N9EKU=";
         persistencedSha256 = "sha256-Z/6IvEEa/XfZ5F5qoSIPvXJLGtscYVqjFxHZaN/M2Ts=";
 
-        patchesOpen =
-          (map injectorPatch [
-            "base/C1-kbuild-version-mk.patch"
-            "base/C2-aer-internal-unmask.patch"
-            "base/C3-gpu-lost-retry.patch"
-            "base/C4-err-handlers-scaffold.patch"
-            "base/E1-egpu-detection.patch"
-            "base/C5-crash-safety.patch"
-            "addon/A1-pcie-primitives.patch"
-            "addon/A2-bus-loss-watchdog.patch"
-            "addon/A3-recovery.patch"
-            "addon/A4-close-path-telemetry.patch"
-            "addon/A5-version-and-toggles.patch"
-          ])
-          ++ [
-            # A5 changes the kernel wrapper version, but NVIDIA's modeset core and
-            # userspace still use 595.71.05. nvkms_get_kapi_funcs rejects DRM's table
-            # when these strings differ. Keep every functional patch; undo only the
-            # version suffix so KAPI, userspace and firmware agree on the ABI version.
-            (pkgs.writeText "nvidia-aorus-display-version.patch" ''
-              --- a/version.mk
-              +++ b/version.mk
-              @@ -1,2 +1,2 @@
-              -NVIDIA_VERSION = 595.71.05-aorus.17
-              +NVIDIA_VERSION = 595.71.05
-               NVIDIA_NVID_VERSION = 595.71.05
-            '')
-          ];
+        patchesOpen = [
+          "base/C1-kbuild-version-mk.patch"
+          "base/C2-aer-internal-unmask.patch"
+          "base/C3-gpu-lost-retry.patch"
+          "base/C4-err-handlers-scaffold.patch"
+          "base/E1-egpu-detection.patch"
+          "base/C5-crash-safety.patch"
+          "addon/A1-pcie-primitives.patch"
+          "addon/A2-bus-loss-watchdog.patch"
+          "addon/A3-recovery.patch"
+          "addon/A4-close-path-telemetry.patch"
+          "addon/A5-version-and-toggles.patch"
+        ]
+        |> map injectorPatch
+        |> (l: l ++ [
+          # A5 changes the kernel wrapper version, but NVIDIA's modeset core and
+          # userspace still use 595.71.05. nvkms_get_kapi_funcs rejects DRM's table
+          # when these strings differ. Keep every functional patch; undo only the
+          # version suffix so KAPI, userspace and firmware agree on the ABI version.
+          (pkgs.writeText "nvidia-aorus-display-version.patch" ''
+            --- a/version.mk
+            +++ b/version.mk
+            @@ -1,2 +1,2 @@
+            -NVIDIA_VERSION = 595.71.05-aorus.17
+            +NVIDIA_VERSION = 595.71.05
+             NVIDIA_NVID_VERSION = 595.71.05
+          '')
+        ]);
       };
     in
     {
-      services.xserver.videoDrivers = [
-        "amdgpu"
-        "nvidia"
-      ];
+      services.xserver.videoDrivers = [ "amdgpu" "nvidia" ];
 
       hardware.graphics = {
         enable = true;
@@ -79,12 +74,7 @@
 
       # Load display drivers before userspace starts. No Thunderbolt authorization,
       # PCI rescan, bridge speed cap, or delayed module loading is needed internally.
-      boot.initrd.kernelModules = [
-        "amdgpu"
-        "nvidia"
-        "nvidia_modeset"
-        "nvidia_drm"
-      ];
+      boot.initrd.kernelModules = [ "amdgpu" "nvidia" "nvidia_modeset" "nvidia_drm" ];
       boot.kernelModules = [ "nvidia_uvm" ];
       boot.extraModprobeConfig = ''
         options nvidia NVreg_DynamicPowerManagement=0x00

@@ -1,10 +1,7 @@
 { inputs, ... }:
 {
   modules.darwin.homebrew =
-    {
-      config,
-      ...
-    }:
+    { config, ... }:
     {
       imports = [ inputs.nix-homebrew.darwinModules.nix-homebrew ];
 

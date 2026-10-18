@@ -1,15 +1,7 @@
 flake@{ inputs, ... }:
 let
   recipe =
-    {
-      lib,
-      stdenv,
-      buildNpmPackage,
-      fetchurl,
-      makeWrapper,
-      nodejs,
-      procps,
-    }:
+    { lib, stdenv, buildNpmPackage, fetchurl, makeWrapper, nodejs, procps }:
 
     buildNpmPackage {
       pname = "rea-agents";

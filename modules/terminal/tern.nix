@@ -1,36 +1,10 @@
 flake@{ inputs, ... }:
 let
   recipe =
-    {
-      lib,
-      stdenv,
-      requireFile,
-      makeWrapper,
-      patchelf,
-      binutils,
-      bashInteractive,
-      nushell,
-      vulkan-loader,
-      libglvnd,
-      wayland,
-      libxkbcommon,
-      libxcb,
-      glib,
-      gtk3,
-      webkitgtk_4_1,
-      libwpe,
-      libwpe-fdo,
-      pipewire,
-      zenity,
-      perf,
-      glib-networking,
-      gsettings-desktop-schemas,
-      gst_all_1,
-      undmg,
-      writeShellScript,
-      runCommand,
-    }:
-
+    { lib, stdenv, requireFile, makeWrapper, patchelf, binutils, bashInteractive, nushell,
+      vulkan-loader, libglvnd, wayland, libxkbcommon, libxcb, glib, gtk3, webkitgtk_4_1,
+      libwpe, libwpe-fdo, pipewire, zenity, perf, glib-networking, gsettings-desktop-schemas,
+      gst_all_1, undmg, writeShellScript, runCommand }:
     let
       version = "0.9.2";
 
@@ -207,14 +181,7 @@ in
   builders.tern = pkgs: pkgs.callPackage recipe { };
   perSystem = { pkgs, ... }: { packages.tern = flake.config.builders.tern pkgs; };
 
-  modules.hjem.tern-implementation =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
-
+  modules.hjem.tern-implementation = { config, lib, pkgs, ... }:
     let
       cfg = config.programs.tern;
     in
@@ -234,9 +201,5 @@ in
       };
     };
 
-  modules.hjem.tern =
-    { ... }:
-    {
-      programs.tern.enable = true;
-    };
+  modules.hjem.tern = { ... }: { programs.tern.enable = true; };
 }

@@ -1,10 +1,6 @@
 { inputs, ... }:
 {
-  modules.nixos.evince =
-    { pkgs, ... }:
-    {
-      environment.systemPackages = [
-        pkgs.evince
-      ];
-    };
+  modules.nixos.evince = { pkgs, ... }: {
+    environment.systemPackages = [ pkgs.evince ];
+  };
 }

@@ -8,14 +8,7 @@
     '';
   };
 
-  modules.hjem.git =
-    {
-      config,
-      lib,
-      pkgs,
-      osConfig,
-      ...
-    }:
+  modules.hjem.git = { config, lib, pkgs, osConfig, ... }:
     let
       uid = toString osConfig.users.users.${config.user}.uid;
       credential = "/run/user/${uid}/nix-github/token.conf";

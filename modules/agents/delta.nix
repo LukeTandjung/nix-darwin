@@ -1,13 +1,7 @@
 flake@{ inputs, ... }:
 {
   modules.hjem.delta-implementation =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
-
+    { config, lib, pkgs, ... }:
     let
       cfg = config.programs.zed-delta;
       sharedMcp = flake.config.agentSupport.renderMcp {
@@ -16,7 +10,6 @@ flake@{ inputs, ... }:
       };
     in
     {
-
       options.programs.zed-delta = {
         skills.enable = lib.mkEnableOption "shared personal skills for Delta, without installing the app";
         context.enable = lib.mkEnableOption "shared personal AGENTS.md instructions for Delta";
@@ -57,19 +50,15 @@ flake@{ inputs, ... }:
 
   modules.hjem.delta =
     { lib, pkgs, ... }:
-
     {
       programs.zed-delta.skills.enable = true;
       programs.zed-delta.context.enable = true;
 
       packages =
-        lib.optionals
-          (builtins.elem pkgs.stdenv.hostPlatform.system [
-            "x86_64-linux"
-            "aarch64-linux"
-          ])
-          [
-            inputs.delta.packages.${pkgs.stdenv.hostPlatform.system}.delta
-          ];
+        [ inputs.delta.packages.${pkgs.stdenv.hostPlatform.system}.delta ]
+        |> lib.optionals (builtins.elem pkgs.stdenv.hostPlatform.system [
+          "x86_64-linux"
+          "aarch64-linux"
+        ]);
     };
 }

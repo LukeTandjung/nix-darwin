@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ ... }:
 let
   ninferPackage =
     {
@@ -71,14 +71,7 @@ let
     };
 in
 {
-  modules.nixos.llm =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
-
+  modules.nixos.llm = { config, lib, pkgs, ... }:
     let
       ninfer = pkgs.callPackage ninferPackage { };
       # Exact artifact used by inference_stack's accepted dflash7-nvfp4 run.
@@ -142,7 +135,7 @@ in
             "${model}"
             "--host 127.0.0.1 --port 8080"
             "--model-id swift-1.5"
-            "--max-context 300000 --kv-capacity 300000"
+            "--max-context 262144 --kv-capacity 262144"
             "--max-concurrency 1 --max-pending-requests 1"
             "--prefill-chunk 1024 --kv-dtype nvfp4"
             "--host-context-mib 8192 --device-state-slots 0"

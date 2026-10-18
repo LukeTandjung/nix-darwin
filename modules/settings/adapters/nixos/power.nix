@@ -1,10 +1,8 @@
-{ inputs, ... }:
+{ ... }:
 {
-  modules.nixos.power =
-    { ... }:
-    {
-      services.upower = {
-        enable = true;
-      };
+  modules.nixos.power = { ... }: {
+    services.upower = {
+      enable = true;
     };
+  };
 }

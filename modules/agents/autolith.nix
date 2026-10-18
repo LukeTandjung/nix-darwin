@@ -1,11 +1,7 @@
 flake@{ inputs, ... }:
 let
   recipe =
-    {
-      pkgs,
-      autolithSource,
-    }:
-
+    { pkgs, autolithSource }:
     let
       upstreamPkgs = import autolithSource.inputs.nixpkgs {
         system = pkgs.stdenv.hostPlatform.system;
@@ -15,6 +11,7 @@ let
       pkgs = upstreamPkgs;
       src = autolithSource;
     };
+
   renderMcp =
     {
       lib,
@@ -23,7 +20,6 @@ let
       endpointEnvironmentVariable ? null,
       extraServers ? [ ],
     }:
-
     let
       approvalKeyword =
         approval:
@@ -34,7 +30,9 @@ let
           deny = ":deny";
         }
         .${approval};
+
       quoteTools = tools: lib.concatMapStringsSep " " (tool: "\"${tool}\"") tools;
+
       renderServer =
         {
           name,
@@ -62,9 +60,11 @@ let
            :approval ${approvalKeyword approval}${trustedTools}
            :child-tools (${quoteTools tools}))
         '';
+
       endpointEnvironment = lib.optionalString (
         endpointEnvironmentVariable != null
       ) "\n      :environment ((\"PADDLE_OCR_URL\" :environment \"${endpointEnvironmentVariable}\"))";
+
       servers = lib.optional (paddleOcrPackage != null) (renderServer {
         name = "paddle-ocr";
         command = "${paddleOcrPackage}/bin/autolith-paddle-ocr-mcp";
@@ -90,13 +90,7 @@ in
   perSystem = { pkgs, ... }: { packages.autolith = flake.config.builders.autolith pkgs; };
 
   modules.hjem.autolith-implementation =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
-
+    { config, lib, pkgs, ... }:
     let
       cfg = config.programs.autolith;
       sharedMcp = flake.config.agentSupport.renderMcp {
@@ -104,21 +98,20 @@ in
         servers = config.programs.agent-mcp.servers;
       };
       pathOrLines = lib.types.either lib.types.path lib.types.lines;
-      approvalType = lib.types.enum [
-        "prompt"
-        "read-only"
-        "allow"
-        "deny"
-      ];
+      approvalType = lib.types.enum [ "prompt" "read-only" "allow" "deny" ];
       skillsDir = ./shared/skills;
-      defaultSkills = lib.mapAttrs (name: _: skillsDir + "/${name}") (
-        lib.filterAttrs (_: type: type == "directory") (builtins.readDir skillsDir)
-      );
+
+      defaultSkills =
+        builtins.readDir skillsDir
+        |> lib.filterAttrs (_: type: type == "directory")
+        |> lib.mapAttrs (name: _: skillsDir + "/${name}");
+
       defaultPackage =
         if builtins.hasAttr pkgs.system inputs.autolith.packages then
           flake.config.builders.autolith pkgs
         else
           throw "Autolith does not provide a package for ${pkgs.system}";
+
       mcpEnabled = sharedMcp.forClient "autolith" != { };
       mcpConfig = renderMcp {
         inherit lib;
@@ -127,7 +120,6 @@ in
       fileValue = value: if builtins.isPath value then { source = value; } else { text = value; };
     in
     {
-
       options.programs.autolith = {
         enable = lib.mkEnableOption "Autolith";
 
@@ -193,7 +185,6 @@ in
             description = "Optional parent environment variable passed to the OCR server as PADDLE_OCR_URL.";
           };
         };
-
       };
 
       config = lib.mkIf cfg.enable {
@@ -259,9 +250,5 @@ in
       };
     };
 
-  modules.hjem.autolith =
-    { ... }:
-    {
-      programs.autolith.enable = true;
-    };
+  modules.hjem.autolith = { ... }: { programs.autolith.enable = true; };
 }

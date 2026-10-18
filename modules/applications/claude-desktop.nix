@@ -42,7 +42,6 @@ let
       xdg-utils,
       xorg,
     }:
-
     let
       sources = {
         x86_64-linux = {
@@ -189,12 +188,7 @@ in
   };
 
   modules.hjem.claude-desktop-implementation =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
+    { config, lib, pkgs, ... }:
 
     let
       cfg = config.programs.claude-desktop;

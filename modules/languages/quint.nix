@@ -1,13 +1,7 @@
 flake@{ ... }:
 let
   recipe =
-    {
-      lib,
-      buildNpmPackage,
-      makeWrapper,
-      nodejs,
-      temurin-jre-bin-17,
-    }:
+    { lib, buildNpmPackage, makeWrapper, nodejs, temurin-jre-bin-17 }:
     buildNpmPackage {
       pname = "quint-toolchain";
       version = "0.32.0";

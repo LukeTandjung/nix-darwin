@@ -1,13 +1,7 @@
 flake@{ inputs, ... }:
 {
   modules.hjem.agent-mcp-implementation =
-    {
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
-
+    { config, lib, pkgs, ... }:
     let
       inherit (lib) mkOption types;
       variableName = types.strMatching "[A-Za-z_][A-Za-z0-9_]*";
@@ -18,20 +12,8 @@ flake@{ inputs, ... }:
               default = true;
             };
             clients = mkOption {
-              type = types.listOf (
-                types.enum [
-                  "pi"
-                  "claude-code"
-                  "autolith"
-                  "delta"
-                ]
-              );
-              default = [
-                "pi"
-                "claude-code"
-                "autolith"
-                "delta"
-              ];
+              type = types.listOf (types.enum [ "pi" "claude-code" "autolith" "delta" ]);
+              default = [ "pi" "claude-code" "autolith" "delta" ];
               description = "Clients receiving this server or, for Delta, its CLI/setup guide.";
             };
             package = mkOption {
@@ -77,12 +59,7 @@ flake@{ inputs, ... }:
                 default = [ ];
               };
               approval = mkOption {
-                type = types.enum [
-                  "prompt"
-                  "read-only"
-                  "allow"
-                  "deny"
-                ];
+                type = types.enum [ "prompt" "read-only" "allow" "deny" ];
                 default = "prompt";
               };
               startupTimeoutSeconds = mkOption {
@@ -98,9 +75,11 @@ flake@{ inputs, ... }:
         }
       );
       enabled = lib.filterAttrs (_: server: server.enable) config.programs.agent-mcp.servers;
-      piNames = map (lib.replaceStrings [ "-" ] [ "_" ]) (
-        builtins.attrNames (lib.filterAttrs (_: server: builtins.elem "pi" server.clients) enabled)
-      );
+      piNames =
+        enabled
+        |> lib.filterAttrs (_: server: builtins.elem "pi" server.clients)
+        |> builtins.attrNames
+        |> map (lib.replaceStrings [ "-" ] [ "_" ]);
     in
     {
       options.programs.agent-mcp.servers = mkOption {
@@ -185,11 +164,7 @@ flake@{ inputs, ... }:
           url = "https://mcp.notion.com/mcp";
           # Autolith supports HTTP but has no MCP OAuth login flow. Delta requires
           # manual Settings → MCP registration; Pi and Claude handle their own OAuth.
-          clients = [
-            "pi"
-            "claude-code"
-            "delta"
-          ];
+          clients = [ "pi" "claude-code" "delta" ];
         };
       };
     };

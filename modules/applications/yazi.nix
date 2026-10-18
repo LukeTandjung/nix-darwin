@@ -4,13 +4,7 @@
   # Copyright (c) 2018-2023 bat-developers; original scheme attribution retained.
   # UI color mapping adapted from Stylix (MIT).
   modules.hjem.yazi =
-    {
-      config,
-      pkgs,
-      theme,
-      lib,
-      ...
-    }:
+    { config, pkgs, theme, lib, ... }:
     let
       colors = theme.colors;
       syntaxTheme = (pkgs.formats.plist { }).generate "kanagawa.tmTheme" {

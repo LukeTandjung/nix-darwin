@@ -1,12 +1,7 @@
 flake@{ inputs, ... }:
 let
   recipe =
-    {
-      lib,
-      stdenv,
-      fetchurl,
-    }:
-
+    { lib, stdenv, fetchurl }:
     let
       version = "2.1.302";
       baseUrl = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases";
@@ -80,14 +75,18 @@ in
         install -Dm644 ${manifest} $out/.claude-plugin/plugin.json
         install -Dm644 ${mcp} $out/.mcp.json
       '';
-      skills = lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./shared/skills);
-    in {
+      skills =
+        builtins.readDir ./shared/skills
+        |> lib.filterAttrs (_: type: type == "directory");
+    in
+    {
       options.programs.claude-code.enable = lib.mkEnableOption "Claude Code";
       config = lib.mkIf config.programs.claude-code.enable {
         packages = [
           (flake.config.builders.claude_code pkgs)
           (flake.config.builders.effect_solutions pkgs)
-        ] ++ sharedMcp.packagesFor "claude-code";
+        ]
+        ++ sharedMcp.packagesFor "claude-code";
         files = {
           ".claude/CLAUDE.md".source = ./pi/context/AGENTS.md;
           # Retain the old path to avoid leaving a duplicate personal plugin behind.
@@ -98,9 +97,5 @@ in
       };
     };
 
-  modules.hjem.claude-code =
-    { ... }:
-    {
-      programs.claude-code.enable = true;
-    };
+  modules.hjem.claude-code = { ... }: { programs.claude-code.enable = true; };
 }

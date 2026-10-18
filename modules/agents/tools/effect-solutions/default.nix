@@ -1,12 +1,7 @@
 flake@{ inputs, ... }:
 let
   recipe =
-    {
-      lib,
-      stdenv,
-      fetchurl,
-      autoPatchelfHook,
-    }:
+    { lib, stdenv, fetchurl, autoPatchelfHook }:
 
     let
       platform =

@@ -1,13 +1,7 @@
 flake@{ inputs, ... }:
 let
   recipe =
-    {
-      lib,
-      buildNpmPackage,
-      makeWrapper,
-      nodejs,
-      poppler-utils,
-    }:
+    { lib, buildNpmPackage, makeWrapper, nodejs, poppler-utils }:
 
     buildNpmPackage {
       pname = "autolith-paddle-ocr-mcp";

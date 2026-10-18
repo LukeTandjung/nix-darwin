@@ -14,10 +14,7 @@
         description = "Valent device integration service";
         wantedBy = [ "graphical-session.target" ];
         partOf = [ "graphical-session.target" ];
-        after = [
-          "graphical-session.target"
-          "set-SSH_AUTH_SOCK.service"
-        ];
+        after = [ "graphical-session.target" "set-SSH_AUTH_SOCK.service" ];
 
         serviceConfig = {
           ExecStart = "${lib.getExe pkgs.valent} --gapplication-service";
