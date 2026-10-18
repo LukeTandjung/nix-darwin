@@ -9,7 +9,12 @@
       # Application preferences are managed; the encrypted database stays writable.
       files.${path}.source = (pkgs.formats.ini { }).generate "keepassxc.ini" {
         SSHAgent.Enabled = true;
-        FdoSecrets.Enabled = linux;
+          # KeePassXC 2.7 keeps Secret Service access decisions only in memory,
+          # scoped to each DBus connection, so confirmations re-prompt on every
+          # client launch regardless of "Allow All & Future". Skip them and
+          # scope exposure in the database settings instead.
+          FdoSecrets.Enabled = linux;
+          FdoSecrets.ConfirmAccessItem = false;
         Browser.UpdateBinaryPath = false;
         GUI = { MinimizeOnClose = true; MinimizeToTray = true; ShowTrayIcon = true; };
       };
