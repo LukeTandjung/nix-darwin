@@ -16,6 +16,7 @@
         # scope exposure in the database settings instead.
         FdoSecrets.Enabled = linux;
         FdoSecrets.ConfirmAccessItem = false;
+        Browser.Enabled = true;
         Browser.UpdateBinaryPath = false;
         GUI = { MinimizeOnClose = true; MinimizeToTray = true; ShowTrayIcon = true; };
       };

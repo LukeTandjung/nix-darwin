@@ -1,6 +1,16 @@
 { lib, ... }:
 let
   schemeAuthor = "Tommaso Laurenzi (https://github.com/rebelot)";
+  # Upstream Plex archives include AppleDouble resource-fork sidecars named
+  # ._*.ttf. They are not fonts; fontdb warns when scanning them. Remove only
+  # their links from the joined package, leaving the actual font faces intact.
+  cleanPlex = _final: prev: {
+    ibm-plex = prev.ibm-plex.overrideAttrs (old: {
+      buildCommand = old.buildCommand + ''
+        find "$out" -name '._*' -delete
+      '';
+    });
+  };
   darkPalette = {
     base00 = "1F1F28"; base01 = "16161D"; base02 = "223249"; base03 = "54546D";
     base04 = "727169"; base05 = "DCD7BA"; base06 = "C8C093"; base07 = "717C7C";
@@ -82,6 +92,7 @@ in
   };
 
   config.modules.nixos.theme = { pkgs, ... }: {
+    nixpkgs.overlays = [ cleanPlex ];
     console.colors = terminalColors;
     fonts = {
       packages = (forPkgs pkgs).fontPackages;
@@ -100,6 +111,7 @@ in
   };
 
   config.modules.darwin.theme = { pkgs, ... }: {
+    nixpkgs.overlays = [ cleanPlex ];
     fonts.packages = (forPkgs pkgs).fontPackages;
     services.jankyborders = {
       active_color = "0xff${palette.base0D}";

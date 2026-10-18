@@ -145,7 +145,7 @@
 
 
       extraConfig = ''
-        local terminal = "kitty"
+        local terminal = "tern"
         local fileManager = "nautilus"
         local menu = "dms ipc call spotlight toggle"
         local mainMod = "${mainMod}"

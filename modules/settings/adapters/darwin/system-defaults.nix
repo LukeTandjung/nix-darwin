@@ -29,7 +29,7 @@
         persistent-apps = [
           { app = "/Users/luketandjung/Applications/Nix User Apps/kitty.app"; }
           { app = "/Applications/Wallper.app"; }
-          { app = "/Users/luketandjung/Applications/Nix User Apps/Zen Browser (Beta).app"; }
+          { app = "/Users/luketandjung/Applications/Nix User Apps/Helium.app"; }
           { app = "/Applications/1Password.app"; }
         ];
       };

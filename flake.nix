@@ -29,9 +29,12 @@
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    zen-browser = {
-      url = "github:0xc000022070/zen-browser-flake/812a7ed1e6aa4ad468b4f9fd0d2bf908d52cf102";
-      # Consume its package recipes, not its Home Manager modules or test input.
+    helium = {
+      url = "github:amaanq/helium-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    ublock = {
+      url = "github:imputnet/uBlock";
       flake = false;
     };
     codex-desktop-linux = {

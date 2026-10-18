@@ -106,11 +106,11 @@
               "workspace 5"
             ];
 
-            # Open kitty (cmd + q)
-            cmd-q = "exec-and-forget open -na kitty";
+            # Open Tern (cmd + q)
+            cmd-q = "exec-and-forget open -na Tern";
 
-            # Open kitty with yazi (cmd + e)
-            cmd-e = "exec-and-forget open -na kitty --args zsh -lc yazi";
+            # Open Tern with yazi (cmd + e)
+            cmd-e = "exec-and-forget open -na Tern --args -e ${lib.getExe pkgs.zsh} -lc yazi";
 
             # Close focused window and quit its app instance when it is the last window
             cmd-x = "close --quit-if-last-window";

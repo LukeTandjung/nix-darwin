@@ -18,13 +18,14 @@
     spicetify
     vesktop
     zed-editor
-    zen-browser
+    helium-browser
     zsh
     yazi
     git
   ];
   modules.nixos.default.imports = with config.modules.nixos; [
     chatgpt
+    helium-browser
     git
     typst
     rust
