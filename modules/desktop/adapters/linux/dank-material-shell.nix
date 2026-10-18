@@ -123,13 +123,13 @@
           };
           session = {
             configVersion = 6;
-            isLightMode = true;
+            isLightMode = false;
             wallpaperCyclingEnabled = true;
             wallpaperCyclingInterval = 1800;
             nightModeEnabled = true;
             nightModeAutoEnabled = true;
             nightModeStartHour = 21;
-            themeModeAutoEnabled = true;
+            themeModeAutoEnabled = false;
             themeModeStartHour = 22;
             weatherLocation = "London, UK";
             weatherCoordinates = "51.5074,-0.1278";

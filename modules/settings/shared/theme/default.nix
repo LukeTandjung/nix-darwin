@@ -164,7 +164,7 @@ in
         };
       activationScripts = lib.optionalAttrs linux {
         gtk-settings = {
-          "org/gnome/desktop/interface/color-scheme" = "default";
+          "org/gnome/desktop/interface/color-scheme" = "prefer-dark";
           "org/gnome/desktop/interface/gtk-theme" = "adw-gtk3";
           "org/gnome/desktop/interface/font-name" = "${theme.font} ${toString theme.fontSize}";
           "org/gnome/desktop/interface/document-font-name" = "${theme.font} 11";

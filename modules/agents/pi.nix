@@ -498,6 +498,7 @@ in
             "${config.directory}/.pi/npm-global"
           ];
           packages = [
+            "git:github.com/lukeramsden/pi-prewalk@v1.1.1"
             "npm:@hicaru/pi-rlm"
             "npm:pi-docparser"
             "npm:pi-autoresearch"
@@ -533,6 +534,40 @@ in
       files.".pi/agent/models.json".text = ''
         {
           "providers": {
+            "supernova": {
+              "name": "Supernova",
+              "baseUrl": "https://api.supernova-labs.ai/glm/v1",
+              "api": "openai-completions",
+              "apiKey": "$SUPERNOVA_API_KEY",
+              "models": [
+                {
+                  "id": "glm-5.3",
+                  "name": "Supernova GLM-5.3",
+                  "reasoning": true,
+                  "input": ["text"],
+                  "contextWindow": 1000000,
+                  "cost": {
+                    "input": 0.63,
+                    "output": 1.98,
+                    "cacheRead": 0.117,
+                    "cacheWrite": 0.63
+                  }
+                },
+                {
+                  "id": "glm-5.3-fast",
+                  "name": "Supernova GLM-5.3 Fast",
+                  "reasoning": true,
+                  "input": ["text"],
+                  "contextWindow": 1000000,
+                  "cost": {
+                    "input": 2.80,
+                    "output": 8.80,
+                    "cacheRead": 0.52,
+                    "cacheWrite": 2.80
+                  }
+                }
+              ]
+            },
             "local-ninfer": {
               "baseUrl": "http://127.0.0.1:8080/v1",
               "api": "openai-completions",

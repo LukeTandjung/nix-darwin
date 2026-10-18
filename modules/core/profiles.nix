@@ -22,7 +22,6 @@
     zsh
     yazi
     git
-    lazygit
   ];
   modules.nixos.default.imports = with config.modules.nixos; [
     chatgpt

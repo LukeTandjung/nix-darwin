@@ -1,5 +1,14 @@
 (in-package #:autolith)
 
+;; Authenticate with `autolith auth supernova`; keys stay in its private store.
+;; API/model metadata: https://supernova-labs.ai/developers/
+(register-openai-compatible-provider
+ :name "supernova"
+ :description "Supernova GLM-5.3 and GLM-5.3 Fast"
+ :endpoint "https://api.supernova-labs.ai/glm/v1/chat/completions"
+ :models '((:name "glm-5.3" :context-window 1000000)
+           (:name "glm-5.3-fast" :context-window 1000000)))
+
 ;; Autolith 0.63.0 rejects Home Manager skill links into /nix/store.
 ;; Remove this override when upstream supports these user-installed links.
 (defun skill-catalog-for-configuration (configuration)

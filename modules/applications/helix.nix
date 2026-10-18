@@ -217,12 +217,6 @@
               ":open %sh{sudo cat /tmp/unique-file}"
               ":redraw"
             ];
-            "C-g" = [
-              ":new"
-              ":insert-output lazygit"
-              ":buffer-close!"
-              ":redraw"
-            ];
           };
         };
       };

@@ -139,7 +139,10 @@ in
 
         init = lib.mkOption {
           type = lib.types.nullOr pathOrLines;
-          default = ./autolith/init.lisp;
+          default = lib.concatMapStringsSep "\n" builtins.readFile [
+            ./autolith/init.lisp
+            ./autolith/prewalk.lisp
+          ];
           description = "Global executable Autolith initialization source.";
         };
 
