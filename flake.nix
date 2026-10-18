@@ -38,7 +38,7 @@
       url = "github:ilysenko/codex-desktop-linux";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    spicetify-nix.url = {
+    spicetify-nix = {
       url = "github:Gerg-L/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -79,7 +79,8 @@
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       # Every Nix file in modules/ is a top-level feature module. Importing a
       # feature registers it; core/profiles.nix selects the enabled features.
-      imports = ./modules
+      imports =
+        ./modules
         |> inputs.nixpkgs.lib.filesystem.listFilesRecursive
         |> builtins.filter (path: inputs.nixpkgs.lib.hasSuffix ".nix" (toString path));
       systems = [
