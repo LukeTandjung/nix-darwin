@@ -28,6 +28,9 @@ let
         '';
       };
     in {
+      # Keep app-only packages in the user profile so Hjem's app linker can find them.
+      environment.pathsToLink = lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ "/Applications" ];
+
       hjem = {
         users.${username}.imports = [ flake.config.modules.hjem.default ];
         specialArgs.theme = flake.config.styling.forPkgs pkgs;

@@ -9,6 +9,12 @@ flake@{ ... }:
   modules.darwin.Lukes-MacBook-Pro = { pkgs, ... }: {
     system.primaryUser = "luketandjung";
 
+    hjem.users.luketandjung = { options, ... }: {
+      programs.pi.extensions = builtins.removeAttrs options.programs.pi.extensions.default [
+        "prewalk"
+      ];
+    };
+
     users.users.luketandjung = {
       name = "luketandjung";
       home = "/Users/luketandjung";
