@@ -152,7 +152,7 @@
           on-focus-changed = [ "exec-and-forget ${focusMode}" ];
           mode.main.binding = desktopBindings;
           mode.tern.binding = (builtins.removeAttrs desktopBindings [
-            "cmd-q" "cmd-r" "cmd-e"
+            "cmd-q" "cmd-r" "cmd-e" "cmd-x"
             "cmd-left" "cmd-right" "cmd-up" "cmd-down"
             "cmd-shift-left" "cmd-shift-right" "cmd-shift-up" "cmd-shift-down"
             "cmd-1" "cmd-2" "cmd-3" "cmd-4" "cmd-5"
@@ -160,6 +160,8 @@
             "cmd-shift-1" "cmd-shift-2" "cmd-shift-3" "cmd-shift-4" "cmd-shift-5"
             "cmd-shift-6" "cmd-shift-7" "cmd-shift-8" "cmd-shift-9" "cmd-shift-0"
           ]) // {
+            # Only Tern mode reserves Shift+X for closing the entire window.
+            cmd-shift-x = "exec-and-forget ${closeWindow}";
             # Tern search replaces the desktop's Raycast launcher.
             cmd-r = "exec-and-forget ${ternSearch}";
           };

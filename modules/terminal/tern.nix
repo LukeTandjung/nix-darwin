@@ -349,6 +349,8 @@ in
           # The desktop's Tern mode releases these chords to the application.
           # Tern maps cmd to Super on Linux and Command on macOS.
           keybinds = {
+            # Close the focused block, or its tab when it is the last block.
+            "${desktopMod}+x" = "close_pane";
             "${desktopMod}+q" = "new_shell_block";
             "${desktopMod}+r" = "palette";
             "${desktopMod}+e" = "focus_files";

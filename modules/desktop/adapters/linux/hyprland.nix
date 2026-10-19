@@ -273,12 +273,13 @@
         bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
 
         local ternKeys = {}
-        for _, key in ipairs({ "Q", "R", "E", "left", "right", "up", "down", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" }) do
+        for _, key in ipairs({ "Q", "R", "E", "X", "left", "right", "up", "down", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" }) do
           ternKeys[mainMod .. " + " .. key] = true
         end
 
         local function isTern(window)
-          local class = window and string.lower(window.class) or ""
+          -- Empty workspaces can report a window without a class.
+          local class = string.lower((window and window.class) or "")
           return class == "tern" or class == "so.stencil.tern"
         end
 
@@ -310,6 +311,7 @@
         registerBindings(false)
         hl.define_submap("tern", function()
           registerBindings(true)
+          hl.bind(mainMod .. " + SHIFT + X", hl.dsp.window.close())
         end)
         hl.on("window.active", function(window)
           setTernMode(isTern(window))
