@@ -187,84 +187,135 @@
           hl.exec_cmd("dms run &")
         end)
 
-        hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
-        hl.bind(mainMod .. " + X", hl.dsp.window.close())
-        hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
-        hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-        hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen(0))
-        hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
-        hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))
+        -- Register both profiles from one binding list; only Tern's chords differ.
+        local desktopBindings = {}
+        local function bind(keys, dispatcher, options)
+          table.insert(desktopBindings, { keys = keys, dispatcher = dispatcher, options = options })
+        end
+
+        bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
+        bind(mainMod .. " + X", hl.dsp.window.close())
+        bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
+        bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
+        bind(mainMod .. " + F", hl.dsp.window.fullscreen(0))
+        bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
+        bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))
 
         -- DankMaterialShell specific binds
-        hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("dms ipc call clipboard toggle"))
-        hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("dms ipc call notifications toggle"))
-        hl.bind(mainMod .. " + comma", hl.dsp.exec_cmd("dms ipc call settings toggle"))
-        hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("dms ipc call notepad toggle"))
-        hl.bind(mainMod .. " + L", hl.dsp.exec_cmd(lockCommand))
-        hl.bind(mainMod .. " + XF86PowerOff", hl.dsp.exec_cmd("dms ipc call powermenu toggle"))
-        hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("dms ipc call dankdash wallpaper"))
-        hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd("dms ipc call hypr toggleOverview"))
+        bind(mainMod .. " + C", hl.dsp.exec_cmd("dms ipc call clipboard toggle"))
+        bind(mainMod .. " + N", hl.dsp.exec_cmd("dms ipc call notifications toggle"))
+        bind(mainMod .. " + comma", hl.dsp.exec_cmd("dms ipc call settings toggle"))
+        bind(mainMod .. " + M", hl.dsp.exec_cmd("dms ipc call notepad toggle"))
+        bind(mainMod .. " + L", hl.dsp.exec_cmd(lockCommand))
+        bind(mainMod .. " + XF86PowerOff", hl.dsp.exec_cmd("dms ipc call powermenu toggle"))
+        bind(mainMod .. " + W", hl.dsp.exec_cmd("dms ipc call dankdash wallpaper"))
+        bind(mainMod .. " + TAB", hl.dsp.exec_cmd("dms ipc call hypr toggleOverview"))
 
         -- Focus movement
-        hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
-        hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
-        hl.bind(mainMod .. " + up", hl.dsp.focus({ direction = "up" }))
-        hl.bind(mainMod .. " + down", hl.dsp.focus({ direction = "down" }))
+        bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
+        bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
+        bind(mainMod .. " + up", hl.dsp.focus({ direction = "up" }))
+        bind(mainMod .. " + down", hl.dsp.focus({ direction = "down" }))
 
         -- Move active window within workspace
-        hl.bind(mainMod .. " + SHIFT + left", hl.dsp.window.move({ direction = "left" }))
-        hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" }))
-        hl.bind(mainMod .. " + SHIFT + up", hl.dsp.window.move({ direction = "up" }))
-        hl.bind(mainMod .. " + SHIFT + down", hl.dsp.window.move({ direction = "down" }))
+        bind(mainMod .. " + SHIFT + left", hl.dsp.window.move({ direction = "left" }))
+        bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" }))
+        bind(mainMod .. " + SHIFT + up", hl.dsp.window.move({ direction = "up" }))
+        bind(mainMod .. " + SHIFT + down", hl.dsp.window.move({ direction = "down" }))
 
         -- Workspaces 1-5
         for i = 1, 5 do
           local key = tostring(i)
-          hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i }))
-          hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
+          bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i }))
+          bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
         end
 
         -- Special workspace
-        hl.bind(mainMod .. " + S", hl.dsp.workspace.toggle_special("magic"))
-        hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
+        bind(mainMod .. " + S", hl.dsp.workspace.toggle_special("magic"))
+        bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 
         -- Scroll through workspaces
-        hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-        hl.bind(mainMod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
+        bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
+        bind(mainMod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
 
         -- Screenshot settings
-        hl.bind(mainMod .. " + PRINT", hl.dsp.exec_cmd("hyprshot -m window"))
-        hl.bind("PRINT", hl.dsp.exec_cmd("hyprshot -m output"))
-        hl.bind(mainMod .. " + SHIFT + PRINT", hl.dsp.exec_cmd("hyprshot -m region"))
+        bind(mainMod .. " + PRINT", hl.dsp.exec_cmd("hyprshot -m window"))
+        bind("PRINT", hl.dsp.exec_cmd("hyprshot -m output"))
+        bind(mainMod .. " + SHIFT + PRINT", hl.dsp.exec_cmd("hyprshot -m region"))
 
         ${lib.optionalString isUm790 ''
           -- Apple Magic Keyboard special keys (Um790 only)
-          hl.bind("XF86Search", hl.dsp.exec_cmd("dms ipc call spotlight toggle"))
+          bind("XF86Search", hl.dsp.exec_cmd("dms ipc call spotlight toggle"))
           -- Apple Magic Keyboard lock emits XF86ScreenSaver, but it can arrive as
           -- a release-only / modifier-tainted event, so match it more loosely than
           -- normal letter binds.
-          hl.bind("XF86ScreenSaver", hl.dsp.exec_cmd(lockCommand), { locked = true, release = true, ignore_mods = true })
-          hl.bind(mainMod .. " + XF86LaunchA", hl.dsp.exec_cmd("hyprshot -m window"))
-          hl.bind("XF86LaunchA", hl.dsp.exec_cmd("hyprshot -m output"))
-          hl.bind(mainMod .. " + SHIFT + XF86LaunchA", hl.dsp.exec_cmd("hyprshot -m region"))
+          bind("XF86ScreenSaver", hl.dsp.exec_cmd(lockCommand), { locked = true, release = true, ignore_mods = true })
+          bind(mainMod .. " + XF86LaunchA", hl.dsp.exec_cmd("hyprshot -m window"))
+          bind("XF86LaunchA", hl.dsp.exec_cmd("hyprshot -m output"))
+          bind(mainMod .. " + SHIFT + XF86LaunchA", hl.dsp.exec_cmd("hyprshot -m region"))
         ''}
 
         -- Mouse binds
-        hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
-        hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
+        bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
+        bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
         -- Media and brightness keys
-        hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("dms ipc call audio increment 5"), { locked = true, repeating = true })
-        hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("dms ipc call audio decrement 5"), { locked = true, repeating = true })
-        hl.bind("XF86AudioMute", hl.dsp.exec_cmd("dms ipc call audio mute"), { locked = true })
-        hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("dms ipc call audio micmute"), { locked = true })
-        hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("dms ipc call brightness increment 5${brightnessDevice}"), { locked = true, repeating = true })
-        hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("dms ipc call brightness decrement 5${brightnessDevice}"), { locked = true, repeating = true })
+        bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("dms ipc call audio increment 5"), { locked = true, repeating = true })
+        bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("dms ipc call audio decrement 5"), { locked = true, repeating = true })
+        bind("XF86AudioMute", hl.dsp.exec_cmd("dms ipc call audio mute"), { locked = true })
+        bind("XF86AudioMicMute", hl.dsp.exec_cmd("dms ipc call audio micmute"), { locked = true })
+        bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("dms ipc call brightness increment 5${brightnessDevice}"), { locked = true, repeating = true })
+        bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("dms ipc call brightness decrement 5${brightnessDevice}"), { locked = true, repeating = true })
 
-        hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
-        hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-        hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-        hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
+        bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
+        bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+        bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+        bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
+
+        local ternKeys = {}
+        for _, key in ipairs({ "Q", "R", "E", "left", "right", "up", "down", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" }) do
+          ternKeys[mainMod .. " + " .. key] = true
+        end
+
+        local function isTern(window)
+          local class = window and string.lower(window.class) or ""
+          return class == "tern" or class == "so.stencil.tern"
+        end
+
+        for _, direction in ipairs({ "left", "right", "up", "down" }) do
+          ternKeys[mainMod .. " + SHIFT + " .. direction] = true
+        end
+
+        for number = 0, 9 do
+          ternKeys[mainMod .. " + SHIFT + " .. tostring(number)] = true
+        end
+
+        local ternMode = false
+        local function setTernMode(enabled)
+          ternMode = enabled
+          hl.dispatch(hl.dsp.submap(enabled and "tern" or "reset"))
+        end
+
+        local function registerBindings(inTern)
+          for _, binding in ipairs(desktopBindings) do
+            if not inTern or not ternKeys[binding.keys] then
+              hl.bind(binding.keys, binding.dispatcher, binding.options)
+            end
+          end
+          hl.bind(mainMod .. " + SHIFT + Escape", function()
+            setTernMode(not ternMode and isTern(hl.get_active_window()))
+          end)
+        end
+
+        registerBindings(false)
+        hl.define_submap("tern", function()
+          registerBindings(true)
+        end)
+        hl.on("window.active", function(window)
+          setTernMode(isTern(window))
+        end)
+        -- Reconcile an already-focused Tern after a config reload too.
+        setTernMode(isTern(hl.get_active_window()))
 
         -- Window and workspace rules
         hl.window_rule({

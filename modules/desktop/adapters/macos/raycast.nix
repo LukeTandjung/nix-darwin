@@ -4,7 +4,11 @@
     let
       enable = false;
     in
-    lib.mkIf enable {
-      environment.systemPackages = [ pkgs.raycast ];
+    {
+      environment.systemPackages = lib.optionals enable [ pkgs.raycast ];
+      # AeroSpace routes Cmd-R by focused app; Raycast must not also grab it.
+      system.defaults.CustomUserPreferences."com.raycast.macos" = {
+        raycastGlobalHotkey = "";
+      };
     };
 }

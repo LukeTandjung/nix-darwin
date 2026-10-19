@@ -4,9 +4,97 @@
     {
       pkgs,
       lib,
+      config,
       ...
     }:
-    lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+    let
+      aerospace = lib.getExe pkgs.aerospace;
+      focusMode = pkgs.writeShellScript "aerospace-focus-mode" ''
+        set -eu
+        app="$(${aerospace} list-windows --focused --format '%{app-bundle-id}')"
+        mode=main
+        if [ "$app" = so.stencil.tern ]; then
+          mode=tern
+          if [ "''${1:-}" = toggle ] && [ "$(${aerospace} list-modes --current)" = tern ]; then
+            mode=main
+          fi
+        fi
+        ${aerospace} mode "$mode"
+      '';
+      ternSearch = pkgs.writeShellScript "tern-search" ''
+        # ctl needs the daemon endpoint when invoked outside a Tern shell.
+        export TERN_PANE_SOCKET="$HOME/Library/Application Support/Tern/daemon.sock"
+        exec ${lib.getExe config.programs.tern.package} ctl plugins run palette
+      '';
+      closeWindow = pkgs.writeShellScript "aerospace-close-window" ''
+        set -eu
+        app="$(${aerospace} list-windows --focused --format '%{app-bundle-id}')"
+        if [ "$app" = org.keepassxc.keepassxc ]; then
+          ${aerospace} close
+        else
+          ${aerospace} close --quit-if-last-window
+        fi
+      '';
+      desktopBindings = {
+        # Window focus (cmd + arrow)
+        cmd-left = "focus left";
+        cmd-down = "focus down";
+        cmd-up = "focus up";
+        cmd-right = "focus right";
+
+        # Window move/warp (cmd + shift + arrow)
+        cmd-shift-left = "move left";
+        cmd-shift-down = "move down";
+        cmd-shift-up = "move up";
+        cmd-shift-right = "move right";
+
+        # Resize (cmd + minus/equal)
+        cmd-minus = "resize smart -50";
+        cmd-equal = "resize smart +50";
+
+        # Workspace focus (cmd + 1-5)
+        cmd-1 = "workspace 1";
+        cmd-2 = "workspace 2";
+        cmd-3 = "workspace 3";
+        cmd-4 = "workspace 4";
+        cmd-5 = "workspace 5";
+
+        # Move window to workspace + focus (cmd + shift + 1-5)
+        cmd-shift-1 = [
+          "move-node-to-workspace 1"
+          "workspace 1"
+        ];
+        cmd-shift-2 = [
+          "move-node-to-workspace 2"
+          "workspace 2"
+        ];
+        cmd-shift-3 = [
+          "move-node-to-workspace 3"
+          "workspace 3"
+        ];
+        cmd-shift-4 = [
+          "move-node-to-workspace 4"
+          "workspace 4"
+        ];
+        cmd-shift-5 = [
+          "move-node-to-workspace 5"
+          "workspace 5"
+        ];
+
+        # Open Tern (cmd + q)
+        cmd-q = "exec-and-forget open -a Tern";
+
+        # AeroSpace owns the launcher shortcut so Tern can override it.
+        cmd-r = "exec-and-forget open -a Raycast";
+
+        # Open Tern with yazi (cmd + e)
+        cmd-e = "exec-and-forget open -na Tern --args -e ${lib.getExe pkgs.zsh} -lc yazi";
+
+        # Keep KeePassXC alive; preserve quit-on-last-window for other apps.
+        cmd-x = "exec-and-forget ${closeWindow}";
+        cmd-shift-esc = "exec-and-forget ${focusMode} toggle";
+      };
+    in lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
       packages = [ pkgs.aerospace ];
       files = {
         ".aerospace.toml".source = (pkgs.formats.toml { }).generate "aerospace.toml" {
@@ -60,60 +148,20 @@
             "5"
           ];
 
-          mode.main.binding = {
-            # Window focus (cmd + arrow)
-            cmd-left = "focus left";
-            cmd-down = "focus down";
-            cmd-up = "focus up";
-            cmd-right = "focus right";
-
-            # Window move/warp (cmd + shift + arrow)
-            cmd-shift-left = "move left";
-            cmd-shift-down = "move down";
-            cmd-shift-up = "move up";
-            cmd-shift-right = "move right";
-
-            # Resize (cmd + minus/equal)
-            cmd-minus = "resize smart -50";
-            cmd-equal = "resize smart +50";
-
-            # Workspace focus (cmd + 1-5)
-            cmd-1 = "workspace 1";
-            cmd-2 = "workspace 2";
-            cmd-3 = "workspace 3";
-            cmd-4 = "workspace 4";
-            cmd-5 = "workspace 5";
-
-            # Move window to workspace + focus (cmd + shift + 1-5)
-            cmd-shift-1 = [
-              "move-node-to-workspace 1"
-              "workspace 1"
-            ];
-            cmd-shift-2 = [
-              "move-node-to-workspace 2"
-              "workspace 2"
-            ];
-            cmd-shift-3 = [
-              "move-node-to-workspace 3"
-              "workspace 3"
-            ];
-            cmd-shift-4 = [
-              "move-node-to-workspace 4"
-              "workspace 4"
-            ];
-            cmd-shift-5 = [
-              "move-node-to-workspace 5"
-              "workspace 5"
-            ];
-
-            # Open Tern (cmd + q)
-            cmd-q = "exec-and-forget open -na Tern";
-
-            # Open Tern with yazi (cmd + e)
-            cmd-e = "exec-and-forget open -na Tern --args -e ${lib.getExe pkgs.zsh} -lc yazi";
-
-            # Close focused window and quit its app instance when it is the last window
-            cmd-x = "close --quit-if-last-window";
+          after-startup-command = [ "exec-and-forget ${focusMode}" ];
+          on-focus-changed = [ "exec-and-forget ${focusMode}" ];
+          mode.main.binding = desktopBindings;
+          mode.tern.binding = (builtins.removeAttrs desktopBindings [
+            "cmd-q" "cmd-r" "cmd-e"
+            "cmd-left" "cmd-right" "cmd-up" "cmd-down"
+            "cmd-shift-left" "cmd-shift-right" "cmd-shift-up" "cmd-shift-down"
+            "cmd-1" "cmd-2" "cmd-3" "cmd-4" "cmd-5"
+            "cmd-6" "cmd-7" "cmd-8" "cmd-9" "cmd-0"
+            "cmd-shift-1" "cmd-shift-2" "cmd-shift-3" "cmd-shift-4" "cmd-shift-5"
+            "cmd-shift-6" "cmd-shift-7" "cmd-shift-8" "cmd-shift-9" "cmd-shift-0"
+          ]) // {
+            # Tern search replaces the desktop's Raycast launcher.
+            cmd-r = "exec-and-forget ${ternSearch}";
           };
         };
       };

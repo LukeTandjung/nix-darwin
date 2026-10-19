@@ -198,11 +198,47 @@ in
         files."${configDir}/settings.json".text = builtins.toJSON cfg.settings;
         # Tern watches this directory even before any plugins are installed.
         files."${configDir}/plugins/.keep".text = "";
+        files."${configDir}/plugins/desktop-shortcuts/plugin.toml".text = ''
+          schema = 1
+          id = "desktop-shortcuts"
+          name = "Desktop shortcuts"
+          version = "0.1.0"
+          window = "window.luau"
+        '';
+        files."${configDir}/plugins/desktop-shortcuts/window.luau".text = ''
+          -- Checked against the types exported by Tern 0.9.2.
+          for number = 1, 10 do
+            local position = tostring(number)
+            tern.command({
+              id = "move-to-tab-" .. position,
+              title = "Move block to tab " .. position,
+              run = function(cx)
+                local pane = cx.session:focused()
+                if pane == nil then return end
+                local tab = cx.session:find_tab(position)
+                if tab == nil then
+                  local created, err = cx.layout:move_to_new_tab(pane, nil, { focus = true })
+                  if created == nil then
+                    cx:toast("error", err or "Could not move block to a new tab")
+                  end
+                  return
+                end
+                if cx.session:tab_of(pane) == tab then return end
+                local ok, err = cx.layout:move_to_tab(pane, tab, { focus = true })
+                if not ok then
+                  cx:toast("error", err or "Could not move block")
+                end
+              end,
+            })
+          end
+        '';
       };
     };
 
-  modules.hjem.tern = { lib, pkgs, theme, ... }:
+  modules.hjem.tern = { lib, pkgs, osConfig, theme, ... }:
     let
+      # The Linux MacBook Air uses Alt as its desktop modifier.
+      desktopMod = if osConfig.networking.hostName == "Lukes-Mac-air" then "alt" else "cmd";
       # OMP-format theme, with Tern's terminal palette extension. Keep these
       # colors derived from the same Base16 source as kitty, not a second palette.
       mkTheme = name: variant:
@@ -310,6 +346,41 @@ in
           native_prompt = false;
           option_as_alt = "both";
           keymap = "kitty";
+          # The desktop's Tern mode releases these chords to the application.
+          # Tern maps cmd to Super on Linux and Command on macOS.
+          keybinds = {
+            "${desktopMod}+q" = "new_shell_block";
+            "${desktopMod}+r" = "palette";
+            "${desktopMod}+e" = "focus_files";
+            "${desktopMod}+left" = "focus_pane:left";
+            "${desktopMod}+right" = "focus_pane:right";
+            "${desktopMod}+up" = "focus_pane:up";
+            "${desktopMod}+down" = "focus_pane:down";
+            "${desktopMod}+shift+left" = "move_pane:left";
+            "${desktopMod}+shift+right" = "move_pane:right";
+            "${desktopMod}+shift+up" = "move_pane:up";
+            "${desktopMod}+shift+down" = "move_pane:down";
+            "${desktopMod}+1" = "goto_tab:1";
+            "${desktopMod}+2" = "goto_tab:2";
+            "${desktopMod}+3" = "goto_tab:3";
+            "${desktopMod}+4" = "goto_tab:4";
+            "${desktopMod}+5" = "goto_tab:5";
+            "${desktopMod}+6" = "goto_tab:6";
+            "${desktopMod}+7" = "goto_tab:7";
+            "${desktopMod}+8" = "goto_tab:8";
+            "${desktopMod}+9" = "goto_tab:9";
+            "${desktopMod}+0" = "goto_tab:10";
+            "${desktopMod}+shift+1" = "plugin.desktop-shortcuts.move-to-tab-1";
+            "${desktopMod}+shift+2" = "plugin.desktop-shortcuts.move-to-tab-2";
+            "${desktopMod}+shift+3" = "plugin.desktop-shortcuts.move-to-tab-3";
+            "${desktopMod}+shift+4" = "plugin.desktop-shortcuts.move-to-tab-4";
+            "${desktopMod}+shift+5" = "plugin.desktop-shortcuts.move-to-tab-5";
+            "${desktopMod}+shift+6" = "plugin.desktop-shortcuts.move-to-tab-6";
+            "${desktopMod}+shift+7" = "plugin.desktop-shortcuts.move-to-tab-7";
+            "${desktopMod}+shift+8" = "plugin.desktop-shortcuts.move-to-tab-8";
+            "${desktopMod}+shift+9" = "plugin.desktop-shortcuts.move-to-tab-9";
+            "${desktopMod}+shift+0" = "plugin.desktop-shortcuts.move-to-tab-10";
+          };
           # Package updates and preferences are owned by Nix.
           auto_update = false;
         };
