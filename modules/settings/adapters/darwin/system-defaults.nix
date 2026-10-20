@@ -27,7 +27,7 @@
         enable-spring-load-actions-on-all-items = true;
 
         persistent-apps = [
-          { app = "/Users/luketandjung/Applications/Nix User Apps/kitty.app"; }
+          { app = "/Users/luketandjung/Applications/Nix User Apps/Tern.app"; }
           { app = "/Applications/Wallper.app"; }
           { app = "/Users/luketandjung/Applications/Nix User Apps/Helium.app"; }
           { app = "/Applications/1Password.app"; }

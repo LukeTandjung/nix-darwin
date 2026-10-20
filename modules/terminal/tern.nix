@@ -240,7 +240,7 @@ in
       # The Linux MacBook Air uses Alt as its desktop modifier.
       desktopMod = if osConfig.networking.hostName == "Lukes-Mac-air" then "alt" else "cmd";
       # OMP-format theme, with Tern's terminal palette extension. Keep these
-      # colors derived from the same Base16 source as kitty, not a second palette.
+      # colors derived from the shared Base16 source, not a second palette.
       mkTheme = name: variant:
         let
           c = variant.colors;

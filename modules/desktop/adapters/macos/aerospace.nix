@@ -29,6 +29,11 @@
       closeWindow = pkgs.writeShellScript "aerospace-close-window" ''
         set -eu
         app="$(${aerospace} list-windows --focused --format '%{app-bundle-id}')"
+        # Never let the ordinary close shortcut destroy a Tern window, even
+        # if a focus change briefly leaves AeroSpace in main mode.
+        if [ "$app" = so.stencil.tern ] && [ "''${1:-}" != whole-window ]; then
+          exit 0
+        fi
         if [ "$app" = org.keepassxc.keepassxc ]; then
           ${aerospace} close
         else
@@ -87,8 +92,8 @@
         # AeroSpace owns the launcher shortcut so Tern can override it.
         cmd-r = "exec-and-forget open -a Raycast";
 
-        # Open Tern with yazi (cmd + e)
-        cmd-e = "exec-and-forget open -na Tern --args -e ${lib.getExe pkgs.zsh} -lc yazi";
+        # Open Finder (cmd + e); Tern mode uses its built-in Files pane.
+        cmd-e = "exec-and-forget open -a Finder";
 
         # Keep KeePassXC alive; preserve quit-on-last-window for other apps.
         cmd-x = "exec-and-forget ${closeWindow}";
@@ -161,7 +166,7 @@
             "cmd-shift-6" "cmd-shift-7" "cmd-shift-8" "cmd-shift-9" "cmd-shift-0"
           ]) // {
             # Only Tern mode reserves Shift+X for closing the entire window.
-            cmd-shift-x = "exec-and-forget ${closeWindow}";
+            cmd-shift-x = "exec-and-forget ${closeWindow} whole-window";
             # Tern search replaces the desktop's Raycast launcher.
             cmd-r = "exec-and-forget ${ternSearch}";
           };

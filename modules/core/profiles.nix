@@ -13,14 +13,12 @@
     helix
     herdr
     keepassxc
-    kitty
     oh-my-posh
     spicetify
     vesktop
     zed-editor
     helium-browser
     zsh
-    yazi
     git
   ];
   modules.nixos.default.imports = with config.modules.nixos; [

@@ -44,7 +44,7 @@
     };
 
     # Terminal
-    environment.sessionVariables.TERMINAL = "kitty";
+    environment.sessionVariables.TERMINAL = "tern";
 
     # Desktop packages
     environment.systemPackages = with pkgs; [
