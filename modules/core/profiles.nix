@@ -22,7 +22,6 @@
     git
   ];
   modules.nixos.default.imports = with config.modules.nixos; [
-    chatgpt
     helium-browser
     git
     typst
@@ -37,7 +36,6 @@
     llm
   ];
   modules.darwin.default.imports = with config.modules.darwin; [
-    chatgpt
     hjem
     homebrew
     orbstack

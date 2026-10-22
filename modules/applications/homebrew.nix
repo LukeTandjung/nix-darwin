@@ -22,10 +22,15 @@
         # Cross-platform CLI tools are owned by modules/agents/tools/cli/default.nix.
         brews = [ ];
         casks = [
+          "bartender"
           "capcut"
+          "chatgpt"
+          "claude"
           "figma"
           "font-jetbrains-mono-nerd-font"
+          "linear"
           "ngrok"
+          "postico"
           "tailscale-app"
           "yaak"
         ];
