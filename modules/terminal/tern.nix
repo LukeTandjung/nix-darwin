@@ -6,7 +6,7 @@ let
       libwpe, libwpe-fdo, pipewire, zenity, perf, glib-networking, gsettings-desktop-schemas,
       gst_all_1, undmg }:
     let
-      version = "0.9.2";
+      version = "0.9.5";
 
       archName =
         {
@@ -22,10 +22,10 @@ let
 
       # Hashes per platform (update when bumping versions)
       hashes = {
-        "linux-x86_64" = "0bwdkw94ycyb2vxmqdf4x6c01yl98pds98bi2x02dk2jw9rgwm5x";
-        "linux-arm64" = "1vw64x7c4cj7qndc0yzjc4a0lscpqf6plii114hpbgd2q1d0857m";
-        "macos-x86_64" = "03ghax7i7harnzyyb2f7z6r5vq09rfhl1glbrm0is6qsjd48f7ya";
-        "macos-arm64" = "0yj1h37h3rpx70lv318q854ri8v7m1ywbciy3hc7jrd9r467g0y0";
+        "linux-x86_64" = "0lnf1b4d1rzbdyfhnsvyx0smib67rrgcg2zb5k7bfjidnrg954q2";
+        "linux-arm64" = "160dvv6w49w41q6jimkjvgirsr7plbnjp9xjhpjy5yprxg2r45df";
+        "macos-x86_64" = "11gqw6vnqirqxwzsah3k6m16iwbhf696wp8lhgbqzvcc3xc05vm4";
+        "macos-arm64" = "1rfkadd13zf7jw8ac3amsssx7ipji8jxjrv3d0jcmgh9krw3hp6r";
       };
 
       # Tern is an auth-gated closed-beta product and cannot be fetched
