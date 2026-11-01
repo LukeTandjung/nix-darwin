@@ -10,7 +10,7 @@ flake@{ ... }:
     system.primaryUser = "luketandjung";
 
     hjem.users.luketandjung = { options, ... }: {
-      programs.pi.extensions = builtins.removeAttrs options.programs.pi.extensions.default [
+      programs.omp.extensions = builtins.removeAttrs options.programs.omp.extensions.default [
         "prewalk"
       ];
     };

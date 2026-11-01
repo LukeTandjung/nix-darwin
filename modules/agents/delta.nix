@@ -31,7 +31,7 @@ flake@{ inputs, ... }:
         # existing fallback AGENTS.md cannot silently shadow the shared rules.
         files = lib.mkMerge [
           (lib.mkIf cfg.context.enable {
-            ".config/delta/AGENT.md".source = ./pi/context/AGENTS.md;
+            ".config/delta/AGENT.md".source = ./omp/context/AGENTS.md;
           })
 
           # Match Pi's per-skill sources so its realpath-based discovery deduplicates

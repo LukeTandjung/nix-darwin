@@ -7,12 +7,12 @@
     autolith-implementation
     claude-code-implementation
     delta-implementation
-    pi-implementation
+    omp-implementation
 
     agent-mcp
     autolith
     claude-code
     delta
-    pi
+    omp
   ];
 }

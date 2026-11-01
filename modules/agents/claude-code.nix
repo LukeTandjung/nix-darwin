@@ -88,7 +88,7 @@ in
         ]
         ++ sharedMcp.packagesFor "claude-code";
         files = {
-          ".claude/CLAUDE.md".source = ./pi/context/AGENTS.md;
+          ".claude/CLAUDE.md".source = ./omp/context/AGENTS.md;
           # Retain the old path to avoid leaving a duplicate personal plugin behind.
           ".claude/skills/claude-code-home-manager".source = plugin;
         } // lib.mapAttrs' (name: _: lib.nameValuePair ".claude/skills/${name}" {
