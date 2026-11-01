@@ -20,7 +20,7 @@ Convert the latest note-overlay notebook states into verified, reusable Typst ze
 
 Treat Drive and explicit input backups as read-only. Never run an rclone move, sync, delete, or write operation against the source. The extractor uses `rclone-drive copy --immutable` into the local raw mirror. It writes only beneath `.note-overlay/`; it never creates or overwrites zettels.
 
-Existing books and articles remain aggregate outputs. Add links or includes to them when useful, but do not replace them with a flat import or reorganize them by notebook provenance.
+Existing books and articles remain aggregate outputs. Add links or includes to them when useful, but do not replace them with a flat import or reorganize them by notebook provenance. Every zettel owns all content assets it uses beneath its own `assets/` directory; book directories retain only aggregate entry points, shared styling, and source material. Existing Typst diagram helpers belong under `assets/diagrams/`, and existing raster images belong under `assets/images/`. New note-overlay SVGs and retained embeds use the simple `assets/diagram-NN.svg` and `assets/image-NN.webp` names shown below.
 
 ## 1. Sync and extract
 
@@ -113,6 +113,10 @@ Use visual/reading order for the initial allocation. Never renumber existing ide
 Each zettel represents one idea and declares its type in metadata. Use `concept`, `claim`, `procedure`, `example`, `question`, or `reference`; do not create a miscellaneous “annotation” type. A self-contained starting shape is:
 
 ```typst
+#import "../../.zettypst/lib.typ": *
+
+#show: zettel
+
 #metadata((
   id: "note-overlay-<page-id>-01",
   kind: "concept",
@@ -120,13 +124,12 @@ Each zettel represents one idea and declares its type in metadata. Use `concept`
   sources: ((title: "<source-title>", url: "<source-url>"),),
 ))
 
-= <idea title>
-<note-overlay-<page-id>-01>
+= <idea title> <note-overlay-<page-id>-01>
 
 <verified note body>
 ```
 
-In actual Typst, replace `<idea title>` and `<verified note body>` with content, not angle-bracket placeholders. Attach the source-derived label to the heading as shown. Link related ideas with `@note-overlay-<page-id>-NN` references and meaningful surrounding prose. A page with several ideas must produce several linked atomic notes, not one page-shaped summary and not repeated paragraphs in multiple notes.
+In actual Typst, replace `<idea title>` and `<verified note body>` with content, not angle-bracket placeholders. Attach the source-derived label to the heading as shown. Register every new `main.typ` in `.zettypst/source.toml`; notes absent from that manifest have no ZetTypst graph identity, definition navigation, or backlinks. Link related ideas with `@note-overlay-<page-id>-NN` references and meaningful surrounding prose. A page with several ideas must produce several linked atomic notes, not one page-shaped summary and not repeated paragraphs in multiple notes.
 
 Search for an existing idea by content and links before adding a duplicate. If the idea already exists, add only missing information or a meaningful source link/citation. Do not create provenance headings such as “Imported notes” or “Notebook annotations.”
 

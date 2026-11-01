@@ -1,10 +1,11 @@
-{ inputs, ... }:
+flake@{ inputs, ... }:
 {
   # Theme mapping adapted from Tinted Theming (https://github.com/tinted-theming).
   modules.hjem.helix =
     { pkgs, theme, lib, ... }:
     let
       colors = theme.colors;
+      zettyp-lsp = flake.config.builders.zettyp-lsp pkgs;
       gulix = inputs.gulix.packages.${pkgs.stdenv.hostPlatform.system}.helix.overrideAttrs (old: {
         nativeBuildInputs = old.nativeBuildInputs ++ [ pkgs.pkg-config ];
         buildInputs = (old.buildInputs or [ ]) ++ [ pkgs.openssl ]
@@ -18,7 +19,7 @@
           ];
       });
     in {
-      packages = [ gulix ];
+      packages = [ gulix zettyp-lsp ];
       xdg.config.files = {
         "helix/themes/kanagawa.toml".source =
           (pkgs.formats.toml { }).generate "kanagawa.toml" {
@@ -134,6 +135,10 @@
               args = [ "--stdio" ];
             };
             rust-analyzer.command = "${pkgs.rust-analyzer}/bin/rust-analyzer";
+            zettyp-lsp = {
+              command = "${zettyp-lsp}/bin/zettyp-lsp";
+              config.entry = "lsp.typ";
+            };
             ty = {
               command = "${pkgs.ty}/bin/ty";
               args = [ "server" ];
@@ -149,7 +154,8 @@
             }
             {
               name = "typst";
-              language-servers = [ "tinymist" ];
+              language-servers = [ "tinymist" "zettyp-lsp" ];
+              roots = [ ".zettypst" ];
               auto-format = true;
               formatter.command = "typstyle";
               file-types = [ "typ" ];
