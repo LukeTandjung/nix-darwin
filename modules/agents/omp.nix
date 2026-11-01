@@ -23,8 +23,6 @@ flake@{ inputs, ... }:
       extensionsDir = ./omp/extensions;
       contextDir = ./omp/context;
 
-      agentBrowser = flake.config.builders.agent_browser pkgs;
-
       defaultSkills =
         builtins.readDir skillsDir
         |> lib.filterAttrs (_: type: type == "directory")
@@ -172,7 +170,6 @@ flake@{ inputs, ... }:
         packages = [
           cfg.package
           (flake.config.builders.effect_solutions pkgs)
-          agentBrowser
           pkgs.temurin-jre-bin-17
         ]
         ++ lib.optionals cfg.mcp.enable (sharedMcp.packagesFor "pi");
@@ -249,7 +246,7 @@ flake@{ inputs, ... }:
         enable = true;
 
         settings = {
-          modelRoles.default = "openai-codex/gpt-5.6-sol";
+          modelRoles.default = "kimi-code/k3.1-pro-highspeed";
           defaultThinkingLevel = "low";
           theme.dark = "dark";
           compaction = {
@@ -264,15 +261,7 @@ flake@{ inputs, ... }:
         };
 
         plugins = [
-          "@hicaru/pi-rlm"
           "pi-docparser"
-          "pi-autoresearch"
-          "@juicesharp/rpiv-ask-user-question"
-          "pi-agent-browser-native"
-        ]
-        ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
-          "pi-goal-x"
-          "pi-web-access"
         ];
 
         mcp.enable = true;
