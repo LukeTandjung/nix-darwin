@@ -170,6 +170,7 @@ flake@{ inputs, ... }:
         packages = [
           cfg.package
           (flake.config.builders.effect_solutions pkgs)
+          pkgs.bun
           pkgs.temurin-jre-bin-17
         ]
         ++ lib.optionals cfg.mcp.enable (sharedMcp.packagesFor "pi");

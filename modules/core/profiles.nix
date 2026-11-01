@@ -14,6 +14,7 @@
     herdr
     keepassxc
     oh-my-posh
+    rclone
     spicetify
     vesktop
     zed-editor

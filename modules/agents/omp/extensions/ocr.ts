@@ -5,7 +5,7 @@ import { spawn } from "node:child_process";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 
-const OCR_ENDPOINT = process.env.PADDLE_OCR_URL ?? "http://127.0.0.1:8080/v1";
+const OCR_ENDPOINT = process.env.PADDLE_OCR_URL ?? "http://127.0.0.1:8081/v1";
 const OCR_MODEL = "paddleocr-vl-1.6";
 const DEFAULT_TIMEOUT_SECONDS = 300;
 

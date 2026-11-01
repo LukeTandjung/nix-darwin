@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { extname, join, resolve } from "node:path";
 
 export const OCR_MODEL = "paddleocr-vl-1.6";
-export const DEFAULT_OCR_URL = "http://127.0.0.1:8080/v1";
+export const DEFAULT_OCR_URL = "http://127.0.0.1:8081/v1";
 
 const TASK_PROMPTS = Object.freeze({
   ocr: "OCR:",

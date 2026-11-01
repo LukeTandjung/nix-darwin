@@ -5,7 +5,7 @@ This package provides the `paddle_ocr` MCP tool over stdio. It sends image pages
 The server uses this endpoint by default:
 
 ```text
-http://127.0.0.1:8080/v1
+http://127.0.0.1:8081/v1
 ```
 
 Set `PADDLE_OCR_URL` to use a different API base URL.

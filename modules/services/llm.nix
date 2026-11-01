@@ -74,6 +74,25 @@ in
   modules.nixos.llm = { config, lib, pkgs, ... }:
     let
       ninfer = pkgs.callPackage ninferPackage { };
+      # PaddleOCR-VL still uses llama.cpp; NInfer remains the text-only server.
+      llamaCpp =
+        (pkgs.llama-cpp.override {
+          # Node 26's file-mode test fails on setuid chmod in the Nix sandbox.
+          nodejs_latest = pkgs.nodejs_24;
+          cudaSupport = true;
+          vulkanSupport = true;
+          blasSupport = true;
+          cpuArchDynamicDispatch = false;
+        }).overrideAttrs
+          (old: {
+            cmakeFlags = old.cmakeFlags ++ [ "-DGGML_NATIVE=ON" ];
+            preConfigure = ''
+              export NIX_ENFORCE_NO_NATIVE=0
+              ${old.preConfigure}
+            '';
+          });
+      paddleOcrModelPath = "/var/lib/llm/models/paddleocr-vl-1.6/PaddleOCR-VL-1.6-GGUF.gguf";
+      paddleOcrProjectorPath = "/var/lib/llm/models/paddleocr-vl-1.6/PaddleOCR-VL-1.6-GGUF-mmproj.gguf";
       # Exact artifact used by inference_stack's accepted dflash7-nvfp4 run.
       # Keep the weights out of Git and independent of the experiment directory.
       model = pkgs.fetchurl {
@@ -83,7 +102,10 @@ in
       };
     in
     lib.mkIf (config.networking.hostName == "Lukes-Um790") {
-      environment.systemPackages = [ ninfer ];
+      environment.systemPackages = [
+        ninfer
+        llamaCpp
+      ];
 
       users.groups.llm = { };
       users.users = {
@@ -98,7 +120,49 @@ in
       systemd.tmpfiles.rules = [
         "d /var/lib/llm 0750 llm llm -"
         "d /var/lib/llm/models 0750 llm llm -"
+        "d /var/lib/llm/models/paddleocr-vl-1.6 0750 llm llm -"
       ];
+
+      systemd.services.paddle-ocr = {
+        description = "PaddleOCR-VL 1.6 OpenAI-compatible vision server";
+        wantedBy = [ "multi-user.target" ];
+        wants = [ "nvidia-persistenced.service" ];
+        after = [
+          "network.target"
+          "nvidia-persistenced.service"
+        ];
+        environment.CUDA_VISIBLE_DEVICES = "0";
+
+        serviceConfig = {
+          Type = "simple";
+          User = "llm";
+          Group = "llm";
+          WorkingDirectory = "/var/lib/llm";
+          MemoryHigh = "40G";
+          MemoryMax = "48G";
+          MemorySwapMax = 0;
+          NoNewPrivileges = true;
+          ProtectSystem = "strict";
+          ProtectHome = true;
+          PrivateTmp = true;
+          # Keep NVIDIA devices and the host's localhost endpoint accessible.
+          PrivateDevices = false;
+          PrivateNetwork = false;
+          ExecStart = lib.concatStringsSep " " [
+            "${llamaCpp}/bin/llama-server"
+            "--host 127.0.0.1 --port 8081"
+            "--model ${paddleOcrModelPath}"
+            "--mmproj ${paddleOcrProjectorPath}"
+            "--alias paddleocr-vl-1.6"
+            "--n-gpu-layers 999 --parallel 1"
+            "--ctx-size 8192 --flash-attn on"
+            "--jinja --temp 0"
+          ];
+          Restart = "on-failure";
+          RestartSec = 10;
+          TimeoutStopSec = 120;
+        };
+      };
 
       systemd.services.ninfer = {
         description = "Swift-1.5 NInfer OpenAI-compatible inference server";

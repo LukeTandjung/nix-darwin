@@ -154,6 +154,7 @@ in
           type = lib.types.listOf lib.types.package;
           default = [
             (flake.config.builders.effect_solutions pkgs)
+            pkgs.bun
             pkgs.poppler-utils
             pkgs.imagemagick
             pkgs.typst
