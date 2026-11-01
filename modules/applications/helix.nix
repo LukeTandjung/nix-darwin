@@ -5,8 +5,20 @@
     { pkgs, theme, lib, ... }:
     let
       colors = theme.colors;
+      gulix = inputs.gulix.packages.${pkgs.stdenv.hostPlatform.system}.helix.overrideAttrs (old: {
+        nativeBuildInputs = old.nativeBuildInputs ++ [ pkgs.pkg-config ];
+        buildInputs = (old.buildInputs or [ ]) ++ [ pkgs.openssl ]
+          ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+            pkgs.fontconfig
+            pkgs.libx11
+            pkgs.libxcb
+            pkgs.libxkbcommon
+            pkgs.vulkan-loader
+            pkgs.wayland
+          ];
+      });
     in {
-      packages = [ pkgs.helix ];
+      packages = [ gulix ];
       xdg.config.files = {
         "helix/themes/kanagawa.toml".source =
           (pkgs.formats.toml { }).generate "kanagawa.toml" {

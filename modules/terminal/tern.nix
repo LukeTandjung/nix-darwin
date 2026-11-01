@@ -175,6 +175,14 @@ in
       configDir = if pkgs.stdenv.hostPlatform.isDarwin
         then "Library/Application Support/Tern"
         else "${lib.removePrefix "${config.directory}/" config.xdg.config.directory}/tern";
+      pluginFiles =
+        cfg.plugins
+        |> lib.mapAttrs' (id: source:
+          lib.nameValuePair "${configDir}/plugins/${id}.path" {
+            text = toString source;
+            clobber = true;
+          }
+        );
     in
     {
       options.programs.tern = {
@@ -191,47 +199,60 @@ in
           default = { };
           description = "Declarative Tern settings.json overrides (edit here, not in Preferences).";
         };
+
+        plugins = lib.mkOption {
+          type = lib.types.attrsOf lib.types.path;
+          default = { };
+          description = "Tern plugin directories to link, keyed by plugin ID. Each directory must contain plugin.toml.";
+          example = lib.literalExpression ''
+            {
+              my-plugin = ./plugins/my-plugin;
+            }
+          '';
+        };
       };
 
       config = lib.mkIf cfg.enable {
         packages = [ cfg.package ];
-        files."${configDir}/settings.json".text = builtins.toJSON cfg.settings;
-        # Tern watches this directory even before any plugins are installed.
-        files."${configDir}/plugins/.keep".text = "";
-        files."${configDir}/plugins/desktop-shortcuts/plugin.toml".text = ''
-          schema = 1
-          id = "desktop-shortcuts"
-          name = "Desktop shortcuts"
-          version = "0.1.0"
-          window = "window.luau"
-        '';
-        files."${configDir}/plugins/desktop-shortcuts/window.luau".text = ''
-          -- Checked against the types exported by Tern 0.9.2.
-          for number = 1, 10 do
-            local position = tostring(number)
-            tern.command({
-              id = "move-to-tab-" .. position,
-              title = "Move block to tab " .. position,
-              run = function(cx)
-                local pane = cx.session:focused()
-                if pane == nil then return end
-                local tab = cx.session:find_tab(position)
-                if tab == nil then
-                  local created, err = cx.layout:move_to_new_tab(pane, nil, { focus = true })
-                  if created == nil then
-                    cx:toast("error", err or "Could not move block to a new tab")
+        files = {
+          "${configDir}/settings.json".text = builtins.toJSON cfg.settings;
+          # Tern watches this directory even before any plugins are installed.
+          "${configDir}/plugins/.keep".text = "";
+          "${configDir}/plugins/desktop-shortcuts/plugin.toml".text = ''
+            schema = 1
+            id = "desktop-shortcuts"
+            name = "Desktop shortcuts"
+            version = "0.1.0"
+            window = "window.luau"
+          '';
+          "${configDir}/plugins/desktop-shortcuts/window.luau".text = ''
+            -- Checked against the types exported by Tern 0.9.2.
+            for number = 1, 10 do
+              local position = tostring(number)
+              tern.command({
+                id = "move-to-tab-" .. position,
+                title = "Move block to tab " .. position,
+                run = function(cx)
+                  local pane = cx.session:focused()
+                  if pane == nil then return end
+                  local tab = cx.session:find_tab(position)
+                  if tab == nil then
+                    local created, err = cx.layout:move_to_new_tab(pane, nil, { focus = true })
+                    if created == nil then
+                      cx:toast("error", err or "Could not move block to a new tab")
+                    end
+                    return
                   end
-                  return
-                end
-                if cx.session:tab_of(pane) == tab then return end
-                local ok, err = cx.layout:move_to_tab(pane, tab, { focus = true })
-                if not ok then
-                  cx:toast("error", err or "Could not move block")
-                end
-              end,
-            })
-          end
-        '';
+                  if cx.session:tab_of(pane) == tab then return end
+                  local ok, err = cx.layout:move_to_tab(pane, tab, { focus = true })
+                  if not ok then
+                    cx:toast("error", err or "Could not move block")
+                  end
+                end,
+              })
+            end
+          '';
+        } // pluginFiles;
       };
     };
 
@@ -331,6 +352,7 @@ in
     in {
       programs.tern = {
         enable = true;
+        plugins.gulix = "${inputs.gulix}/tern/gulix";
         settings = {
           theme = "Dark";
           theme_dark = "kanagawa-nix";

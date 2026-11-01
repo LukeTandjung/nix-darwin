@@ -20,6 +20,10 @@
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
     nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-unstable";
+    gulix = {
+      url = "github:LukeTandjung/gulix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     hjem = {
       url = "github:feel-co/hjem/6b2cc57463bbbac3d7c61206ab365a2c928861a4";

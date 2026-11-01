@@ -212,6 +212,27 @@
         "type": "github"
       }
     },
+    "gulix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "lastModified": 1793493494,
+        "narHash": "sha256-lo/ax0EnTmWkLMBjLgK9OJfJ/xGokZ3TmWQXF1Z0nlY=",
+        "owner": "LukeTandjung",
+        "repo": "gulix",
+        "rev": "e71165d82630e512416f912ef7c4e06f7fdf07a4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LukeTandjung",
+        "repo": "gulix",
+        "type": "github"
+      }
+    },
     "helium": {
       "inputs": {
         "nixpkgs": [
@@ -397,6 +418,7 @@
         "dms-plugin-registry": "dms-plugin-registry",
         "dsearch": "dsearch",
         "flake-parts": "flake-parts_2",
+        "gulix": "gulix",
         "helium": "helium",
         "hjem": "hjem",
         "homebrew-cask": "homebrew-cask",
@@ -407,6 +429,27 @@
         "nixpkgs": "nixpkgs_3",
         "spicetify-nix": "spicetify-nix",
         "ublock": "ublock"
+      }
+    },
+    "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "gulix",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1775358767,
+        "narHash": "sha256-f2eC+WIfhjevCPQILuV08i/kmKZzYZpUvkom/33VxCA=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "20fd44bc663daa53a2575e01293e24e681d62244",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
       }
     },
     "spicetify-nix": {
