@@ -267,7 +267,6 @@ flake@{ inputs, ... }:
           "@hicaru/pi-rlm"
           "pi-docparser"
           "pi-autoresearch"
-          "@pi-unipi/notify"
           "@juicesharp/rpiv-ask-user-question"
           "pi-agent-browser-native"
         ]
