@@ -173,15 +173,4 @@
         };
       };
     };
-
-  modules.darwin.aerospace = { pkgs, ... }: {
-    launchd.user.agents.aerospace.serviceConfig = {
-      Label = "org.hjem.aerospace";
-      Program = "${pkgs.aerospace}/Applications/AeroSpace.app/Contents/MacOS/AeroSpace";
-      RunAtLoad = true;
-      KeepAlive = true;
-      StandardOutPath = "/tmp/aerospace.log";
-      StandardErrorPath = "/tmp/aerospace.err.log";
-    };
-  };
 }
