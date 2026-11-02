@@ -1,7 +1,7 @@
 ---
 name: note-overlay-notes
 description: Imports note-overlay v2 JSON backups from Google Drive Documents/raw, prepares handwriting and embedded images for verified OCR, and turns them into typed, linked Typst Zettelkasten notes with semantic SVG figures. Use for DC1 note-overlay backups, note-overlay JSON extraction, or updating vault zettels from tablet notebooks.
-compatibility: Requires Bun for the stdlib-only TypeScript extractor. Drive import requires rclone-drive; PNG review requires ImageMagick or another SVG renderer. Note transcription requires the PaddleOCR-VL paddle_ocr tool and visual inspection; final notes require Typst and Poppler for validation.
+compatibility: Requires Bun for the stdlib-only TypeScript extractor. Drive import requires rclone-drive; PNG review requires ImageMagick or another SVG renderer. Note transcription requires the PaddleOCR-VL paddle_ocr tool and visual inspection; final notes require Bash, Typst and Poppler for validation.
 metadata:
   author: Luke T
 ---
@@ -14,7 +14,8 @@ Convert the latest note-overlay notebook states into verified, reusable Typst ze
 
 - Drive source: `remote:Documents/raw`, accessed only through `rclone-drive`.
 - Vault: `~/Documents/vault`.
-- Raw Drive mirror, generated review files, transcriptions, and validation renders: `~/Documents/vault/.note-overlay/`.
+- Persistent extractor outputs and transcription ledgers: `~/Documents/vault/.note-overlay/`.
+- Disposable review PNGs, OCR crops, and validation renders: a unique per-run `/tmp/note-overlay.XXXXXX` directory.
 - Reusable notes: `~/Documents/vault/zettels/`.
 - Figures used by those notes: `~/Documents/vault/zettels/<zettel-id>/assets/`.
 
@@ -64,25 +65,32 @@ The extractor validates `app == "note-overlay"` and `v == 2`. It decodes:
 
 ## 2. Render and verify every source page
 
-Convert each non-empty page SVG to PNG for visual review:
+Create one unique temporary directory for this run and use its printed path in later commands:
+
+```bash
+NOTE_OVERLAY_TMP="$(mktemp -d /tmp/note-overlay.XXXXXX)"
+mkdir -p "$NOTE_OVERLAY_TMP/review" "$NOTE_OVERLAY_TMP/crops"
+```
+
+Convert each non-empty page SVG to a temporary PNG for visual review:
 
 ```bash
 magick -background white \
   .note-overlay/review/<notebook-id>/<page-id>.svg \
-  .note-overlay/review/<notebook-id>/<page-id>.png
+  "$NOTE_OVERLAY_TMP/review/<page-id>.png"
 ```
 
 ImageMagick can omit linked WebP images from SVG. After the base render, composite every embed explicitly, using its manifest bounds multiplied by the canvas size. For each image, run:
 
 ```bash
-magick .note-overlay/review/<notebook-id>/<page-id>.png \
+magick "$NOTE_OVERLAY_TMP/review/<page-id>.png" \
   \( .note-overlay/review/<notebook-id>/assets/<image>.webp \
      -resize '<width>x<height>!' \) \
   -geometry '+<x>+<y>' -composite \
-  .note-overlay/review/<notebook-id>/<page-id>.png
+  "$NOTE_OVERLAY_TMP/review/<page-id>.png"
 ```
 
-Increase the raster size for small handwriting, but retain the original SVG and WebP as evidence. Inspect every non-empty page at readable resolution, including the regions between strokes and every original embedded WebP; confirm the embeds are visible in the review PNG. Record pages with no content instead of silently skipping them. Keep transcription ledgers and uncertain-reading crops under `.note-overlay/working/`, not in final notes.
+Increase the raster size for small handwriting, but retain the original SVG and WebP as evidence. Inspect every non-empty page at readable resolution, including the regions between strokes and every original embedded WebP; confirm the embeds are visible in the review PNG. Record pages with no content instead of silently skipping them. Keep the verified transcription ledger at `.note-overlay/transcriptions/<page-id>.md`. Keep OCR and uncertain-reading crops under `$NOTE_OVERLAY_TMP/crops/`, not in final notes or the persistent extractor output.
 
 ### Serial PaddleOCR and literal transcription
 
@@ -169,18 +177,26 @@ Before completion:
 1. Compare every imported literal passage and diagram label with the verified transcription ledger and source pixels.
 2. Check that multi-idea pages became linked atomic notes and that no idea was duplicated across zettels.
 3. Confirm all new figures resolve beneath their zettel's `assets/` directory, all source citations are meaningful, and existing human edits remain intact.
-4. Compile every affected standalone zettel and every changed aggregate entry point. Use the vault/project's actual package path and build settings rather than assuming another book's configuration.
-5. Render the resulting PDFs to PNG with Poppler and visually inspect the changed pages and adjacent pages. Check handwriting fidelity, text overflow, links, captions, SVG labels/arrows, raster quality, and figure placement.
+4. Run the validation helper for every affected zettel. Pass every directly referenced zettel needed to resolve its `@` links. Compile every changed aggregate entry point with its established package path and build settings.
+5. Render and visually inspect the changed pages and adjacent pages. Check handwriting fidelity, text overflow, links, captions, SVG labels/arrows, raster quality, and figure placement.
 
-A representative standalone validation loop is:
+From this skill directory, run:
 
 ```bash
-typst compile --root "$HOME/Documents/vault" \
+bash validate_note_overlay.sh \
+  "$HOME/Documents/vault" \
   "$HOME/Documents/vault/zettels/<zettel-id>/main.typ" \
-  "$HOME/Documents/vault/.note-overlay/validation/<zettel-id>.pdf"
-pdftoppm -png -r 150 \
-  "$HOME/Documents/vault/.note-overlay/validation/<zettel-id>.pdf" \
-  "$HOME/Documents/vault/.note-overlay/validation/<zettel-id>"
+  "$HOME/Documents/vault/zettels/<related-zettel-id>/main.typ"
 ```
 
-For an existing book, compile its real root (usually `main.typ`) with its established package path instead. Do not treat a successful compile alone as visual verification. Report changed zettels/assets, source pages covered, semantic redraws, citations retained, validation performed, and any unresolved readings explicitly.
+Omit the related-zettel argument when the target has no cross-zettel references; repeat it for multiple direct references. The helper compiles the complete ZetTypst graph, builds a temporary linked document with heading numbering enabled, and renders it with Poppler. It prints a unique `/tmp/note-overlay-validate.XXXXXX` directory containing the PDF and PNGs. This resolves cross-zettel labels without changing the notes' own heading style.
+
+For an existing book, compile its real root (usually `main.typ`) into `$NOTE_OVERLAY_TMP/validation/` with its established package path instead. Do not treat a successful compile alone as visual verification.
+
+After every render has passed visual inspection, remove the run and validation temporary directories:
+
+```bash
+rm -r -- "$NOTE_OVERLAY_TMP" /tmp/note-overlay-validate.<suffix>
+```
+
+On failure, retain the relevant temporary directory for diagnosis and report its path. Do not leave validation PDFs, review PNGs, or OCR crops in the vault after a successful run. Report changed zettels/assets, source pages covered, semantic redraws, citations retained, validation performed, and any unresolved readings explicitly.
