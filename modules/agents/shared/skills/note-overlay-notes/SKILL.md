@@ -52,7 +52,9 @@ bun extract_note_overlay.ts \
 
 Use `--output <directory>` for an isolated working set and `--width`/`--height` when a different review canvas is needed. The default canvas is 1000 × 1414 px. Coordinates and image bounds in v2 are normalized to that canvas.
 
-Selection is **per stable notebook ID**, not merely the newest whole backup. For every notebook, the extractor selects the state with the greatest book `m`; equal `m` values are resolved by the lexicographically greatest backup filename. Thus an older backup can still supply a notebook absent from newer exports, while duplicate exports resolve deterministically. With the two sample names above and equal notebook `m` values, `note-overlay-backup-20261101-124413-11.json` wins the tie.
+Selection is **per stable notebook ID**, not merely the newest whole backup. For every notebook, the extractor selects the state with the greatest book `m`; equal `m` values are resolved by the lexicographically greatest backup filename. Thus an older backup can still supply a notebook absent from newer exports, while duplicate exports resolve deterministically. With the two sample names above and equal notebook `m` values, `note-overlay-backup-20261102-124413-11.json` wins the tie.
+
+Drive imports use `manifest.json` as an incremental checkpoint. The extractor parses only backup filenames absent from the previous manifest, merges them with the prior per-notebook selections, and records `latest_processed_backup`. An unchanged rerun parses zero backup JSON files. A newer backup that omits a notebook does not remove its prior selection. A missing, invalid, or canvas-incompatible manifest triggers a full rebuild. Explicit local inputs always perform a full rebuild so an intentional subset cannot retain unrelated cached notebooks.
 
 The extractor validates `app == "note-overlay"` and `v == 2`. It decodes:
 

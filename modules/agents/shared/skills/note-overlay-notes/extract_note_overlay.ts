@@ -25,9 +25,12 @@ const UTF8_DECODER = new TextDecoder('utf-8', { fatal: true });
 type JsonObject = Record<string, unknown>;
 type Point = [number, number, number];
 
-interface Backup {
+interface BackupDescriptor {
   readonly filename: string;
   readonly sha256: string;
+}
+
+interface Backup extends BackupDescriptor {
   readonly books: Array<unknown>;
 }
 
@@ -93,6 +96,29 @@ interface Options {
 interface Source {
   readonly type: 'drive' | 'local';
   readonly remote?: string;
+}
+
+interface PreviousNotebook {
+  readonly bookId: string;
+  readonly modified: number;
+  readonly backup: BackupDescriptor;
+  readonly record: JsonObject;
+  readonly artifacts: Array<string>;
+}
+
+interface PreviousManifest {
+  readonly backups: Array<BackupDescriptor>;
+  readonly notebooks: Array<PreviousNotebook>;
+  readonly artifacts: Set<string>;
+}
+
+interface ExtractInput {
+  readonly backups: Array<Backup>;
+  readonly output: string;
+  readonly source: Source;
+  readonly width: number;
+  readonly height: number;
+  readonly previous: PreviousManifest;
 }
 
 class ExtractError extends Error {
@@ -517,18 +543,64 @@ async function renderPage(
   return { reviewSvg: relativeSvg, artifacts, changed };
 }
 
-async function previousArtifacts(path: string): Promise<Set<string>> {
-  if (!await isFile(path)) {
-    return new Set();
+function emptyPreviousManifest(): PreviousManifest {
+  return { backups: [], notebooks: [], artifacts: new Set() };
+}
+
+function parseBackupDescriptor(value: unknown, where: string): BackupDescriptor {
+  const record = requireObject(value, where);
+  return {
+    filename: requireText(record.filename, `${where}.filename`),
+    sha256: requireText(record.sha256, `${where}.sha256`),
+  };
+}
+
+function parsePreviousNotebook(value: unknown, where: string): PreviousNotebook {
+  const record = requireObject(value, where);
+  const bookId = requireText(record.id, `${where}.id`);
+  const modified = requireNumber(record.modified_ms, `${where}.modified_ms`);
+  const backup = parseBackupDescriptor(record.source_backup, `${where}.source_backup`);
+  const artifacts: Array<string> = [];
+  for (const [pageIndex, rawPage] of requireList(record.pages, `${where}.pages`).entries()) {
+    const page = requireObject(rawPage, `${where}.pages[${pageIndex}]`);
+    artifacts.push(requireText(page.review_svg, `${where}.pages[${pageIndex}].review_svg`));
+    const images = requireList(defaultList(page.images), `${where}.pages[${pageIndex}].images`);
+    for (const [imageIndex, rawImage] of images.entries()) {
+      const image = requireObject(rawImage, `${where}.pages[${pageIndex}].images[${imageIndex}]`);
+      artifacts.push(requireText(image.asset, `${where}.pages[${pageIndex}].images[${imageIndex}].asset`));
+    }
   }
+  return { bookId, modified, backup, record, artifacts };
+}
+
+async function loadPreviousManifest(
+  path: string,
+  width: number,
+  height: number,
+): Promise<PreviousManifest> {
+  const artifacts = new Set<string>();
+  if (!await isFile(path)) return emptyPreviousManifest();
   try {
     const manifest: unknown = JSON.parse(UTF8_DECODER.decode(await readFile(path)));
-    if (!isObject(manifest) || !Array.isArray(manifest.artifacts)) {
-      return new Set();
+    if (!isObject(manifest)) return emptyPreviousManifest();
+    if (Array.isArray(manifest.artifacts)) {
+      for (const item of manifest.artifacts) {
+        if (typeof item === 'string') artifacts.add(item);
+      }
     }
-    return new Set(manifest.artifacts.filter((item): item is string => typeof item === 'string'));
+    if (manifest.schema !== MANIFEST_SCHEMA) return { backups: [], notebooks: [], artifacts };
+    const canvas = requireObject(manifest.canvas, 'previous manifest.canvas');
+    if (requireNumber(canvas.width, 'previous manifest.canvas.width') !== width ||
+        requireNumber(canvas.height, 'previous manifest.canvas.height') !== height) {
+      return { backups: [], notebooks: [], artifacts };
+    }
+    const backups = requireList(manifest.backups, 'previous manifest.backups')
+      .map((item, index) => parseBackupDescriptor(item, `previous manifest.backups[${index}]`));
+    const notebooks = requireList(manifest.notebooks, 'previous manifest.notebooks')
+      .map((item, index) => parsePreviousNotebook(item, `previous manifest.notebooks[${index}]`));
+    return { backups, notebooks, artifacts };
   } catch {
-    return new Set();
+    return { backups: [], notebooks: [], artifacts };
   }
 }
 
@@ -552,19 +624,45 @@ async function removeStaleArtifacts(output: string, stale: Set<string>): Promise
   return removed;
 }
 
-async function extract(
-  backups: Array<Backup>,
-  output: string,
-  source: Source,
-  width: number,
-  height: number,
-): Promise<[number, number, number]> {
+function isLaterThanPrevious(selected: SelectedBook, previous: PreviousNotebook): boolean {
+  const modified = requireNumber(selected.book.m, `notebook ${selected.bookId}.m`);
+  return modified > previous.modified ||
+    (modified === previous.modified && selected.backup.filename > previous.backup.filename);
+}
+
+function mergeBackupDescriptors(
+  previous: Array<BackupDescriptor>,
+  added: Array<Backup>,
+): Array<BackupDescriptor> {
+  const merged = new Map<string, BackupDescriptor>();
+  for (const backup of [...previous, ...added]) merged.set(backup.filename, backup);
+  return [...merged.values()].sort((left, right) => compareText(left.filename, right.filename));
+}
+
+async function extract({
+  backups,
+  output,
+  source,
+  width,
+  height,
+  previous,
+}: ExtractInput): Promise<[number, number, number]> {
   const manifestPath = join(output, 'manifest.json');
-  const oldArtifacts = await previousArtifacts(manifestPath);
   const currentArtifacts = new Set<string>();
   const changed: Array<string> = [];
   const notebooks: Array<JsonObject> = [];
-  for (const { book, backup, bookId } of selectLatestBooks(backups)) {
+  const previousById = new Map(previous.notebooks.map((notebook) => [notebook.bookId, notebook]));
+  const selectedBooks = selectLatestBooks(backups).filter((selected) => {
+    const old = previousById.get(selected.bookId);
+    return old === undefined || isLaterThanPrevious(selected, old);
+  });
+  const selectedIds = new Set(selectedBooks.map((selected) => selected.bookId));
+  for (const old of previous.notebooks) {
+    if (selectedIds.has(old.bookId)) continue;
+    notebooks.push(old.record);
+    for (const artifact of old.artifacts) currentArtifacts.add(artifact);
+  }
+  for (const { book, backup, bookId } of selectedBooks) {
     const pages = requireList(book.pages, `notebook ${bookId}: pages`);
     const pageRecords: Array<JsonObject> = [];
     const seenPages = new Set<string>();
@@ -599,15 +697,20 @@ async function extract(
       pages: pageRecords,
     });
   }
+  notebooks.sort((left, right) =>
+    compareText(requireText(left.id, 'notebook.id'), requireText(right.id, 'notebook.id'))
+  );
+  const allBackups = mergeBackupDescriptors(previous.backups, backups);
   const manifest = {
     schema: MANIFEST_SCHEMA,
     source,
     canvas: { width, height, units: 'px' },
-    backups: backups.map((backup) => ({ filename: backup.filename, sha256: backup.sha256 })),
+    latest_processed_backup: allBackups.at(-1)?.filename ?? null,
+    backups: allBackups.map((backup) => ({ filename: backup.filename, sha256: backup.sha256 })),
     artifacts: [...currentArtifacts].sort(),
     notebooks,
   };
-  const stale = new Set([...oldArtifacts].filter((item) => !currentArtifacts.has(item)));
+  const stale = new Set([...previous.artifacts].filter((item) => !currentArtifacts.has(item)));
   const removed = await removeStaleArtifacts(output, stale);
   const manifestBytes = Buffer.from(`${JSON.stringify(canonicalize(manifest), null, 2)}\n`, 'utf8');
   if (await writeIfChanged(manifestPath, manifestBytes)) changed.push('manifest.json');
@@ -711,13 +814,29 @@ async function main(): Promise<void> {
     inputs = [join(options.output, 'raw')];
     source = { type: 'drive', remote: options.remote };
   }
-  const backups = await loadBackups(await collectInputs(inputs));
-  const [changed, unchanged, removed] = await extract(
-    backups, options.output, source, options.width, options.height,
-  );
+  const previous = options.isDrive
+    ? await loadPreviousManifest(
+        join(options.output, 'manifest.json'), options.width, options.height,
+      )
+    : emptyPreviousManifest();
+  const paths = await collectInputs(inputs);
+  const processedFilenames = new Set(previous.backups.map((backup) => backup.filename));
+  const pendingPaths = options.isDrive
+    ? paths.filter((path) => !processedFilenames.has(basename(path)))
+    : paths;
+  const backups = await loadBackups(pendingPaths);
+  const [changed, unchanged, removed] = await extract({
+    backups,
+    output: options.output,
+    source,
+    width: options.width,
+    height: options.height,
+    previous,
+  });
   console.log(
-    `Wrote ${changed} changed artifacts; ${unchanged} unchanged; ` +
-    `removed ${removed} stale. Manifest: ${join(options.output, 'manifest.json')}`,
+    `Parsed ${backups.length} new backups. Wrote ${changed} changed artifacts; ` +
+    `${unchanged} unchanged; removed ${removed} stale. ` +
+    `Manifest: ${join(options.output, 'manifest.json')}`,
   );
 }
 
