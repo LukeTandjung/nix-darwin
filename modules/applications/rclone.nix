@@ -4,7 +4,7 @@
     let
       rclone-drive = pkgs.writeShellApplication {
         name = "rclone-drive";
-        runtimeInputs = [ pkgs.jq pkgs.libsecret ];
+        runtimeInputs = [ pkgs.coreutils pkgs.jq pkgs.libsecret ];
         text = ''
           set +x
           read_credential() {
@@ -33,7 +33,13 @@
           fi
 
           export RCLONE_CONFIG_REMOTE_CLIENT_ID RCLONE_CONFIG_REMOTE_CLIENT_SECRET RCLONE_CONFIG_REMOTE_TOKEN
-          exec ${lib.getExe pkgs.rclone} --config ${lib.escapeShellArg "${config.xdg.config.directory}/rclone/rclone.conf"} "$@"
+
+          # OAuth refreshes must never persist outside KeePassXC.
+          config_dir=$(mktemp -d /dev/shm/rclone-drive.XXXXXX)
+          trap 'rm -rf -- "$config_dir"' EXIT
+          install -m 600 ${lib.escapeShellArg "${config.xdg.config.directory}/rclone/rclone.conf"} "$config_dir/rclone.conf"
+
+          ${lib.getExe pkgs.rclone} --config "$config_dir/rclone.conf" "$@"
         '';
       };
     in
