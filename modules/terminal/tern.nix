@@ -6,7 +6,8 @@ let
       libwpe, libwpe-fdo, pipewire, zenity, perf, glib-networking, gsettings-desktop-schemas,
       gst_all_1, undmg }:
     let
-      version = "0.9.5";
+      # Only bump platforms whose matching release archive has been verified.
+      version = if stdenv.hostPlatform.system == "aarch64-darwin" then "0.9.10" else "0.9.5";
 
       archName =
         {
@@ -25,7 +26,7 @@ let
         "linux-x86_64" = "0lnf1b4d1rzbdyfhnsvyx0smib67rrgcg2zb5k7bfjidnrg954q2";
         "linux-arm64" = "160dvv6w49w41q6jimkjvgirsr7plbnjp9xjhpjy5yprxg2r45df";
         "macos-x86_64" = "11gqw6vnqirqxwzsah3k6m16iwbhf696wp8lhgbqzvcc3xc05vm4";
-        "macos-arm64" = "1rfkadd13zf7jw8ac3amsssx7ipji8jxjrv3d0jcmgh9krw3hp6r";
+        "macos-arm64" = "0a2b8nz2k2nwdqhhqly6nhm274p3jpls1hphyx5j255cb39ws2sf";
       };
 
       # Tern is an auth-gated closed-beta product and cannot be fetched
