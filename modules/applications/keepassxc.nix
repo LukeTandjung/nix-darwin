@@ -18,6 +18,12 @@
         FdoSecrets.ConfirmAccessItem = false;
         Browser.Enabled = true;
         Browser.UpdateBinaryPath = false;
+        Security = {
+          LockDatabaseIdle = true;
+          LockDatabaseIdleSeconds = 3600;
+          LockDatabaseMinimize = false;
+          LockDatabaseScreenLock = true;
+        };
         GUI = { MinimizeOnClose = true; MinimizeToTray = true; ShowTrayIcon = true; };
       };
     } // lib.optionalAttrs linux {
