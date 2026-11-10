@@ -1,87 +1,33 @@
 #!/usr/bin/env bun
 
-import { createHash, randomBytes } from 'node:crypto';
 import { spawn } from 'node:child_process';
+import { createHash, randomBytes } from 'node:crypto';
 import { type Stats } from 'node:fs';
 import {
   type FileHandle,
   mkdir,
+  mkdtemp,
   open,
   readFile,
   readdir,
   rename,
+  rm,
   stat,
   unlink,
 } from 'node:fs/promises';
-import { homedir } from 'node:os';
-import { basename, dirname, isAbsolute, join } from 'node:path';
+import { homedir, tmpdir } from 'node:os';
+import { basename, dirname, isAbsolute, join, resolve, sep } from 'node:path';
 import { TextDecoder } from 'node:util';
 
-const MANIFEST_SCHEMA = 'note-overlay-review/v1';
+const MANIFEST_SCHEMA = 'note-overlay-review/v2';
 const DEFAULT_OUTPUT = '~/Documents/vault/.note-overlay';
-const DEFAULT_REMOTE = 'remote:Documents/raw';
+const DEFAULT_REMOTE = 'remote:Note Overlay';
+const MAX_PAGES = 10_000;
+const MAX_COMMAND_OUTPUT = 16 * 1024 * 1024;
+const COMMAND_TIMEOUT_MS = 120_000;
 const UTF8_DECODER = new TextDecoder('utf-8', { fatal: true });
 
 type JsonObject = Record<string, unknown>;
-type Point = [number, number, number];
-
-interface BackupDescriptor {
-  readonly filename: string;
-  readonly sha256: string;
-}
-
-interface Backup extends BackupDescriptor {
-  readonly books: Array<unknown>;
-}
-
-interface SelectedBook {
-  readonly book: JsonObject;
-  readonly backup: Backup;
-  readonly bookId: string;
-}
-
-interface Stroke {
-  readonly index: number;
-  readonly kind: number;
-  readonly width: number;
-  readonly started_ms: number;
-  readonly duration_ms: number;
-  readonly points: Array<Point>;
-}
-
-interface ImageBounds {
-  readonly x: number;
-  readonly y: number;
-  readonly w: number;
-  readonly h: number;
-}
-
-interface ImageSource {
-  readonly package: string | null;
-  readonly title: string | null;
-  readonly url: string | null;
-}
-
-interface DecodedImage {
-  readonly index: number;
-  readonly bounds: ImageBounds;
-  readonly sha256: string;
-  readonly source: ImageSource;
-  readonly data: Buffer;
-  asset: string;
-}
-
-interface DecodedPage {
-  readonly id: string;
-  readonly strokes: Array<Stroke>;
-  readonly images: Array<DecodedImage>;
-}
-
-interface RenderedPage {
-  readonly reviewSvg: string;
-  readonly artifacts: Array<string>;
-  readonly changed: Array<string>;
-}
 
 interface Options {
   readonly inputs: Array<string>;
@@ -89,36 +35,49 @@ interface Options {
   readonly remote: string;
   readonly rclone: string;
   readonly output: string;
+  readonly dpi: number;
+}
+
+interface SourceDocument {
+  readonly id: string;
+  readonly path: string;
+  readonly title: string;
+  readonly size: number;
+  readonly modTime: string;
+  readonly rawPath: string;
+  readonly expectedSha256: string | null;
+}
+
+interface PageDimensions {
   readonly width: number;
   readonly height: number;
 }
 
-interface Source {
-  readonly type: 'drive' | 'local';
-  readonly remote?: string;
+interface PdfDescription {
+  readonly pageCount: number;
+  readonly dimensions: Array<PageDimensions>;
 }
 
-interface PreviousNotebook {
-  readonly bookId: string;
-  readonly modified: number;
-  readonly backup: BackupDescriptor;
-  readonly record: JsonObject;
-  readonly artifacts: Array<string>;
+interface PreviousPage {
+  readonly id: string;
+  readonly number: number;
+  readonly zettelId: string;
+  readonly contentSha256: string;
+  readonly reviewSha256: string;
+  readonly dimensions: PageDimensions;
+  readonly reviewPath: string;
+  readonly transcriptionPath: string;
+}
+
+interface PreviousDocument {
+  readonly id: string;
+  readonly sha256: string;
+  readonly pages: Array<PreviousPage>;
 }
 
 interface PreviousManifest {
-  readonly backups: Array<BackupDescriptor>;
-  readonly notebooks: Array<PreviousNotebook>;
+  readonly documents: Array<PreviousDocument>;
   readonly artifacts: Set<string>;
-}
-
-interface ExtractInput {
-  readonly backups: Array<Backup>;
-  readonly output: string;
-  readonly source: Source;
-  readonly width: number;
-  readonly height: number;
-  readonly previous: PreviousManifest;
 }
 
 class ExtractError extends Error {
@@ -128,34 +87,17 @@ class ExtractError extends Error {
   }
 }
 
-class RcloneError extends Error {
-  readonly exitCode: number;
-
-  constructor(exitCode: number) {
-    super(`rclone exited ${exitCode}`);
-    this.name = 'RcloneError';
-    this.exitCode = exitCode;
-  }
-}
-
 function isObject(value: unknown): value is JsonObject {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function requireObject(value: unknown, where: string): JsonObject {
-  if (!isObject(value)) {
-    throw new ExtractError(`${where} must be an object`);
-  }
+  if (!isObject(value)) throw new ExtractError(`${where} must be an object`);
   return value;
 }
 
-function requireNumber(value: unknown, where: string): number {
-  if (typeof value !== 'number') {
-    throw new ExtractError(`${where} must be a number`);
-  }
-  if (!Number.isFinite(value)) {
-    throw new ExtractError(`${where} must be finite`);
-  }
+function requireList(value: unknown, where: string): Array<unknown> {
+  if (!Array.isArray(value)) throw new ExtractError(`${where} must be a list`);
   return value;
 }
 
@@ -166,279 +108,82 @@ function requireText(value: unknown, where: string): string {
   return value;
 }
 
-function optionalText(value: unknown, where: string): string | null {
-  if (value === null || value === undefined) {
-    return null;
-  }
-  if (typeof value !== 'string') {
-    throw new ExtractError(`${where} must be a string or null`);
+function requireNumber(value: unknown, where: string): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new ExtractError(`${where} must be a finite number`);
   }
   return value;
 }
 
-function requireList(value: unknown, where: string): Array<unknown> {
-  if (!Array.isArray(value)) {
-    throw new ExtractError(`${where} must be a list`);
-  }
-  return value;
+function requireInteger(value: unknown, where: string): number {
+  const number = requireNumber(value, where);
+  if (!Number.isSafeInteger(number)) throw new ExtractError(`${where} must be an integer`);
+  return number;
 }
 
-function defaultList(value: unknown): unknown {
-  return value === undefined ? [] : value;
-}
-
-function nullableProperty(record: JsonObject, key: string): unknown {
-  return record[key] === undefined ? null : record[key];
+function requireSha256(value: unknown, where: string): string {
+  const hash = requireText(value, where);
+  if (!/^[0-9a-f]{64}$/.test(hash)) throw new ExtractError(`${where} must be a SHA-256 hash`);
+  return hash;
 }
 
 function sha256(data: Uint8Array): string {
   return createHash('sha256').update(data).digest('hex');
 }
 
-function canonicalize(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map(canonicalize);
-  }
-  if (!isObject(value)) {
-    return value;
-  }
-  const sorted: JsonObject = {};
-  for (const key of Object.keys(value).sort()) {
-    sorted[key] = canonicalize(value[key]);
-  }
-  return sorted;
-}
-
-function canonicalJson(value: unknown): string {
-  const encoded = JSON.stringify(canonicalize(value));
-  if (encoded === undefined) {
-    throw new ExtractError('content cannot be represented as JSON');
-  }
-  return encoded;
-}
-
-function contentHash(value: unknown): string {
-  return createHash('sha256').update(canonicalJson(value), 'utf8').digest('hex');
+async function fileSha256(path: string): Promise<string> {
+  return sha256(await readFile(path));
 }
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-async function loadBackup(path: string): Promise<Backup> {
-  let raw: Buffer;
-  let document: unknown;
-  try {
-    raw = await readFile(path);
-    document = JSON.parse(UTF8_DECODER.decode(raw));
-  } catch (error) {
-    throw new ExtractError(`cannot read ${path}: ${errorMessage(error)}`, { cause: error });
-  }
-  const root = requireObject(document, `${path}: backup root`);
-  if (root.app !== 'note-overlay' || root.v !== 2) {
-    throw new ExtractError(`${path}: expected a note-overlay v2 backup`);
-  }
-  const books = requireList(root.books, `${path}: books`);
-  return { filename: basename(path), sha256: sha256(raw), books };
-}
-
-async function collectInputs(inputs: Array<string>): Promise<Array<string>> {
-  const paths: Array<string> = [];
-  for (const input of inputs) {
-    let information: Stats;
-    try {
-      information = await stat(input);
-    } catch (error) {
-      throw new ExtractError(`input does not exist: ${input}`, { cause: error });
-    }
-    if (information.isDirectory()) {
-      const entries = await readdir(input);
-      for (const entry of entries.filter((name) => name.endsWith('.json')).sort()) {
-        paths.push(join(input, entry));
-      }
-    } else if (information.isFile()) {
-      paths.push(input);
-    } else {
-      throw new ExtractError(`input does not exist: ${input}`);
-    }
-  }
-  if (paths.length === 0) {
-    throw new ExtractError('no JSON backups found');
-  }
-  return paths;
-}
-
 function compareText(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
-async function loadBackups(paths: Array<string>): Promise<Array<Backup>> {
-  const orderedPaths = [...paths].sort((left, right) => {
-    const filenameOrder = compareText(basename(left), basename(right));
-    return filenameOrder === 0 ? compareText(left, right) : filenameOrder;
-  });
-  const backups = new Map<string, Backup>();
-  for (const path of orderedPaths) {
-    const backup = await loadBackup(path);
-    const previous = backups.get(backup.filename);
-    if (previous !== undefined) {
-      if (previous.sha256 !== backup.sha256) {
-        throw new ExtractError(`ambiguous backups share filename '${backup.filename}'`);
-      }
-      continue;
-    }
-    backups.set(backup.filename, backup);
-  }
-  return [...backups.values()].sort((left, right) =>
-    compareText(left.filename, right.filename),
-  );
+function canonicalize(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (!isObject(value)) return value;
+  const sorted: JsonObject = {};
+  for (const key of Object.keys(value).sort()) sorted[key] = canonicalize(value[key]);
+  return sorted;
 }
 
-function selectLatestBooks(backups: Array<Backup>): Array<SelectedBook> {
-  interface RankedBook extends SelectedBook {
-    readonly modified: number;
+function safeRelativePath(value: unknown, where: string): string {
+  const path = requireText(value, where);
+  const parts = path.split('/');
+  if (isAbsolute(path) || path.includes('\\') || path.includes('\0') ||
+      parts.some((part) => part === '' || part === '.' || part === '..')) {
+    throw new ExtractError(`${where} is not a safe relative path`);
   }
-  const selected = new Map<string, RankedBook>();
-  for (const backup of backups) {
-    for (const [index, value] of backup.books.entries()) {
-      const where = `${backup.filename}: books[${index}]`;
-      const book = requireObject(value, where);
-      const bookId = requireText(book.id, `${where}.id`);
-      const modified = requireNumber(book.m, `${where}.m`);
-      const current = selected.get(bookId);
-      const isLater = current === undefined ||
-        modified > current.modified ||
-        (modified === current.modified && backup.filename > current.backup.filename);
-      if (isLater) {
-        selected.set(bookId, { book, backup, bookId, modified });
-      }
-    }
-  }
-  return [...selected.values()]
-    .sort((left, right) => compareText(left.bookId, right.bookId))
-    .map(({ book, backup, bookId }) => ({ book, backup, bookId }));
+  return path;
 }
 
-function decodeWebp(value: unknown, where: string): Buffer {
-  let encoded = requireText(value, where);
-  if (encoded.startsWith('data:')) {
-    const marker = ';base64,';
-    const markerIndex = encoded.indexOf(marker);
-    if (markerIndex < 0) {
-      throw new ExtractError(`${where} data URL must be Base64`);
-    }
-    encoded = encoded.slice(markerIndex + marker.length);
+function safeDocumentId(value: unknown, where: string): string {
+  const id = requireText(value, where);
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,255}$/.test(id) || id === '.' || id === '..') {
+    throw new ExtractError(`${where} is not a safe document ID`);
   }
-  const base64Pattern = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
-  if (!base64Pattern.test(encoded)) {
-    throw new ExtractError(`${where} is not valid Base64`);
-  }
-  const data = Buffer.from(encoded, 'base64');
-  if (data.length < 12 || data.subarray(0, 4).toString('ascii') !== 'RIFF' ||
-      data.subarray(8, 12).toString('ascii') !== 'WEBP') {
-    throw new ExtractError(`${where} does not contain a WebP image`);
-  }
-  return data;
+  return id;
 }
 
-function decodePoints(packed: Array<unknown>, where: string): Array<Point> {
-  if (packed.length === 0 || packed.length % 3 !== 0) {
-    throw new ExtractError(`${where} must contain x/y/pressure triples`);
-  }
-  const points: Array<Point> = [];
-  for (let offset = 0; offset < packed.length; offset += 3) {
-    points.push([
-      requireNumber(packed[offset], `${where}[${offset}]`),
-      requireNumber(packed[offset + 1], `${where}[${offset + 1}]`),
-      requireNumber(packed[offset + 2], `${where}[${offset + 2}]`),
-    ]);
-  }
-  return points;
-}
-
-function decodeStroke(value: unknown, where: string, index: number): Stroke {
-  const stroke = requireObject(value, where);
-  const packed = requireList(stroke.p, `${where}.p`);
-  const width = requireNumber(stroke.w, `${where}.w`);
-  const duration = requireNumber(stroke.dur, `${where}.dur`);
-  if (width <= 0 || duration < 0) {
-    throw new ExtractError(`${where} has invalid width or duration`);
-  }
-  const kind = stroke.k === undefined ? 0 : stroke.k;
-  if (typeof kind !== 'number' || !Number.isInteger(kind)) {
-    throw new ExtractError(`${where}.k must be an integer`);
-  }
-  return {
-    index,
-    kind,
-    width,
-    started_ms: requireNumber(stroke.t0, `${where}.t0`),
-    duration_ms: duration,
-    points: decodePoints(packed, `${where}.p`),
-  };
-}
-
-function decodeImage(value: unknown, where: string, index: number): DecodedImage {
-  const image = requireObject(value, where);
-  const bounds = {
-    x: requireNumber(image.x, `${where}.x`),
-    y: requireNumber(image.y, `${where}.y`),
-    w: requireNumber(image.w, `${where}.w`),
-    h: requireNumber(image.h, `${where}.h`),
-  };
-  if (bounds.w <= 0 || bounds.h <= 0) {
-    throw new ExtractError(`${where} has invalid dimensions`);
-  }
-  const data = decodeWebp(image.data, `${where}.data`);
-  return {
-    index,
-    bounds,
-    sha256: sha256(data),
-    source: {
-      package: optionalText(image.sp, `${where}.sp`),
-      title: optionalText(image.st, `${where}.st`),
-      url: optionalText(image.su, `${where}.su`),
-    },
-    data,
-    asset: '',
-  };
-}
-
-function decodePage(value: unknown, where: string): DecodedPage {
-  const page = requireObject(value, where);
-  const id = requireText(page.id, `${where}.id`);
-  const strokes = requireList(defaultList(page.s), `${where}.s`).map((stroke, index) =>
-    decodeStroke(stroke, `${where}.s[${index}]`, index),
-  );
-  const images = requireList(defaultList(page.i), `${where}.i`).map((image, index) =>
-    decodeImage(image, `${where}.i[${index}]`, index),
-  );
-  return { id, strokes, images };
-}
-
-function formatNumber(value: number): string {
-  const fixed = value.toFixed(6);
-  const formatted = fixed.replace(/0+$/, '').replace(/\.$/, '');
-  return formatted === '' || formatted === '-0' && value === 0 && !Object.is(value, -0)
-    ? '0'
-    : formatted;
+function pageName(number: number): string {
+  return number.toString().padStart(3, '0');
 }
 
 async function isFile(path: string): Promise<boolean> {
   try {
     return (await stat(path)).isFile();
   } catch (error) {
-    if (isObject(error) && error.code === 'ENOENT') {
-      return false;
-    }
+    if (isObject(error) && error.code === 'ENOENT') return false;
     throw error;
   }
 }
 
 async function writeIfChanged(path: string, data: Uint8Array): Promise<boolean> {
-  if (await isFile(path) && Buffer.compare(await readFile(path), data) === 0) {
-    return false;
-  }
+  if (await isFile(path) && Buffer.compare(await readFile(path), data) === 0) return false;
   const directory = dirname(path);
   await mkdir(directory, { recursive: true });
   const temporary = join(
@@ -455,266 +200,48 @@ async function writeIfChanged(path: string, data: Uint8Array): Promise<boolean> 
     await rename(temporary, path);
     ownsTemporary = false;
   } finally {
-    if (handle !== undefined) {
-      await handle.close().catch(() => undefined);
-    }
-    if (ownsTemporary && await isFile(temporary)) {
-      await unlink(temporary);
-    }
+    if (handle !== undefined) await handle.close().catch(() => undefined);
+    if (ownsTemporary && await isFile(temporary)) await unlink(temporary);
   }
   return true;
 }
 
-function xmlEscape(value: string): string {
-  return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-}
-
-function publicImage(image: DecodedImage): JsonObject {
-  return {
-    index: image.index,
-    bounds: image.bounds,
-    sha256: image.sha256,
-    source: image.source,
-    asset: image.asset,
-  };
-}
-
-function renderImageElement(image: DecodedImage, width: number, height: number): string {
-  const bounds = image.bounds;
-  const href = `assets/${basename(image.asset)}`;
-  return '  <image' +
-    ` x="${formatNumber(bounds.x * width)}"` +
-    ` y="${formatNumber(bounds.y * height)}"` +
-    ` width="${formatNumber(bounds.w * width)}"` +
-    ` height="${formatNumber(bounds.h * height)}"` +
-    ` href="${href}" preserveAspectRatio="none"/>`;
-}
-
-function renderStrokeElement(stroke: Stroke, width: number, height: number): string {
-  const pathData = stroke.points.map((point, index) =>
-    `${index === 0 ? 'M' : 'L'}${formatNumber(point[0] * width)} ${formatNumber(point[1] * height)}`,
-  ).join(' ');
-  return '  <path' +
-    ` d="${pathData}"` +
-    ' fill="none" stroke="#111111" stroke-linecap="round"' +
-    ' stroke-linejoin="round"' +
-    ` stroke-width="${formatNumber(stroke.width * width)}"` +
-    ` data-kind="${stroke.kind}"` +
-    ` data-started-ms="${stroke.started_ms}"` +
-    ` data-duration-ms="${stroke.duration_ms}"/>`;
-}
-
-async function renderPage(
-  output: string,
-  bookId: string,
-  page: DecodedPage,
-  width: number,
-  height: number,
-): Promise<RenderedPage> {
-  const relativeDirectory = join('review', bookId);
-  const changed: Array<string> = [];
-  const artifacts: Array<string> = [];
-  for (const image of page.images) {
-    const filename = `${page.id}-${image.index.toString().padStart(2, '0')}-${image.sha256.slice(0, 16)}.webp`;
-    const relativeAsset = join(relativeDirectory, 'assets', filename);
-    artifacts.push(relativeAsset);
-    if (await writeIfChanged(join(output, relativeAsset), image.data)) {
-      changed.push(relativeAsset);
-    }
-    image.asset = relativeAsset;
-  }
-  const metadata = xmlEscape(`note-overlay review: notebook=${bookId}; page=${page.id}`);
-  const elements = page.images.map((image) => renderImageElement(image, width, height));
-  elements.push(...page.strokes.map((stroke) => renderStrokeElement(stroke, width, height)));
-  const svg = [
-    '<?xml version="1.0" encoding="UTF-8"?>',
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" data-note-overlay-review="true">`,
-    `  <metadata>${metadata}</metadata>`,
-    `  <rect width="${width}" height="${height}" fill="white"/>`,
-    ...elements,
-    '</svg>',
-    '',
-  ].join('\n');
-  const relativeSvg = join(relativeDirectory, `${page.id}.svg`);
-  artifacts.push(relativeSvg);
-  if (await writeIfChanged(join(output, relativeSvg), Buffer.from(svg, 'utf8'))) {
-    changed.push(relativeSvg);
-  }
-  return { reviewSvg: relativeSvg, artifacts, changed };
-}
-
-function emptyPreviousManifest(): PreviousManifest {
-  return { backups: [], notebooks: [], artifacts: new Set() };
-}
-
-function parseBackupDescriptor(value: unknown, where: string): BackupDescriptor {
-  const record = requireObject(value, where);
-  return {
-    filename: requireText(record.filename, `${where}.filename`),
-    sha256: requireText(record.sha256, `${where}.sha256`),
-  };
-}
-
-function parsePreviousNotebook(value: unknown, where: string): PreviousNotebook {
-  const record = requireObject(value, where);
-  const bookId = requireText(record.id, `${where}.id`);
-  const modified = requireNumber(record.modified_ms, `${where}.modified_ms`);
-  const backup = parseBackupDescriptor(record.source_backup, `${where}.source_backup`);
-  const artifacts: Array<string> = [];
-  for (const [pageIndex, rawPage] of requireList(record.pages, `${where}.pages`).entries()) {
-    const page = requireObject(rawPage, `${where}.pages[${pageIndex}]`);
-    artifacts.push(requireText(page.review_svg, `${where}.pages[${pageIndex}].review_svg`));
-    const images = requireList(defaultList(page.images), `${where}.pages[${pageIndex}].images`);
-    for (const [imageIndex, rawImage] of images.entries()) {
-      const image = requireObject(rawImage, `${where}.pages[${pageIndex}].images[${imageIndex}]`);
-      artifacts.push(requireText(image.asset, `${where}.pages[${pageIndex}].images[${imageIndex}].asset`));
-    }
-  }
-  return { bookId, modified, backup, record, artifacts };
-}
-
-async function loadPreviousManifest(
-  path: string,
-  width: number,
-  height: number,
-): Promise<PreviousManifest> {
-  const artifacts = new Set<string>();
-  if (!await isFile(path)) return emptyPreviousManifest();
-  try {
-    const manifest: unknown = JSON.parse(UTF8_DECODER.decode(await readFile(path)));
-    if (!isObject(manifest)) return emptyPreviousManifest();
-    if (Array.isArray(manifest.artifacts)) {
-      for (const item of manifest.artifacts) {
-        if (typeof item === 'string') artifacts.add(item);
-      }
-    }
-    if (manifest.schema !== MANIFEST_SCHEMA) return { backups: [], notebooks: [], artifacts };
-    const canvas = requireObject(manifest.canvas, 'previous manifest.canvas');
-    if (requireNumber(canvas.width, 'previous manifest.canvas.width') !== width ||
-        requireNumber(canvas.height, 'previous manifest.canvas.height') !== height) {
-      return { backups: [], notebooks: [], artifacts };
-    }
-    const backups = requireList(manifest.backups, 'previous manifest.backups')
-      .map((item, index) => parseBackupDescriptor(item, `previous manifest.backups[${index}]`));
-    const notebooks = requireList(manifest.notebooks, 'previous manifest.notebooks')
-      .map((item, index) => parsePreviousNotebook(item, `previous manifest.notebooks[${index}]`));
-    return { backups, notebooks, artifacts };
-  } catch {
-    return { backups: [], notebooks: [], artifacts };
-  }
-}
-
-function assertSafeArtifact(relative: string): void {
-  const parts = relative.split('/');
-  if (isAbsolute(relative) || parts.includes('..') || parts[0] !== 'review') {
-    throw new ExtractError(`unsafe artifact path in previous manifest: ${relative}`);
-  }
-}
-
-async function removeStaleArtifacts(output: string, stale: Set<string>): Promise<Array<string>> {
-  const removed: Array<string> = [];
-  for (const relative of [...stale].sort()) {
-    assertSafeArtifact(relative);
-    const target = join(output, relative);
-    if (await isFile(target)) {
-      await unlink(target);
-      removed.push(relative);
-    }
-  }
-  return removed;
-}
-
-function isLaterThanPrevious(selected: SelectedBook, previous: PreviousNotebook): boolean {
-  const modified = requireNumber(selected.book.m, `notebook ${selected.bookId}.m`);
-  return modified > previous.modified ||
-    (modified === previous.modified && selected.backup.filename > previous.backup.filename);
-}
-
-function mergeBackupDescriptors(
-  previous: Array<BackupDescriptor>,
-  added: Array<Backup>,
-): Array<BackupDescriptor> {
-  const merged = new Map<string, BackupDescriptor>();
-  for (const backup of [...previous, ...added]) merged.set(backup.filename, backup);
-  return [...merged.values()].sort((left, right) => compareText(left.filename, right.filename));
-}
-
-async function extract({
-  backups,
-  output,
-  source,
-  width,
-  height,
-  previous,
-}: ExtractInput): Promise<[number, number, number]> {
-  const manifestPath = join(output, 'manifest.json');
-  const currentArtifacts = new Set<string>();
-  const changed: Array<string> = [];
-  const notebooks: Array<JsonObject> = [];
-  const previousById = new Map(previous.notebooks.map((notebook) => [notebook.bookId, notebook]));
-  const selectedBooks = selectLatestBooks(backups).filter((selected) => {
-    const old = previousById.get(selected.bookId);
-    return old === undefined || isLaterThanPrevious(selected, old);
+async function run(command: string, args: Array<string>): Promise<string> {
+  const { promise, resolve: settle, reject } = Promise.withResolvers<number>();
+  const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+  const stdout: Array<Buffer> = [];
+  const stderr: Array<Buffer> = [];
+  let stdoutSize = 0;
+  let stderrSize = 0;
+  let outputExceeded = false;
+  let didTimeout = false;
+  const timeout = setTimeout(() => {
+    didTimeout = true;
+    child.kill('SIGKILL');
+  }, COMMAND_TIMEOUT_MS);
+  child.stdout.on('data', (chunk: Buffer) => {
+    stdoutSize += chunk.length;
+    if (stdoutSize <= MAX_COMMAND_OUTPUT) stdout.push(chunk);
+    else outputExceeded = true;
   });
-  const selectedIds = new Set(selectedBooks.map((selected) => selected.bookId));
-  for (const old of previous.notebooks) {
-    if (selectedIds.has(old.bookId)) continue;
-    notebooks.push(old.record);
-    for (const artifact of old.artifacts) currentArtifacts.add(artifact);
+  child.stderr.on('data', (chunk: Buffer) => {
+    stderrSize += chunk.length;
+    if (stderrSize <= MAX_COMMAND_OUTPUT) stderr.push(chunk);
+    else outputExceeded = true;
+  });
+  child.once('error', (error) => reject(new ExtractError(`cannot run ${command}: ${errorMessage(error)}`)));
+  child.once('exit', (code) => settle(code ?? 1));
+  const exitCode = await promise.finally(() => clearTimeout(timeout));
+  const errorOutput = Buffer.concat(stderr).toString('utf8').trim();
+  if (didTimeout) {
+    throw new ExtractError(`${command} timed out after ${COMMAND_TIMEOUT_MS}ms`);
   }
-  for (const { book, backup, bookId } of selectedBooks) {
-    const pages = requireList(book.pages, `notebook ${bookId}: pages`);
-    const pageRecords: Array<JsonObject> = [];
-    const seenPages = new Set<string>();
-    for (const [pageIndex, rawPage] of pages.entries()) {
-      const page = decodePage(rawPage, `notebook ${bookId}: pages[${pageIndex}]`);
-      if (seenPages.has(page.id)) {
-        throw new ExtractError(`duplicate page ID ${page.id} in notebook ${bookId}`);
-      }
-      seenPages.add(page.id);
-      const rendered = await renderPage(output, bookId, page, width, height);
-      for (const artifact of rendered.artifacts) currentArtifacts.add(artifact);
-      changed.push(...rendered.changed);
-      pageRecords.push({
-        id: page.id,
-        index: pageIndex,
-        zettel_id: `note-overlay-${page.id}`,
-        content_sha256: contentHash(rawPage),
-        review_svg: rendered.reviewSvg,
-        strokes: page.strokes,
-        images: page.images.map(publicImage),
-      });
-    }
-    notebooks.push({
-      id: bookId,
-      title: optionalText(book.n, `notebook ${bookId}.n`),
-      created_ms: nullableProperty(book, 'c'),
-      modified_ms: book.m,
-      notebook_type: nullableProperty(book, 't'),
-      order: nullableProperty(book, 'o'),
-      content_sha256: contentHash(book),
-      source_backup: { filename: backup.filename, sha256: backup.sha256 },
-      pages: pageRecords,
-    });
+  if (outputExceeded) throw new ExtractError(`${command} produced too much output`);
+  if (exitCode !== 0) {
+    const detail = errorOutput.length === 0 ? '' : `: ${errorOutput}`;
+    throw new ExtractError(`${command} exited ${exitCode}${detail}`);
   }
-  notebooks.sort((left, right) =>
-    compareText(requireText(left.id, 'notebook.id'), requireText(right.id, 'notebook.id'))
-  );
-  const allBackups = mergeBackupDescriptors(previous.backups, backups);
-  const manifest = {
-    schema: MANIFEST_SCHEMA,
-    source,
-    canvas: { width, height, units: 'px' },
-    latest_processed_backup: allBackups.at(-1)?.filename ?? null,
-    backups: allBackups.map((backup) => ({ filename: backup.filename, sha256: backup.sha256 })),
-    artifacts: [...currentArtifacts].sort(),
-    notebooks,
-  };
-  const stale = new Set([...previous.artifacts].filter((item) => !currentArtifacts.has(item)));
-  const removed = await removeStaleArtifacts(output, stale);
-  const manifestBytes = Buffer.from(`${JSON.stringify(canonicalize(manifest), null, 2)}\n`, 'utf8');
-  if (await writeIfChanged(manifestPath, manifestBytes)) changed.push('manifest.json');
-  return [changed.length, currentArtifacts.size + 1 - changed.length, removed.length];
+  return Buffer.concat(stdout).toString('utf8');
 }
 
 function expandPath(value: string): string {
@@ -723,27 +250,23 @@ function expandPath(value: string): string {
   return value;
 }
 
-function positiveDimension(value: string, flag: string): number {
-  if (!/^[+-]?\d+$/.test(value.trim())) {
-    throw new ExtractError(`${flag}: must be an integer`);
-  }
-  const dimension = Number(value);
-  if (!Number.isSafeInteger(dimension) || dimension <= 0) {
+function positiveInteger(value: string, flag: string): number {
+  if (!/^\d+$/.test(value)) throw new ExtractError(`${flag}: must be an integer`);
+  const number = Number(value);
+  if (!Number.isSafeInteger(number) || number <= 0) {
     throw new ExtractError(`${flag}: must be positive`);
   }
-  return dimension;
+  return number;
 }
 
 function usage(): string {
   return 'Usage: bun extract_note_overlay.ts [--drive] [--output DIRECTORY] ' +
-    '[--width PIXELS] [--height PIXELS] [BACKUP ...]';
+    '[--remote REMOTE] [--rclone COMMAND] [--dpi DPI] [PDF_OR_DIRECTORY ...]';
 }
 
 function optionValue(args: Array<string>, index: number, flag: string): string {
   const value = args[index + 1];
-  if (value === undefined) {
-    throw new ExtractError(`${flag} requires a value`);
-  }
+  if (value === undefined) throw new ExtractError(`${flag} requires a value`);
   return value;
 }
 
@@ -753,8 +276,7 @@ function parseOptions(args: Array<string>): Options | null {
   let remote = DEFAULT_REMOTE;
   let rclone = 'rclone-drive';
   let output = expandPath(DEFAULT_OUTPUT);
-  let width = 1000;
-  let height = 1414;
+  let dpi = 180;
   for (let index = 0; index < args.length; index += 1) {
     const argument = args[index];
     if (argument === '--help' || argument === '-h') {
@@ -763,13 +285,12 @@ function parseOptions(args: Array<string>): Options | null {
     }
     if (argument === '--drive') {
       isDrive = true;
-    } else if (argument === '--output' || argument === '--width' || argument === '--height' ||
+    } else if (argument === '--output' || argument === '--dpi' ||
         argument === '--remote' || argument === '--rclone') {
       const value = optionValue(args, index, argument);
       index += 1;
       if (argument === '--output') output = expandPath(value);
-      if (argument === '--width') width = positiveDimension(value, argument);
-      if (argument === '--height') height = positiveDimension(value, argument);
+      if (argument === '--dpi') dpi = positiveInteger(value, argument);
       if (argument === '--remote') remote = value;
       if (argument === '--rclone') rclone = value;
     } else if (argument?.startsWith('-')) {
@@ -779,65 +300,414 @@ function parseOptions(args: Array<string>): Options | null {
     }
   }
   if (isDrive && inputs.length > 0) {
-    throw new ExtractError('use either --drive or explicit BACKUP inputs, not both');
+    throw new ExtractError('use either --drive or explicit PDF inputs, not both');
   }
   if (!isDrive && inputs.length === 0) {
-    throw new ExtractError('supply --drive or at least one BACKUP input');
+    throw new ExtractError('supply --drive or at least one PDF or directory input');
   }
-  return { inputs, isDrive, remote, rclone, output, width, height };
+  return { inputs, isDrive, remote, rclone, output, dpi };
 }
 
-async function copyDrive(options: Options): Promise<void> {
-  const mirror = join(options.output, 'raw');
-  await mkdir(mirror, { recursive: true });
-  const args = [
-    'copy', options.remote, mirror,
-    '--filter', '+ note-overlay-backup-*.json',
-    '--filter', '- *',
-    '--immutable',
-  ];
-  const { promise, resolve: resolveExit, reject } = Promise.withResolvers<number>();
-  const child = spawn(options.rclone, args, { stdio: 'inherit' });
-  child.once('error', reject);
-  child.once('exit', (code) => resolveExit(code ?? 1));
-  const exitCode = await promise;
-  if (exitCode !== 0) throw new RcloneError(exitCode);
+function parseDriveDocument(value: unknown, index: number, output: string): SourceDocument {
+  const where = `Drive listing[${index}]`;
+  const item = requireObject(value, where);
+  const path = safeRelativePath(item.Path, `${where}.Path`);
+  const name = requireText(item.Name, `${where}.Name`);
+  const id = safeDocumentId(item.ID, `${where}.ID`);
+  const size = requireInteger(item.Size, `${where}.Size`);
+  if (size < 0 || !name.toLowerCase().endsWith('.pdf')) {
+    throw new ExtractError(`${where} is not a valid PDF entry`);
+  }
+  requireText(item.MimeType, `${where}.MimeType`);
+  const hashes = requireObject(item.Hashes, `${where}.Hashes`);
+  return {
+    id,
+    path,
+    title: name,
+    size,
+    modTime: requireText(item.ModTime, `${where}.ModTime`),
+    rawPath: join(output, 'raw', ...path.split('/')),
+    expectedSha256: requireSha256(hashes.sha256, `${where}.Hashes.sha256`),
+  };
+}
+
+async function driveDocuments(options: Options): Promise<Array<SourceDocument>> {
+  const listing = await run(options.rclone, [
+    'lsjson', options.remote, '--recursive', '--files-only', '--hash',
+    '--filter', '+ **.pdf', '--filter', '- *',
+  ]);
+  let decoded: unknown;
+  try {
+    decoded = JSON.parse(listing);
+  } catch (error) {
+    throw new ExtractError(`cannot parse Drive listing: ${errorMessage(error)}`, { cause: error });
+  }
+  const documents = requireList(decoded, 'Drive listing')
+    .map((item, index) => parseDriveDocument(item, index, options.output));
+  const ids = new Set<string>();
+  const paths = new Set<string>();
+  for (const document of documents) {
+    if (ids.has(document.id)) throw new ExtractError(`duplicate Drive document ID: ${document.id}`);
+    if (paths.has(document.path)) throw new ExtractError(`duplicate Drive path: ${document.path}`);
+    ids.add(document.id);
+    paths.add(document.path);
+  }
+  await mkdir(join(options.output, 'raw'), { recursive: true });
+  await run(options.rclone, [
+    'copy', options.remote, join(options.output, 'raw'), '--checksum',
+    '--filter', '+ **.pdf', '--filter', '- *',
+  ]);
+  for (const document of documents) {
+    if (!await isFile(document.rawPath)) {
+      throw new ExtractError(`Drive PDF was not copied: ${document.path}`);
+    }
+    const actual = await fileSha256(document.rawPath);
+    if (actual !== document.expectedSha256) {
+      throw new ExtractError(`SHA-256 mismatch for Drive PDF: ${document.path}`);
+    }
+  }
+  return documents.sort((left, right) => compareText(left.id, right.id));
+}
+
+async function discoverDirectory(
+  directory: string,
+  prefix: string,
+  found: Array<{ absolute: string; relative: string }>,
+): Promise<void> {
+  const entries = await readdir(directory, { withFileTypes: true });
+  entries.sort((left, right) => compareText(left.name, right.name));
+  for (const entry of entries) {
+    const absolute = join(directory, entry.name);
+    const normalized = prefix.length === 0 ? entry.name : `${prefix}/${entry.name}`;
+    if (entry.isDirectory()) await discoverDirectory(absolute, normalized, found);
+    else if (entry.isFile() && entry.name.toLowerCase().endsWith('.pdf')) {
+      found.push({ absolute, relative: normalized });
+    }
+  }
+}
+
+async function localDocuments(inputs: Array<string>): Promise<Array<SourceDocument>> {
+  const found: Array<{ absolute: string; relative: string }> = [];
+  for (const input of inputs) {
+    const absolute = resolve(input);
+    let information: Stats;
+    try {
+      information = await stat(absolute);
+    } catch (error) {
+      throw new ExtractError(`input does not exist: ${input}`, { cause: error });
+    }
+    if (information.isDirectory()) {
+      await discoverDirectory(absolute, '', found);
+    } else if (information.isFile() && absolute.toLowerCase().endsWith('.pdf')) {
+      found.push({ absolute, relative: basename(absolute) });
+    } else {
+      throw new ExtractError(`input is not a PDF file or directory: ${input}`);
+    }
+  }
+  if (found.length === 0) throw new ExtractError('no PDF files found');
+  const documents: Array<SourceDocument> = [];
+  const ids = new Set<string>();
+  const paths = new Set<string>();
+  for (const item of found.sort((left, right) => compareText(left.relative, right.relative))) {
+    if (paths.has(item.absolute)) continue;
+    const normalized = safeRelativePath(item.relative.split(sep).join('/'), 'local PDF path');
+    const id = safeDocumentId(sha256(`local:${normalized}`), 'local document ID');
+    if (ids.has(id)) throw new ExtractError(`duplicate local PDF path: ${normalized}`);
+    const information = await stat(item.absolute);
+    ids.add(id);
+    paths.add(item.absolute);
+    documents.push({
+      id,
+      path: normalized,
+      title: basename(normalized),
+      size: information.size,
+      modTime: information.mtime.toISOString(),
+      rawPath: item.absolute,
+      expectedSha256: null,
+    });
+  }
+  return documents.sort((left, right) => compareText(left.id, right.id));
+}
+
+function parseDimensions(match: RegExpMatchArray, where: string): PageDimensions {
+  const width = Number(match[1]);
+  const height = Number(match[2]);
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    throw new ExtractError(`${where} has invalid page dimensions`);
+  }
+  return { width, height };
+}
+
+async function describePdf(path: string): Promise<PdfDescription> {
+  const output = await run('pdfinfo', ['-f', '1', '-l', MAX_PAGES.toString(), path]);
+  const pageMatch = output.match(/^Pages:\s+(\d+)\s*$/m);
+  if (pageMatch === null) throw new ExtractError(`pdfinfo did not report a page count: ${path}`);
+  const pageCount = Number(pageMatch[1]);
+  if (!Number.isSafeInteger(pageCount) || pageCount <= 0 || pageCount > MAX_PAGES) {
+    throw new ExtractError(`PDF page count is outside 1..${MAX_PAGES}: ${path}`);
+  }
+  const dimensions = new Map<number, PageDimensions>();
+  let common: PageDimensions | null = null;
+  for (const line of output.split('\n')) {
+    const individual = line.match(/^Page\s+(\d+) size:\s+([0-9.]+) x ([0-9.]+) pts/);
+    if (individual !== null) {
+      const number = Number(individual[1]);
+      const size = line.match(/size:\s+([0-9.]+) x ([0-9.]+) pts/);
+      if (size !== null) dimensions.set(number, parseDimensions(size, `page ${number}`));
+      continue;
+    }
+    const general = line.match(/^Page size:\s+([0-9.]+) x ([0-9.]+) pts/);
+    if (general !== null) common = parseDimensions(general, path);
+  }
+  const result: Array<PageDimensions> = [];
+  for (let number = 1; number <= pageCount; number += 1) {
+    const size = dimensions.get(number) ?? common;
+    if (size === undefined || size === null) {
+      throw new ExtractError(`pdfinfo did not report dimensions for page ${number}: ${path}`);
+    }
+    result.push(size);
+  }
+  return { pageCount, dimensions: result };
+}
+
+function parsePreviousPage(value: unknown, where: string): PreviousPage {
+  const page = requireObject(value, where);
+  const dimensionsValue = requireObject(page.dimensions, `${where}.dimensions`);
+  const dimensions = {
+    width: requireNumber(dimensionsValue.width_pt, `${where}.dimensions.width_pt`),
+    height: requireNumber(dimensionsValue.height_pt, `${where}.dimensions.height_pt`),
+  };
+  return {
+    id: requireText(page.id, `${where}.id`),
+    number: requireInteger(page.number, `${where}.number`),
+    zettelId: requireText(page.zettel_id, `${where}.zettel_id`),
+    contentSha256: requireSha256(page.content_sha256, `${where}.content_sha256`),
+    reviewSha256: requireSha256(page.review_sha256, `${where}.review_sha256`),
+    dimensions,
+    reviewPath: safeRelativePath(page.review_path, `${where}.review_path`),
+    transcriptionPath: safeRelativePath(
+      page.transcription_path,
+      `${where}.transcription_path`,
+    ),
+  };
+}
+
+function parsePreviousDocument(value: unknown, where: string): PreviousDocument {
+  const document = requireObject(value, where);
+  return {
+    id: safeDocumentId(document.id, `${where}.id`),
+    sha256: requireSha256(document.sha256, `${where}.sha256`),
+    pages: requireList(document.pages, `${where}.pages`)
+      .map((page, index) => parsePreviousPage(page, `${where}.pages[${index}]`)),
+  };
+}
+
+async function loadPreviousManifest(path: string, dpi: number): Promise<PreviousManifest> {
+  const empty: PreviousManifest = { documents: [], artifacts: new Set<string>() };
+  if (!await isFile(path)) return empty;
+  try {
+    const root = requireObject(JSON.parse(UTF8_DECODER.decode(await readFile(path))), 'manifest');
+    const artifacts = new Set<string>();
+    for (const item of requireList(root.artifacts, 'manifest.artifacts')) {
+      artifacts.add(safeRelativePath(item, 'manifest artifact'));
+    }
+    if (root.schema !== MANIFEST_SCHEMA || root.dpi !== dpi) return { documents: [], artifacts };
+    const documents = requireList(root.documents, 'manifest.documents')
+      .map((document, index) => parsePreviousDocument(document, `manifest.documents[${index}]`));
+    return { documents, artifacts };
+  } catch {
+    return empty;
+  }
+}
+
+async function validReview(path: string, expectedSha256: string): Promise<boolean> {
+  return await isFile(path) && await fileSha256(path) === expectedSha256;
+}
+
+async function processDocument(
+  document: SourceDocument,
+  actualSha256: string,
+  description: PdfDescription | null,
+  previous: PreviousDocument | undefined,
+  output: string,
+  dpi: number,
+  temporary: string,
+): Promise<{ record: JsonObject; artifacts: Array<string>; changed: number }> {
+  const unchanged = previous !== undefined && previous.sha256 === actualSha256 &&
+    previous.pages.length > 0;
+  if (unchanged && description === null) {
+    const artifacts: Array<string> = [];
+    for (const page of previous.pages) {
+      if (!await validReview(join(output, page.reviewPath), page.reviewSha256)) {
+        throw new ExtractError(`declared review PNG is missing or invalid: ${page.reviewPath}`);
+      }
+      artifacts.push(page.reviewPath);
+    }
+    const record: JsonObject = {
+      id: document.id,
+      path: document.path,
+      title: document.title,
+      sha256: actualSha256,
+      size: document.size,
+      mod_time: document.modTime,
+      raw_path: document.rawPath,
+      page_count: previous.pages.length,
+      pages: previous.pages.map((page) => ({
+        id: page.id,
+        number: page.number,
+        zettel_id: page.zettelId,
+        content_sha256: page.contentSha256,
+        review_sha256: page.reviewSha256,
+        dimensions: { width_pt: page.dimensions.width, height_pt: page.dimensions.height },
+        review_path: page.reviewPath,
+        transcription_path: page.transcriptionPath,
+      })),
+    };
+    return { record, artifacts, changed: 0 };
+  }
+  if (description === null) throw new ExtractError(`missing PDF description: ${document.rawPath}`);
+  const splitDirectory = join(temporary, document.id);
+  await mkdir(splitDirectory, { recursive: true });
+  await run('pdfseparate', [
+    document.rawPath,
+    join(splitDirectory, 'page-%d.pdf'),
+  ]);
+  const previousPages = new Map((previous?.pages ?? []).map((page) => [page.number, page]));
+  const pages: Array<JsonObject> = [];
+  const artifacts: Array<string> = [];
+  let changed = 0;
+  for (let number = 1; number <= description.pageCount; number += 1) {
+    const dimensions = description.dimensions[number - 1];
+    if (dimensions === undefined) throw new ExtractError(`missing dimensions for page ${number}`);
+    const splitPath = join(splitDirectory, `page-${number}.pdf`);
+    const contentSha256 = await fileSha256(splitPath);
+    const old = previousPages.get(number);
+    const name = pageName(number);
+    const reviewPath = `review/${document.id}/page-${name}.png`;
+    const reviewAbsolute = join(output, reviewPath);
+    let reviewSha256 = old?.reviewSha256;
+    if (old === undefined || old.contentSha256 !== contentSha256 ||
+        reviewSha256 === undefined || !await validReview(reviewAbsolute, reviewSha256)) {
+      await mkdir(dirname(reviewAbsolute), { recursive: true });
+      const renderedBase = join(splitDirectory, `review-${name}`);
+      await run('pdftoppm', [
+        '-singlefile', '-png', '-r', dpi.toString(), splitPath, renderedBase,
+      ]);
+      const rendered = `${renderedBase}.png`;
+      if (!await isFile(rendered)) throw new ExtractError(`pdftoppm did not create page ${number}`);
+      if (await writeIfChanged(reviewAbsolute, await readFile(rendered))) changed += 1;
+      reviewSha256 = await fileSha256(reviewAbsolute);
+    }
+    const id = `${document.id}-page-${name}`;
+    const zettelId = `note-overlay-${sha256(document.id).slice(0, 16)}-${name}`;
+    const transcriptionPath = `transcriptions/${zettelId}.md`;
+    pages.push({
+      id,
+      number,
+      zettel_id: zettelId,
+      content_sha256: contentSha256,
+      review_sha256: reviewSha256,
+      dimensions: { width_pt: dimensions.width, height_pt: dimensions.height },
+      review_path: reviewPath,
+      transcription_path: transcriptionPath,
+    });
+    artifacts.push(reviewPath);
+  }
+  return {
+    record: {
+      id: document.id,
+      path: document.path,
+      title: document.title,
+      sha256: actualSha256,
+      size: document.size,
+      mod_time: document.modTime,
+      raw_path: document.rawPath,
+      page_count: description.pageCount,
+      pages,
+    },
+    artifacts,
+    changed,
+  };
+}
+
+function assertSafeReviewArtifact(path: string): void {
+  const safe = safeRelativePath(path, 'previous manifest artifact');
+  if (!safe.startsWith('review/') || !(safe.endsWith('.png') || safe.endsWith('.svg'))) {
+    throw new ExtractError(`unsafe review artifact in previous manifest: ${path}`);
+  }
 }
 
 async function main(): Promise<void> {
   const options = parseOptions(process.argv.slice(2));
   if (options === null) return;
-  let inputs = options.inputs;
-  let source: Source = { type: 'local' };
-  if (options.isDrive) {
-    await copyDrive(options);
-    inputs = [join(options.output, 'raw')];
-    source = { type: 'drive', remote: options.remote };
+  const manifestPath = join(options.output, 'manifest.json');
+  const previous = await loadPreviousManifest(manifestPath, options.dpi);
+  const documents = options.isDrive
+    ? await driveDocuments(options)
+    : await localDocuments(options.inputs);
+  const previousById = new Map(previous.documents.map((document) => [document.id, document]));
+  const temporary = await mkdtemp(join(tmpdir(), 'note-overlay-'));
+  try {
+    const records: Array<JsonObject> = [];
+    const artifacts = new Set<string>();
+    let changed = 0;
+    for (const document of documents) {
+      const actualSha256 = await fileSha256(document.rawPath);
+      if (document.expectedSha256 !== null && actualSha256 !== document.expectedSha256) {
+        throw new ExtractError(`SHA-256 mismatch for PDF: ${document.path}`);
+      }
+      const old = options.isDrive ? previousById.get(document.id) : undefined;
+      let unchanged = old?.sha256 === actualSha256;
+      if (old !== undefined && unchanged) {
+        for (const page of old.pages) {
+          if (!await validReview(join(options.output, page.reviewPath), page.reviewSha256)) {
+            unchanged = false;
+            break;
+          }
+        }
+      }
+      const description = unchanged ? null : await describePdf(document.rawPath);
+      const result = await processDocument(
+        document,
+        actualSha256,
+        description,
+        old,
+        options.output,
+        options.dpi,
+        temporary,
+      );
+      records.push(result.record);
+      for (const artifact of result.artifacts) artifacts.add(artifact);
+      changed += result.changed;
+    }
+    let removed = 0;
+    for (const artifact of [...previous.artifacts].sort()) {
+      if (artifacts.has(artifact)) continue;
+      assertSafeReviewArtifact(artifact);
+      const path = join(options.output, artifact);
+      if (await isFile(path)) {
+        await unlink(path);
+        removed += 1;
+      }
+    }
+    const manifest = {
+      schema: MANIFEST_SCHEMA,
+      source: options.isDrive
+        ? { type: 'drive', remote: options.remote }
+        : { type: 'local' },
+      dpi: options.dpi,
+      artifacts: [...artifacts].sort(),
+      documents: records,
+    };
+    const bytes = Buffer.from(`${JSON.stringify(canonicalize(manifest), null, 2)}\n`, 'utf8');
+    if (await writeIfChanged(manifestPath, bytes)) changed += 1;
+    console.log(
+      `Processed ${documents.length} PDFs. Wrote ${changed} changed artifacts; ` +
+      `removed ${removed} stale review artifacts. Manifest: ${manifestPath}`,
+    );
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
   }
-  const previous = options.isDrive
-    ? await loadPreviousManifest(
-        join(options.output, 'manifest.json'), options.width, options.height,
-      )
-    : emptyPreviousManifest();
-  const paths = await collectInputs(inputs);
-  const processedFilenames = new Set(previous.backups.map((backup) => backup.filename));
-  const pendingPaths = options.isDrive
-    ? paths.filter((path) => !processedFilenames.has(basename(path)))
-    : paths;
-  const backups = await loadBackups(pendingPaths);
-  const [changed, unchanged, removed] = await extract({
-    backups,
-    output: options.output,
-    source,
-    width: options.width,
-    height: options.height,
-    previous,
-  });
-  console.log(
-    `Parsed ${backups.length} new backups. Wrote ${changed} changed artifacts; ` +
-    `${unchanged} unchanged; removed ${removed} stale. ` +
-    `Manifest: ${join(options.output, 'manifest.json')}`,
-  );
 }
 
 try {
