@@ -2,6 +2,8 @@
 {
   modules.hjem.default.imports = with config.modules.hjem; [
     home-base
+    battlenet-umu-implementation
+    battlenet-umu
     agents
     quint
     bend-implementation

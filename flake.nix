@@ -24,6 +24,7 @@
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
     nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-unstable";
+    nixpkgs-vesktop.url = "github:NixOS/nixpkgs/master";
     gulix = {
       url = "github:LukeTandjung/gulix";
       inputs.nixpkgs.follows = "nixpkgs";

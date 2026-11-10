@@ -1,10 +1,14 @@
-{ ... }:
+{ inputs, ... }:
 {
   modules.hjem.vesktop = { pkgs, theme, ... }:
     let
       base = if pkgs.stdenv.hostPlatform.isDarwin then "Library/Application Support/vesktop" else ".config/vesktop";
+      vesktop = pkgs.vesktop.override {
+        withSystemVencord = true;
+        vencord = inputs.nixpkgs-vesktop.legacyPackages.${pkgs.stdenv.hostPlatform.system}.vencord;
+      };
     in {
-      packages = [ pkgs.vesktop ];
+      packages = [ vesktop ];
       files = {
         "${base}/themes/stylix.css".text = theme.render ./theme.css.mustache {
           font-family = theme.font;
