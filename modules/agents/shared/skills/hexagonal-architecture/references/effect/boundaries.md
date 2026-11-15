@@ -6,9 +6,9 @@ Read for schemas and public/adapter error handling. Examples reuse the model fro
 ## 1. Decode before dispatch; encode before transport
 
 ```typescript
-// example: api/contracts.ts -> api/main/archive-contract.ts
+// example: services/invoices/http/archive-contract.ts
 import { Schema } from 'effect';
-import { InvoiceId } from 'core';
+import { InvoiceId } from '../core';
 
 export const ArchiveRequest = Schema.Struct({ invoiceId: InvoiceId });
 export const ArchiveReply = Schema.Struct({ invoiceId: InvoiceId });
@@ -42,7 +42,7 @@ not a fresh value hidden inside a retried handler.
 - Derive TypeScript types from schemas; preserve brands internally.
 - Do not reparse trusted values at every function call. New computations may still
   need new invariants checked (ranges, state transitions, cross-field constraints).
-- Keep API DTOs at the edge. Map fields explicitly into app inputs; no payload spreads.
+- Keep transport DTOs (`http/`, `queue/`) at the edge. Map fields explicitly into app inputs; no payload spreads.
 - Bound incoming bodies/strings/arrays/page sizes before expensive work.
 - Collect independent validation failures before writes when callers benefit from
   seeing them together; do not accumulate failures by continuing dependent writes.
@@ -50,9 +50,9 @@ not a fresh value hidden inside a retried handler.
 ## 2. Separate recovery from presentation
 
 App composition owns `catchTag`/`catchTags` recovery policy. Adapters translate
-vendor failures into port errors; API/impl projects unresolved failures into these
-public schemas without choosing business fallbacks. See [error policy](errors.md)
-for a complete app recovery example and exhaustive public projection.
+vendor failures into port errors; inbound boundaries (`http/`, `queue/`) project
+unresolved failures into public schemas without choosing business fallbacks. See
+[error policy](errors.md) for a complete app recovery example and exhaustive projection.
 
 ## 3. One use case, multiple surfaces—not one DTO everywhere
 

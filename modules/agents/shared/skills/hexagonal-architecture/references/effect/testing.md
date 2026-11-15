@@ -7,11 +7,16 @@ not need an Effect wrapper.
 
 ## 1. A fresh, behaviorally honest in-memory adapter
 
+Build an in-memory port fixture when `app/` owns meaningful branching, batch
+recovery, or retry logic that benefits from fast isolated permutations. When an
+operation is thin over SQL, skip 1-to-1 fake stores and test against real
+PostgreSQL directly.
+
 ```typescript
-// example: fixtures/invoices.ts -> adapters/test/fixtures/invoices.ts
+// example: services/invoices/tests/fixtures/invoices.ts
 import { Context, Effect, Layer, Option } from 'effect';
-import type { ArchiveWrite, Invoice } from 'core';
-import { InvoiceChanged, InvoiceSession } from 'ports';
+import type { ArchiveWrite, Invoice } from '../../core';
+import { InvoiceChanged, InvoiceSession } from '../../ports';
 
 export class InvoiceProbe extends Context.Service<InvoiceProbe, {
   readonly events: Effect.Effect<ReadonlyArray<ArchiveWrite>>;
@@ -52,14 +57,14 @@ properties from tests against it.
 ## 2. Test behavior, not how many helper calls occurred
 
 ```typescript
-// example: tests/invoice.test.ts -> app/test/archive-invoice.test.ts
+// example: services/invoices/tests/archive-invoice.test.ts
 import { expect, it } from '@effect/vitest';
 import { Effect, Layer, Schema } from 'effect';
-import { EventId, InvoiceId } from 'core';
-import { archiveInvoice } from 'app/archive';
-import { archiveItem } from 'app/archive-item';
-import { InvoiceSession, InvoiceStoreFailure } from 'ports';
-import { InvoiceProbe, invoiceTestLayer } from 'fixtures/invoices';
+import { EventId, InvoiceId } from '../core';
+import { archiveInvoice } from '../app/archive';
+import { archiveItem } from '../app/archive-item';
+import { InvoiceSession, InvoiceStoreFailure } from '../ports';
+import { InvoiceProbe, invoiceTestLayer } from './fixtures/invoices';
 
 const invoiceId = Schema.decodeUnknownSync(InvoiceId)('00000000-0000-4000-8000-000000000001');
 const eventId = Schema.decodeUnknownSync(EventId)('00000000-0000-4000-8000-000000000002');
@@ -125,12 +130,12 @@ PostgreSQL for transaction rollback, constraints, and racing writes.
 ## 3. Virtual time proves a retry budget
 
 ```typescript
-// example: tests/retry.test.ts -> app/test/lookup-policy.test.ts
+// example: services/lookups/tests/lookup-policy.test.ts
 import { expect, it } from '@effect/vitest';
 import { Effect, Fiber, Ref } from 'effect';
 import { TestClock } from 'effect/testing';
-import { retryLookup } from 'app/retry';
-import { LookupUnavailable } from 'ports/lookup';
+import { retryLookup } from '../app/retry-policy';
+import { LookupUnavailable } from '../ports';
 
 it.effect('stops after the initial lookup plus three retries', () => Effect.gen(function* () {
   const attempts = yield* Ref.make(0);
@@ -153,7 +158,7 @@ Do not let a real network timeout substitute for a deterministic policy test.
 ## 4. Cleanup is observable behavior
 
 ```typescript
-// example: tests/scope.test.ts -> adapters/test/resource-lifetime.test.ts
+// example: platform/provider/tests/resource-lifetime.test.ts
 import { expect, it } from '@effect/vitest';
 import { Effect, Ref, Schema } from 'effect';
 

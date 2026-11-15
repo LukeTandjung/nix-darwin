@@ -1,131 +1,183 @@
 # Boundary rules
 
-Read for ownership decisions or cross-layer reviews. For directories use
-[layouts](layout.md); for code select the [Effect recipes](typescript-effect.md).
+Read for rank placement, DDD boundaries, ownership decisions, or dependency
+reviews. For directory trees use [layouts](layout.md); for Effect code select
+the [Effect recipes](typescript-effect.md).
+
+## Strategic DDD: ranks, deep modules, and language
+
+- **Sink shared capabilities downward (Ousterhout + Rust crate granularity):**
+  separate general-purpose mechanisms and shared domain capabilities from
+  product-surface orchestration. When two `services/*` need the same capability
+  (for example, resilient product-page reading, price math, or rate-limited API
+  calls), extract one deep `domain/*` or `platform/*` module with a narrow
+  public interface instead of duplicating shallow versions inside each service.
+- **One Ubiquitous Language, context-shaped types:** use exact domain terms
+  consistently across the codebase (`business` vs `tenant`, `candidate` vs
+  `canonical`), while keeping each module's types narrow and specific to its
+  bounded responsibility. Do not pass one repo-wide god-entity across every
+  module or reuse HTTP/queue DTOs as internal domain models.
+- **Deploy plane vs runtime plane:** keep `infra/` (deploy time) strictly above
+  and separate from `platform/` (request/job time).
 
 ## Vocabulary
 
-- **Port:** an application-owned contract for a needed capability.
-- **Adapter:** an implementation translating an external system into that port.
-- **Use case:** app orchestration that loads facts, asks core to decide, and invokes ports.
-- **Domain event:** a published fact about service-owned state—not a requirement
-  for event sourcing or a DDD framework.
+- **Inbound trigger (`http/`, `queue/`, `workflows/`):** protocol entry that
+  decodes external input, calls `app/`, and maps results/failures to wire output.
+- **Use case (`app/`):** orchestration that loads facts, asks `core/` to decide
+  when rules branch, invokes `ports/` or `adapters/`, and owns recovery policy.
+- **Port (`ports/`):** an application-owned contract for an external, stubbable,
+  or cross-service capability.
+- **Adapter (`adapters/`):** concrete I/O implementation (SQL/ORM, HTTP client,
+  outbound queue producer/outbox writer, or in-memory test fixture).
+- **Composition root (Rank 0 `app/`):** process-level wiring that mounts inbound
+  triggers, supplies pools/Layers/transactions, and bridges sibling services.
 
-Prefer functions and records. Service/tag classes declare Effect capabilities;
-Rust structs/traits express data and contracts, not business-object hierarchies.
-Use state unions and intent names where they clarify rules. Do not import DDD
-machinery merely because an example uses that vocabulary.
+Prefer functions, records, and discriminated unions. Service/tag classes declare
+Effect runtime capabilities; Rust structs/traits express data and contracts, not
+object-oriented entity hierarchies.
 
 ## Who owns what?
 
 | Concern | Owner | Not here |
 | --- | --- | --- |
-| Transport input/output, status codes | API | Core, app, persistence DTOs |
-| Validated IDs, pure schemas, decisions | Core | Clock reads, I/O, logging, mutable globals |
-| Needed storage/network capability | Ports | SQL, clients, concrete Layers |
-| Loading facts and executing decisions | App | Vendor APIs or hidden business rules in adapters |
-| SQL, row decoding, guarded writes | Persistence adapter | Separate repository layer |
-| HTTP requests and remote error translation | HTTP adapter | App's business policy |
-| Choosing concrete implementations | Impl | Core/app or static production Layers on ports |
-| Runtime/transaction/process lifetime | Impl, using adapter mechanics | Detached background work |
+| Cloud resources, IaC stacks, build/deploy | `infra/` | `platform/`, runtime modules |
+| Process startup, pools, sibling-service bridges | Rank 0 `bin/` + `app/` | Business rules, raw SQL |
+| Wire DTO decode/encode, status codes, acks | `http/` or `queue/` | `core/`, `app/`, `adapters/` |
+| Deterministic durable step sequencing | `workflows/` | Direct DB/HTTP I/O, complex branching rules |
+| Validated IDs, pure schemas, invariants, decisions | `core/` | Clock reads, I/O, logging, `process.env` |
+| Multi-impl / stubbable / sibling capability contract | `ports/` | SQL, SDK clients, concrete Layers, 1-impl wrappers |
+| Loading facts, orchestrating steps, recovery policy | Module `app/` | Vendor SDKs, SQL queries, HTTP status codes |
+| Co-located `schema.ts`, SQL queries, HTTP/queue I/O | `adapters/` | Separate repository layer, cross-module table writes |
 
-### API
+### Deploy plane (`infra/`) vs runtime `platform/`
 
-Decode untrusted input, map explicitly to app inputs, and encode output through
-the declared public schema. Public errors have intentional codes/status/details;
-raw internal causes never become public JSON. API types do not become convenient
-shared internal types. Re-export service-owned ID schemas when callers need them.
+Use a 2-second test to separate them:
 
-API contract modules do not import app implementations. Bind handlers to app
-operations in `impl/`; the transport framework may perform decoding/encoding.
-Rust API owns public caller-facing traits, implemented by `impls/`, never forwarding
-functions that import `impls/`. Caller-facing API traits are distinct from ports.
+- **`platform/` runs at request/job time** inside the live process (opening a
+  Postgres pool, checking a Redis rate limit, calling a third-party HTTP API).
+- **`infra/` runs at deploy time** (`alchemy deploy`, `terraform apply`) to
+  provision cloud resources (databases, queues, buckets, secrets) and bundle or
+  deploy `bin/` entrypoints.
 
-### Core and app
+`infra/` lives inside the workspace (`workspaces/infra/`, `src/infra/`, or
+`crates/infra/`) so it shares typechecking, linting, and tests—never inside
+`platform/`. Because `infra/` points **downward** at `bin/` entrypoints,
+`migrations/`, and shared env/queue-name contracts in `platform/config`, placing
+IaC inside Rank 3 `platform/` would invert the dependency graph and risk leaking
+deploy-only SDKs or cloud-admin credentials into production bundles.
+
+- **Zero upward imports:** runtime code (`bin/`, `app/`, `services/`, `domain/`,
+  `platform/`) never imports `infra/`. The application runs identically under
+  Alchemy, Terraform, Docker Compose, or a test runner.
+- **Crossing the boundary at `bin/`:**
+  - **Node / Docker / ECS:** `infra/` injects `process.env` and secrets; `bin/`
+    parses them once at startup via `platform/config` before calling `app/`.
+  - **Cloudflare Workers (Alchemy):** `infra/` binds queues, R2, D1, or
+    Hyperdrive onto the Worker `env`; `bin/worker.ts` receives `env` at the
+    outer handler, wraps raw bindings through `platform/*` adapters, and passes
+    clean capabilities into `app/` and `services/*`.
+
+### Inbound triggers (`http/`, `queue/`, `workflows/`)
+
+`http/`, `queue/`, and `workflows/` are strictly inbound into module `app/`.
+Decode untrusted input at the edge, map explicitly to `app/` inputs, and project
+unresolved failures to intentional public codes/statuses or queue ack/retry
+decisions without leaking raw internal causes.
+
+**Prevent inbound/outbound queue cycles:** `queue/` contains **inbound consumers
+only** (decoding messages and calling `app/`). Outbound queue producers and
+outbox writers live in `adapters/`, and shared message payload schemas live in
+`core/` (or `domain/*` when published by one service and consumed by another).
+`app/` never imports `http/`, `queue/`, or `workflows/`.
+
+### Core, app, and earning inner layers
 
 ```text
 request + loaded facts + runtime values
                  |
                  v
-          pure core decision
+      pure core decision (when rules branch)
                  |
                  v
-        app executes that decision
+     app executes & owns recovery policy
 ```
 
-Business decisions live in core; app may branch on absence, port failures, and
-which decision was returned. Aggregate recovery/fallback policy at the app's
-composition point instead of catching and rethrowing in each helper. Adapters
-still translate vendor failures into owned port errors; API boundaries present
-unresolved failures. Translation and presentation do not own business recovery. Core receives time, generated IDs, and authorization
-facts as data. App does not need a new service class for each use-case function.
+- Put genuine branching decisions, invariants, parsers, and state transitions in
+  `core/`. Receive time, generated IDs, and actor permissions as explicit data.
+- When an operation has no pure branching rule (for example, a bounded read or
+  straightforward write), do not invent a pass-through `decide*` function in
+  `core/` just to satisfy ceremony.
+- Define intent-specific operations (`archiveInvoice`), not generic CRUD update
+  bags. Aggregate `catchTag`/`catchTags` recovery at `app/` composition rather
+  than catching and rethrowing in every helper.
 
-Define intent-specific operations such as `archiveInvoice`, not generic updates
-that hide different rules. Do not introduce `handlers/`, `commands/`, or `queries/`
-as generic app buckets. Keep concepts within the existing layer folders.
-
-### Ports and adapters
-
-- Bundle methods by a cohesive capability; neither one-method ceremony nor god ports.
-- Describe absence, ordering, limits, consistency, conflicts, and replay guarantees.
-- Persistence ports expose domain values, not SQL/query builders or driver errors.
-- Adapters decode rows, including IDs, and map vendor failures to owned errors.
-- Private SQL helpers may live inside the adapter. No public repository layer.
-- Transactional calls use an actual transaction or transaction-scoped capability;
-  never `{}` placeholders or a generic `UnitOfWork` framework.
-- An intentionally non-transactional reader is a distinct explicit capability.
-- Adapter state belongs to an instance/Layer construction, not a module-global Map.
-
-## What requires a port?
+### When does a capability need `ports/`?
 
 ```text
-External/runtime capability?  clock, filesystem, database, network, randomness
-                              -> application-owned port + adapter
+Multiple implementations, paid/external API stub,  -> port in ports/ + impls in adapters/
+sibling-service callback, or rich app unit fixture?
 
-Pure in-process library?      parser, codec, compiler, algorithm, UI calculation
-                              -> import in the responsible layer
+Module-owned SQL tested against real Postgres,     -> concrete functions/Layer in adapters/
+or shared Rank 2/3 module (`domain/*`, `platform/*`)?  (no pass-through port needed)
+
+Pure in-process library (parser, math, codec)?     -> import directly in the owning layer
 ```
 
-A dependency's package origin is not itself a reason for a wrapper. Avoid shallow
-pass-through layers. Standard Effect services can satisfy runtime needs without
-inventing project-specific copies.
+- Bundle port methods by cohesive capability; avoid both one-method tags and god ports.
+- Describe absence, ordering, limits, consistency, conflicts, and replay guarantees.
+- Stateful modules co-locate their table definitions (`adapters/schema.ts`),
+  re-exported so migration tooling, foreign keys, and cross-module read `JOIN`s
+  work on the shared `public` database namespace without N+1 wrapper ceremony
+  (sink shared tables to `domain/*` so Rank 1 `services/*` import them downward).
+  **Writes remain strictly single-owner:** never `INSERT`, `UPDATE`, or `DELETE`
+  another module's tables directly.
+- Adapters decode rows (including branded IDs) and translate vendor errors into
+  module-owned error types. There is no separate repository layer.
+- Adapter state belongs to an instance/Layer construction, never a module-global `Map`.
 
-## Dependency direction
+### Sibling-service decoupling and preventing Rank 0 `app/` bloat
 
-| Layer | May import | Must not import |
+- `services/A` must never import `services/B`. When `A` must trigger `B`
+  synchronously, `services/A/ports/` defines a narrow callback contract in `A`'s
+  language and Rank 0 `app/` bridges it to `services/B`. When communication is
+  asynchronous, move the shared event schema to `domain/*`.
+- Keep Rank 0 `app/` thin: each module exposes cohesive public operations,
+  constructors, or Layers from its root barrel (`index.ts` / `lib.rs`) so Rank 0
+  `app/` wires shared pools, credentials, transactions, and cross-service
+  bridges—not internal module helpers.
+
+## Path-based dependency rules
+
+| Path scope | May import | Must not import |
 | --- | --- | --- |
-| API | Core boundary types, transport framework | App implementation, adapters |
-| Core | Pure type/validation/algorithm libraries | I/O, runtime services, adapters |
-| Ports | Core, service-contract declarations | Adapters, DB clients, impl, own API DTOs |
-| App | Core, ports, appropriate in-process libraries | Adapters, impl, workflow runtime |
-| Adapters | Ports, core, infrastructure | App business decisions |
-| Events | Core, pure codecs | Impl, adapters, downstream implementations |
-| Publisher | Event contracts, queue infrastructure | App/impl internals |
-| Workflows | Deterministic app sequencing, activity contracts | DB clients, activity implementations |
-| Impl | Layers needed for composition | Business decisions |
+| `infra/**` | `platform/config`, `bin/*` entrypoints | Runtime internals for execution |
+| Outside `<rank>/<mod>/` | `<rank>/<mod>` root barrel (`<rank>/<mod>/workflows` for workers) | `<rank>/<mod>/{core,ports,adapters,app,http,queue}/*` |
+| `bin/**`, `app/**` (Rank 0) | `services/*`, `domain/*`, `platform/*` | `infra/`, module internals bypassing root barrels |
+| `services/<A>/**` (Rank 1) | `domain/*`, `platform/*` | `services/<B>/**`, `app/`, `bin/`, `infra/` |
+| `domain/<A>/**` (Rank 2) | Lower `domain/<B>` (acyclic), `platform/*` | `services/*`, `app/`, `bin/`, `infra/` |
+| `platform/<A>/**` (Rank 3) | Lower `platform/<B>` (acyclic) | `domain/*`, `services/*`, `app/`, `bin/`, `infra/` |
+| Inside `<rank>/<mod>/` | `{http,queue,workflows} -> app -> {ports,adapters} -> core` | Reverse arrows; `core/` importing I/O or runtime services |
 
-Enforce imports with tooling when practical, including barrel re-exports. Test
-both allowed and forbidden examples of the rule; checking one directory spelling
-is not proof that a boundary cannot be bypassed.
+Enforce these rules mechanically with path-based lint or Cargo workspace checks,
+testing both allowed and forbidden imports (including re-exports).
 
 ## Types retain their evidence
 
-The owner of an ID owns its schema/type; other services consume that public
-boundary contract instead of inventing duplicate brands. Parse HTTP/RPC/event/DB
-values once. Use valid deterministic IDs in tests. Do not widen trusted values to
-`unknown`, serialize/reparse them internally, or assert a lost type back into place.
-New calculations and patches must establish any new cross-field invariants.
-Explicitly map fields across representation boundaries; spreads are fine within
-a layer when they preserve its invariants.
+The module owning an entity owns its branded ID schema/newtype and re-exports it
+from its root barrel; consumers reuse that contract rather than inventing
+duplicate brands. Parse untrusted HTTP, queue, RPC, and DB inputs once at the
+boundary. Do not widen validated values to `unknown`, reparse them internally,
+or cast lost types back into place. Map fields explicitly across representation
+boundaries; spreads are fine within a layer when invariants hold.
 
-## Migration without a big-bang rewrite
+## Incremental migration
 
-1. Extract pure decisions and values.
-2. Define ports for real external capabilities.
-3. Move existing SQL/row decoding into adapters; remove repository forwarding.
-4. Move orchestration into app and implementation selection into impl.
-5. Add atomic outbox handling for required durable external effects.
-6. Thin workflows and remove outbox-only workflow schedulers.
-
-Preserve behavior at each step. Stop adding layers when they provide no hidden
-complexity or independent responsibility.
+1. Sink duplicated cross-service logic into deep `domain/*` or `platform/*` modules.
+2. Collapse unnecessary `api/`, per-module `impl/`, `main/`, and repository
+   wrappers behind a clean root barrel (`index.ts` / `lib.rs`).
+3. Extract pure branching decisions and branded types into `core/`.
+4. Move SQL/row decoding and external clients into `adapters/`; keep `ports/`
+   only where multiple implementations or stubs earn their keep.
+5. Separate inbound `queue/` consumers from outbound `adapters/` producers.
+6. Move process composition and transaction/bridge wiring to Rank 0 `app/`.

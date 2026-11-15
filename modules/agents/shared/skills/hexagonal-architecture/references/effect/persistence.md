@@ -5,18 +5,27 @@ Read for SQL/write paths. Requires the model in [flow](flow.md) and port in
 
 ## 1. Put SQL and row decoding inside the adapter
 
-This example assumes service-owned migrations create `invoice` (UUID primary key,
-status, integer version, `created_at_ms`, nullable `archived_at_ms`) and `invoice_outbox` (unique
-UUID event ID, invoice ID, JSONB payload). Every relevant invoice change increments
-`version`. No SQL escapes this adapter and no repository wrapper is required.
+This example assumes a single linear `migrations/` history for the PostgreSQL
+database creates `invoice` (UUID primary key, status, integer version,
+`created_at_ms`, nullable `archived_at_ms`) and `invoice_outbox` (unique UUID
+event ID, invoice ID, JSONB payload) from `services/invoices/adapters/schema.ts`.
+While table schemas may be exposed for foreign keys and read joins,
+`services/invoices` is the sole write-owner of both tables, and every relevant
+invoice mutation increments `version`. No write SQL escapes `adapters/` and no
+repository wrapper exists.
+
+Define a persistence port in `ports/` when `app/` has genuine branching/recovery
+worth testing against an in-memory fixture; for thin SQL-backed operations tested
+against real PostgreSQL, expose concrete functions/Layers from `adapters/` without
+a 1-to-1 pass-through port.
 
 ```typescript
-// example: adapters/session.ts -> adapters/main/postgres/invoice-session.ts
+// example: services/invoices/adapters/postgres-session.ts
 import { Effect, Layer, Option, Schema } from 'effect';
 import { SqlClient } from 'effect/sql';
-import { Invoice, InvoiceId } from 'core';
-import type { ArchiveWrite } from 'core';
-import { InvoiceChanged, InvoiceSession, InvoiceStoreFailure } from 'ports';
+import { Invoice, InvoiceId } from '../core';
+import type { ArchiveWrite } from '../core';
+import { InvoiceChanged, InvoiceSession, InvoiceStoreFailure } from '../ports';
 
 const decodeInvoices = Schema.decodeUnknownEffect(Schema.Array(Invoice));
 const decodeUpdated = Schema.decodeUnknownEffect(Schema.Array(Schema.Struct({ id: InvoiceId })));
@@ -86,24 +95,22 @@ outbox event ID is supplied, not generated during the write or dispatch retry.
 Do not suppress an event-ID collision unless reconciliation proves it is the same
 logical operation. An insert failure must fail the surrounding transaction.
 Local `mapError` translates each I/O phase; it does not recover. Keep write failures
-failed until rollback completes. App-owned recovery can then be applied by impl
-outside the transaction wrapper; catching them as success inside it risks a partial commit.
+failed until rollback completes. App-owned recovery can then be applied outside
+the transaction wrapper; catching them as success inside it risks a partial commit.
 
 The constructor guard detects missing transaction wiring, a programmer defect.
 It does **not** enforce lifetime after construction: never retain this session or
 use its methods after the enclosing transaction, including from detached fibers.
 A fake transaction marker would provide no safety.
 
-## 2. Impl owns the transaction boundary
+## 2. Rank 0 `app/` owns the transaction boundary
 
 ```typescript
-// example: impl/transaction.ts -> impl/main/transaction.ts
+// example: app/invoices.ts (Rank 0 composition root)
 import { Effect } from 'effect';
 import { SqlClient, SqlError } from 'effect/sql';
-import { archiveInvoice } from 'app/archive';
-import type { ArchiveFailure } from 'app/archive';
-import type { ArchiveInput, InvoiceId } from 'core';
-import { invoiceSessionPostgresLayer } from 'adapters/session';
+import { archiveInvoice, invoiceSessionPostgresLayer } from '../services/invoices';
+import type { ArchiveFailure, ArchiveInput, InvoiceId } from '../services/invoices';
 
 export const archiveInTransaction = Effect.fn('Invoices.archiveTransaction')(
   (input: ArchiveInput): Effect.Effect<
@@ -117,7 +124,7 @@ export const archiveInTransaction = Effect.fn('Invoices.archiveTransaction')(
 );
 ```
 
-The concrete SQL driver Layer comes from the outer impl composition. Building a
+The concrete SQL driver Layer comes from Rank 0 `app/` composition. Building a
 Layer does not open a transaction: `withTransaction` does. The session Layer is
 provided within each operation, not memoized as a process singleton. Never open
 independent transactions inside `find` and `archive`.

@@ -1,7 +1,7 @@
 # Effect: start here
 
-**Use Luke's folders and the traced `fn` + `gen(...).pipe(...)` hybrid.** This
-page is the entry point, not a request to load every recipe below.
+**Use Luke's ranked modules and the traced `fn` + `gen(...).pipe(...)` hybrid.**
+This page is the entry point, not a request to load every recipe below.
 
 ## The coding shape
 
@@ -44,8 +44,9 @@ that policy outside the transaction, or handle only proven pre-write refusals.
   composition point; use `catchTag`/`catchTags` there for deliberate fallbacks or
   aggregation. Do not add handlers merely to log and rethrow unchanged errors.
 - Adapters still translate vendor failures with localized `mapError` where the
-  operation has one meaning. API/impl maps unresolved failures to public responses.
-  Translation and presentation are not business recovery. See [error policy](effect/errors.md).
+  operation has one meaning. Inbound protocol boundaries (`http/`, `queue/`) map
+  unresolved failures to public responses. Translation and presentation are not
+  business recovery. See [error policy](effect/errors.md).
 
 ## Load by task
 
@@ -81,7 +82,8 @@ may execute many requests and must be disposed by its owner.
 
 Check the project's manifest/lockfile and matching Effect `LLMS.md`/source before
 using an unfamiliar API. These recipes target **Effect 4.0.0**; they are not an
-Effect 3 migration guide. Example module labels map to Luke's canonical folders;
-imports such as `core` and `ports` mean their public barrels. Typechecking and
-in-memory tests do not prove real database isolation, live HTTP behavior, or
-production shutdown semantics; verify those against the actual integrations.
+Effect 3 migration guide. Example paths follow Luke's canonical folders; inside a
+module, layers import sibling barrels (`../core`, `../ports`), never their own
+root `index.ts`, while external callers import only the module's root barrel.
+Typechecking and in-memory tests do not prove real database isolation, live HTTP
+behavior, or production shutdown semantics; verify those against the actual integrations.

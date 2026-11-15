@@ -7,9 +7,9 @@ Read when deciding what a failure means for the use case. Values/ports come from
 ## One recovery owner, not a catch at every layer
 
 ```text
-adapter: translate vendor failure -> owned port failure (still failed)
-   app: compose operations -> one recovery/aggregation policy
-   API: unresolved failure -> safe public representation (still failed)
+adapter:    translate vendor failure -> owned port failure (still failed)
+app:        compose operations -> one recovery/aggregation policy
+http/queue: unresolved failure -> safe public representation (still failed)
 ```
 
 This applies Ousterhout's error aggregation: reduce the number of places making
@@ -22,8 +22,8 @@ same failure at every function on the path.
 | Domain decisions | Pure core outcomes; app turns them into expected failures where needed |
 | Vendor-to-port translation | Adapter-local `mapError`; preserve useful cause and reason |
 | Recovery, fallback, aggregation | App composition's `catchTag` / `catchTags` |
-| Public response classification | Exhaustive pure projection + `mapError` at API/impl boundary |
-| Final reporting of unresolved failures/defects | Owning runtime/integration boundary |
+| Public response classification | Exhaustive pure projection + `mapError` at `http/` or `queue/` boundary |
+| Final reporting of unresolved failures/defects | Rank 0 `app/` / runtime integration boundary |
 
 Let an already-correct typed error propagate unchanged. If a driver needs tag-specific
 translation, handle it at that adapter seam rather than leak the vendor types inward;
@@ -37,11 +37,11 @@ still fails for those cases. This is an explicit product contract, not a blanket
 "ignore errors" helper. Conflicts and storage failures remain failures.
 
 ```typescript
-// example: app/archive-item.ts -> app/main/invoices/archive-item.ts
+// example: services/invoices/app/archive-item.ts
 import { Effect } from 'effect';
-import { archiveInvoice } from 'app/archive';
-import type { ArchiveInput, InvoiceId } from 'core';
-import type { InvoiceChanged, InvoiceSession, InvoiceStoreFailure } from 'ports';
+import { archiveInvoice } from './archive';
+import type { ArchiveInput, InvoiceId } from '../core';
+import type { InvoiceChanged, InvoiceSession, InvoiceStoreFailure } from '../ports';
 
 export type ArchiveItemResult =
   | { readonly kind: 'archived'; readonly invoiceId: InvoiceId }
@@ -70,8 +70,8 @@ export const archiveItem = Effect.fn('Invoices.archiveItem')(
 These two refusals happen **before writes**. Do not recover a post-mutation failure
 into success inside an active transaction: that could commit partial work. Let it
 fail through the transaction wrapper first. Recovery that requires rollback runs
-outside that wrapper; app can define the policy and impl apply it to the composed
-transactional Effect. Keep vendor transaction mechanics out of app.
+outside that wrapper; module `app/` can define the policy and Rank 0 `app/` can
+apply it outside the composed transactional Effect. Keep vendor transaction mechanics out of module `app/`.
 
 The explicit remaining error union makes a newly unhandled failure visible to the
 compiler. Do not re-fail unchanged errors just to list every tag in `catchTags`.
@@ -79,13 +79,13 @@ compiler. Do not re-fail unchanged errors just to list every tag in `catchTags`.
 ## Public presentation is not another recovery decision
 
 ```typescript
-// example: impl/public-archive.ts -> impl/main/public-archive.ts
+// example: services/invoices/http/public-archive.ts
 import { Effect, Match } from 'effect';
-import { archiveInvoice } from 'app/archive';
-import type { ArchiveFailure } from 'app/archive';
-import type { PublicArchiveError } from 'api/contracts';
-import type { ArchiveInput, InvoiceId } from 'core';
-import type { InvoiceSession } from 'ports';
+import { archiveInvoice } from '../app';
+import type { ArchiveFailure } from '../app';
+import type { PublicArchiveError } from './archive-contract';
+import type { ArchiveInput, InvoiceId } from '../core';
+import type { InvoiceSession } from '../ports';
 
 const publicArchiveError = (error: ArchiveFailure, requestId: string): PublicArchiveError =>
   Match.value(error).pipe(
@@ -116,9 +116,10 @@ export const archiveForApi = Effect.fn('Invoices.archiveForApi')(
 This projection intentionally distinguishes tags; it does not retry, fallback, or
 change failure into success. `Match.tagsExhaustive` rejects new unclassified failures;
 it projects an error value, while app's `catchTags` handles the Effect error channel.
-Binding belongs in impl: API contract modules do not import app implementations or
-app errors. A real handler additionally classifies transaction acquisition/commit
-failures, authentication, and decoding, and invokes app under an actual transaction.
+Route handlers in `http/` project module `app/` errors without leaking wire DTOs
+inward; Rank 0 `app/` supplies concrete Layers and transactions. A real handler
+additionally classifies transaction acquisition/commit failures, authentication,
+and decoding, and invokes the operation under an actual transaction.
 
 ## Safety rules
 

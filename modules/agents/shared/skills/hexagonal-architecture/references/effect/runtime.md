@@ -1,12 +1,12 @@
 # Runtime: dependencies, bounds, and owners
 
 Read only the sections relevant to configuration, HTTP, retries, or resource/runtime
-ownership. Keep business decisions in core and production selection in impl.
+ownership. Keep business decisions in `core/` and production selection in Rank 0 `app/`.
 
 ## Configuration is supplied, not ambient
 
 ```typescript
-// example: ports/settings.ts -> ports/main/delivery-settings.ts
+// example: services/delivery/ports/settings.ts
 import { Context } from 'effect';
 
 export class DeliverySettings extends Context.Service<DeliverySettings, {
@@ -15,9 +15,9 @@ export class DeliverySettings extends Context.Service<DeliverySettings, {
 ```
 
 ```typescript
-// example: adapters/config.ts -> adapters/main/config/delivery-settings.ts
+// example: services/delivery/adapters/config.ts
 import { Config, Effect, Layer, Schema } from 'effect';
-import { DeliverySettings } from 'ports/settings';
+import { DeliverySettings } from '../ports';
 
 const concurrencySchema = Schema.Int.check(
   Schema.isGreaterThanOrEqualTo(1), Schema.isLessThanOrEqualTo(32),
@@ -32,15 +32,15 @@ export const deliverySettingsLayer = Layer.effect(
 );
 ```
 
-The contract stays in `ports/`; the parsing Layer stays in `adapters/`. Parse
-when the Layer builds, not on every method call. Use `ConfigProvider` for parsing
-tests and `Layer.succeed(DeliverySettings, ...)` when testing business behavior.
-Keep credentials redacted; never read `process.env` in core or app.
+Process entrypoints (`bin/`) parse startup environment once via `platform/config`
+(or a `Config` Layer like this). Parse when the Layer/process starts, not on every
+method call. Use `ConfigProvider` for parsing tests and `Layer.succeed(DeliverySettings, ...)`
+when testing business behavior. Keep credentials redacted; never read `process.env` in `core/` or `app/`.
 
 ## HTTP requires status *and* body validation
 
 ```typescript
-// example: adapters/http.ts -> adapters/main/http/provider-version.ts
+// example: platform/provider/adapters/version-client.ts
 import { Effect, Schema } from 'effect';
 import { HttpClient, HttpClientResponse } from 'effect/http';
 
@@ -80,7 +80,7 @@ HttpClient to test this decoder rather than replacing the whole adapter.
 ## Bound active work and replay separately
 
 ```typescript
-// example: ports/lookup.ts -> ports/main/lookup-errors.ts
+// example: services/lookups/ports/lookup.ts
 import { Schema } from 'effect';
 
 export class LookupUnavailable extends Schema.TaggedError<LookupUnavailable>()(
@@ -89,9 +89,9 @@ export class LookupUnavailable extends Schema.TaggedError<LookupUnavailable>()(
 ```
 
 ```typescript
-// example: app/retry.ts -> app/main/lookups/retry-policy.ts
+// example: services/lookups/app/retry-policy.ts
 import { Cause, Effect, Schedule } from 'effect';
-import { LookupUnavailable } from 'ports/lookup';
+import { LookupUnavailable } from '../ports';
 
 const MAX_RETRY_COUNT = 3;
 const ATTEMPT_TIMEOUT_MS = 1_000;
@@ -153,8 +153,8 @@ signal. Keep database statement timeouts as well as request budgets.
 
 - CLI/executable: the platform's `runMain` at the entry point.
 - Native Effect HTTP/workflow integration: return an Effect; let that bridge run it.
-- Foreign Promise-based framework: one owned `ManagedRuntime` from the impl Layer,
-  reuse `runtime.runPromise` for requests, `await runtime.dispose()` on shutdown.
+- Foreign Promise-based framework: one owned `ManagedRuntime` from the Rank 0 `app/`
+  Layer, reuse `runtime.runPromise` for requests, `await runtime.dispose()` on shutdown.
 - Tests: Effect-aware runner; manual execution only at a genuinely non-Effect test edge.
 
 Do not rebuild the full Layer graph per request or call `runPromise` inside adapters.
@@ -164,7 +164,7 @@ immutable data only with an explicit key, authorization boundary, expiry, and bu
 Use meaningful names on the default `Effect.fn('name')` boundary and safe correlation
 attributes. Do not add an identical `withSpan` inside it; reserve `withSpan` for a
 useful additional sub-operation. A created span is not proof telemetry was exported;
-exporter startup/flushing belongs to impl.
+exporter startup/flushing belongs to `bin/` / Rank 0 `app/`.
 Do not attach raw payloads, credentials, or high-cardinality secrets.
 
 Credits: [configuration](https://ratstack.sh/lore/configuration-is-a-dependency),

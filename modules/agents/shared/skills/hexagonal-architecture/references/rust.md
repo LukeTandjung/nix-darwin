@@ -4,49 +4,56 @@ When assisting a learner, explain the direction, relevant traits/types, and
 documentation rather than supplying a finished implementation. The snippets here
 communicate boundaries only.
 
-## Crate boundary and layout
+## Ranked workspace and crate layout
 
-Each crate represents one cohesive service or one cohesive product feature. Do
-not split a feature into separate core, port, adapter, FFI, or UI crates merely
-to enforce dependency direction; enforce those boundaries with modules inside
-the owning crate.
+Favour small, deep crates arranged into the workspace layers inside `crates/`:
+optional `crates/infra/*` (deploy/IaC tooling), `crates/apps/*` (Rank 0 binaries
+& composition root), `crates/services/*` (Rank 1 vertical features),
+`crates/domain/*` (Rank 2 shared domain capabilities), and `crates/platform/*`
+(Rank 3 technical & vendor mechanisms).
+
+Never split a single capability into separate `-core`, `-ports`, `-adapters`,
+or `-api` crates merely to enforce dependency direction. Enforce inner layer
+boundaries with private `mod` declarations inside `src/lib.rs`, selectively
+re-exporting only the crate's public surface (`pub use`).
 
 ```text
-crates/{service-or-feature}/
+crates/services/{service}/
 ├── Cargo.toml
 ├── src/
-│   ├── api/          # when an external boundary exists
-│   ├── core/         # when pure decisions exist
-│   ├── ports/
-│   ├── app/
-│   ├── adapters/
-│   ├── impls/
-│   ├── lib.rs
-│   └── main.rs       # when executable
-└── tests/
-    ├── core/
-    ├── app/
-    ├── adapters/
-    └── impls/
+│   ├── lib.rs          # private `mod`s + selective `pub use` barrel
+│   ├── core/           # pure types, newtypes, enums, decisions
+│   ├── ports/          # [optional] narrow traits for external/stubbable capabilities
+│   ├── adapters/       # SQL/HTTP/queue implementations & test fixtures
+│   ├── app/            # use-case functions & recovery policy
+│   ├── http/           # [optional] route handlers & wire DTOs
+│   ├── queue/          # [optional] inbound message consumers
+│   └── workflows/      # [optional] durable workflow definitions
+└── tests/              # integration & layer tests (no inline tests in src/)
 ```
+
+`domain/*` and `platform/*` crates omit unused inner modules (for example, a
+pure domain crate contains only `src/lib.rs`, `src/core/`, and `tests/`). Note
+that naming an internal module `mod core;` works inside `src/lib.rs`; if macro
+expansions inside that crate ever need Rust's built-in `no_std` crate, refer to
+`::core::...` (or `std::...`).
 
 Keep production code and tests physically separate: production modules under
 `src/` must not contain inline `#[cfg(test)] mod tests` blocks. Put tests under
-`tests/`, organized by the architectural layer they exercise. Omit directories
-for layers that do not earn their existence.
+`tests/` at the crate root.
 
 ## Mapping
 
-| Architecture     | Rust representation                                         |
-| ---------------- | ----------------------------------------------------------- |
-| Core             | pure functions, enums, newtypes                             |
-| Port             | application-owned trait                                     |
-| Adapter          | struct or closure implementing a port trait                 |
-| Use case         | function generic over narrow port traits                    |
-| API              | public trait plus API-facing boundary types                  |
-| Wiring           | `impls/` composition root constructing concrete adapters     |
-| Expected error   | explicit `Result<T, E>` with service-owned error enum       |
-| Broken invariant | panic only when truly unrecoverable/programmer error        |
+| Architecture | Rust representation |
+| --- | --- |
+| Public module surface | `src/lib.rs` with private inner `mod`s and narrow `pub use` |
+| Core | Pure functions, state enums, validated newtypes |
+| Port (when needed) | Application-owned trait in `ports/` |
+| Adapter | Concrete struct/functions in `adapters/` (implements port when one exists) |
+| Use case | Function (or cohesive service struct) in `app/` |
+| Composition root | Binary crate in `crates/apps/*` wiring pools, routes, and bridges |
+| Expected error | Explicit `Result<T, E>` with crate-owned error enum |
+| Broken invariant | `panic!` / `assert!` only for programmer defects |
 
 ## Libraries and capability boundaries
 
@@ -73,57 +80,30 @@ appropriate to that layer. For example:
 - Reading monotonic time crosses a `Clock` port. A `SystemClock` adapter may use
   `Instant::now()`, while core receives the resulting timestamp explicitly.
 
-## API traits
+## Crate boundary (`src/lib.rs`) — no `api/` + `impls/` ceremony
 
-`api/` owns public interface traits and API-facing configuration, request,
-result, and error types. These caller-facing traits are not ports: ports are
-inward-facing contracts for capabilities app use cases need. `impls/` defines
-concrete types that implement API traits, maps API contracts into app
-operations, and constructs concrete adapters as the composition root.
-
-```text
-caller -> API trait
-             ^
-             | implements
-          Impl type
-             |
-             +-> app
-             +-> adapters
-```
-
-Reject API-to-implementation forwarding:
+Do **not** create separate `api/` traits (`pub trait EditorApi`) and `impls/`
+structs (`pub struct EditorApiImpl`) for single-implementation crates. Rust's
+module privacy (`mod` vs `pub use`) enforces encapsulation directly without
+double indirection:
 
 ```rust
-// api/
-pub fn create_editor(/* ... */) {
-    crate::impls::create_editor(/* ... */)
-}
+// crates/domain/editor/src/lib.rs
+mod adapters;
+mod app;
+mod core;
+mod ports;
+
+pub use app::{create_editor, CreateEditorError};
+pub use core::{DocumentId, EditorConfig, EditorSession};
+pub use ports::Clipboard;
 ```
 
-Prefer an API-owned trait implemented in `impls/`:
-
-```rust
-// api/
-pub trait EditorApi {
-    fn create_editor(&self, config: EditorConfig) -> EditorResult;
-}
-
-// impls/
-pub struct EditorApiImpl;
-
-impl EditorApi for EditorApiImpl {
-    fn create_editor(&self, config: EditorConfig) -> EditorResult {
-        // Compose adapters and invoke app operations.
-    }
-}
-
-// lib.rs
-pub use api::*;
-pub use impls::EditorApiImpl;
-```
-
-`api/` must not import or call `impls/`. The crate root may re-export both the
-API traits and concrete implementation type or factory.
+Callers outside the crate see only the types, traits, and constructors/functions
+re-exported from `src/lib.rs`. Internal adapter structs, SQL row helpers, and
+private state remain unreachable by compiler visibility rules. Reserve public
+traits for genuine polymorphism (multiple implementations, external runtime
+ports like `Clipboard`/`Clock`, or cross-service callbacks wired in `crates/apps/*`).
 
 ## Core
 
@@ -149,10 +129,13 @@ spawn tasks, or perform I/O in core. In particular, core must not call
 `Instant::now()` or otherwise read runtime time; a `Clock` port and
 `SystemClock` adapter provide an explicit time value to core.
 
-## Ports
+## Ports (when polymorphism is earned)
 
-Traits belong to the app/ports side, not the adapter crate/module. Bundle
-operations by cohesive capability.
+Add a trait in `ports/` when the crate must invert an external runtime effect,
+swap providers, stub a paid/network API in tests, or callback into a sibling
+service from `crates/apps/*`. Do not add 1-to-1 pass-through traits around
+in-process `domain/*` crates or single-implementation SQL tested directly
+against PostgreSQL unless unit-level `app/` branching tests earn the seam.
 
 ```rust
 pub trait AgentRunStore {
@@ -250,71 +233,61 @@ tolerate at-least-once delivery.
 - Do not hold a database transaction across arbitrary external network calls;
   commit an outbox event instead.
 
-## Impl and composition
+## Composition root (`crates/apps/*`) and queue/outbox ownership
 
-`src/impls/` is Rust's keyword-safe equivalent of `impl/`. It defines concrete
-implementations of traits owned by `api/`, constructs concrete adapters, chooses
-static or dynamic dispatch, opens transactions around app use cases, owns task
-lifecycle/shutdown, maps API contracts to app operations, and runs the outbox
-processor. It is the only module that imports both app and adapters. `api/`
-never imports `impls/` or reaches it through forwarding functions.
+Binary crates in `crates/apps/*` are the Rank 0 composition root: they parse
+startup config once via `platform/config`, construct pools and concrete
+adapters, open transactions around multi-step operations, mount `http/`,
+`queue/`, and `workflows/` surfaces, bridge sibling `services/*` crates, and own
+task lifecycles and graceful shutdown.
 
-Optional workflow activities are small wrappers over port operations. Durable
-orchestration must not move into one giant activity.
-
-## Events, publisher, and workflows
-
-- `core/events.rs` owns persisted outbox event variants.
-- `events/` owns portable queue schemas/conversion.
-- `publisher/` implements event publication.
-- `workflows/` contains only durable-runtime translation and sequencing.
-- Spawned outbox tasks are owned, cancelled, and drained by `impls/`; detached
-  tasks are forbidden.
+- `core/` (or a shared `domain/*` crate) owns persisted outbox event variants
+  and queue message schemas.
+- `adapters/` writes outbox rows in the state transaction and implements
+  outbound queue publishers.
+- `queue/` implements inbound queue consumers calling `app/`, avoiding
+  producer/consumer cycles.
+- `workflows/` contains only deterministic durable-runtime sequencing.
+- Spawned outbox and worker tasks are owned, cancelled, and drained by the
+  binary's composition root; detached background tasks are forbidden.
 
 ## Testing
 
 All tests live under the crate-level `tests/` directory, never inline with
-production modules under `src/`. Mirror architectural ownership without
-replicating every source file mechanically:
+production modules under `src/`. Choose the smallest honest test level:
 
-- `tests/core/`: table-driven pure tests.
-- `tests/app/`: use-case tests with in-memory trait implementations; no database
-  or network.
-- `tests/adapters/`: integration tests against real dependencies.
-- `tests/impls/`: critical wiring/E2E paths only.
+- Pure `core/` rules and parsers: table-driven and property tests.
+- Rich `app/` branching/recovery: fast tests over in-memory port implementations
+  with deterministic `Clock`/`IdGenerator` adapters.
+- `adapters/` and SQL-backed flows: integration tests against real PostgreSQL
+  and real protocol boundaries.
+- `crates/apps/*`: critical composition and E2E paths only.
 
-Tests use valid newtype identifiers and deterministic clock/ID adapters. Avoid
-mocking concrete libraries when a port can be implemented in memory. Test
-in-process libraries directly in the owning layer; do not invent a port merely
-to mock a Cargo dependency. Expose the smallest necessary library surface to
-integration tests; do not make adapter internals public solely for trivial
+Use valid newtype identifiers. Test in-process libraries directly in the owning
+crate rather than inventing a port merely to mock a Cargo dependency. Keep
+`src/lib.rs` narrow; do not make adapter internals `pub` solely for trivial
 forwarding tests.
 
 ## Rust-specific checks
 
-- [ ] Each crate represents one cohesive service or product feature.
-- [ ] Architectural layers and implementation technologies remain modules, not
-      separate crates.
-- [ ] Tests live under `tests/`; production modules contain no inline test
-      modules.
-- [ ] Public API traits and API-facing boundary types are owned by `api/` and
-      remain distinct from app-owned ports.
-- [ ] Concrete `impls/` types implement API traits and remain the composition
-      root; `api/` contains no forwarding calls into `impls/`.
-- [ ] Traits for external capabilities are owned by the application that
-      consumes them.
-- [ ] In-process Cargo libraries are imported by the responsible layer without
-      ceremonial ports or adapters.
-- [ ] Core remains synchronous and pure; runtime time enters through a `Clock`
-      port and explicit values.
-- [ ] Newtypes protect identifiers after parsing.
-- [ ] `Result`/enums model expected outcomes.
-- [ ] No recoverable-path `unwrap`/`expect`.
-- [ ] Generic bounds remain narrow and readable.
-- [ ] Dynamic dispatch appears only for a runtime need.
-- [ ] Async tasks have explicit ownership and shutdown.
-- [ ] Transactions do not span arbitrary network effects.
-- [ ] No repository layer exists; Postgres adapters implement app-owned
-      persistence traits and own queries and row decoding.
-- [ ] API DTOs do not leak into core/ports/app/adapters.
-- [ ] Outbox tasks have explicit ownership, cancellation, and shutdown draining.
+- [ ] Crates are small, deep, and placed in the right workspace rank
+      (`apps/`, `services/`, `domain/`, `platform/`) with zero sibling-service imports.
+- [ ] Inner layers are private `mod`s in `src/lib.rs`, not separate per-layer crates
+      and not `api/` + `impls/` trait-forwarding boilerplate.
+- [ ] Tests live under `tests/`; production modules under `src/` contain no inline
+      `#[cfg(test)]` modules.
+- [ ] Port traits belong to the consuming crate (`ports/`) and exist only for real
+      external/runtime capabilities, stubs, or multi-provider seams.
+- [ ] In-process Cargo libraries and `domain/*` crates are called directly without
+      ceremonial wrapper traits.
+- [ ] `core/` remains synchronous and pure; runtime time enters via a `Clock` port
+      and explicit values.
+- [ ] Validated newtypes protect identifiers; `Result`/enums model expected outcomes
+      with no recoverable-path `unwrap`/`expect`.
+- [ ] Generic bounds remain narrow; `dyn Trait`, `Arc`, `Send`, and `Sync` appear
+      only for real runtime needs.
+- [ ] No repository layer exists; SQL adapters own queries, row decoding, and
+      error translation, and transactions never span arbitrary network calls.
+- [ ] Transport DTOs (`http/`, `queue/`) do not leak into `core/`, `ports/`, or `app/`.
+- [ ] Async tasks and outbox processors have explicit ownership, cancellation,
+      and shutdown draining in `crates/apps/*`.

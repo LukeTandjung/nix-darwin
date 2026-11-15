@@ -6,7 +6,7 @@ Read for business use cases. The app example uses the port from
 ## 1. Core owns values, not runtime services
 
 ```typescript
-// example: core/model.ts -> core/main/model.ts
+// example: services/invoices/core/model.ts
 import { Match, Schema } from 'effect';
 
 export const InvoiceId = Schema.String.check(Schema.isUUID()).pipe(Schema.brand('InvoiceId'));
@@ -77,12 +77,12 @@ into core. It does not replace `catchTags` for app-owned error-channel recovery.
 ## 2. App executes the decision
 
 ```typescript
-// example: app/archive.ts -> app/main/invoices/archive-invoice.ts
+// example: services/invoices/app/archive.ts
 import { Clock, Effect, Option, Schema } from 'effect';
-import { decideArchive, InvoiceId } from 'core';
-import type { ArchiveInput } from 'core';
-import { InvoiceSession } from 'ports';
-import type { InvoiceChanged, InvoiceStoreFailure } from 'ports';
+import { decideArchive, InvoiceId } from '../core';
+import type { ArchiveInput } from '../core';
+import { InvoiceSession } from '../ports';
+import type { InvoiceChanged, InvoiceStoreFailure } from '../ports';
 
 export class InvoiceNotFound extends Schema.TaggedError<InvoiceNotFound>()(
   'InvoiceNotFound', { invoiceId: InvoiceId },
@@ -124,11 +124,11 @@ Clock is a standard Effect runtime service; no custom clock tag is needed here.
 ## 3. Use a pipeline when the transformation is linear
 
 ```typescript
-// example: app/list.ts -> app/main/invoices/list-paid-ids.ts
+// example: services/invoices/app/list-paid-ids.ts
 import { Effect } from 'effect';
-import { InvoiceCatalog } from 'ports';
-import type { InvoiceStoreFailure } from 'ports';
-import type { InvoiceId } from 'core';
+import { InvoiceCatalog } from '../ports';
+import type { InvoiceStoreFailure } from '../ports';
+import type { InvoiceId } from '../core';
 
 export const listPaidIds = Effect.fn('Invoices.listPaidIds')(
   (): Effect.Effect<ReadonlyArray<InvoiceId>, InvoiceStoreFailure, InvoiceCatalog> =>
