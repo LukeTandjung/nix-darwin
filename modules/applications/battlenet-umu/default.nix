@@ -202,7 +202,7 @@
         // cfg.addons.extraConfig
       );
     in
-    {
+    lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
       options.programs.battlenet-umu = {
         enable = lib.mkEnableOption "umu-launcher for Battle.net games";
         prefix = lib.mkOption {
@@ -290,8 +290,8 @@
 
   modules.hjem.battlenet-umu =
     { lib, pkgs, ... }:
-    {
-      programs.battlenet-umu = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+    lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+      programs.battlenet-umu = {
         enable = true;
         games = [
           { name = "Battle.net"; }
