@@ -266,13 +266,19 @@ let
       |> filterAttrs (_: extension: !(extension.preinstalled or false))
       |> mapAttrsToList (const <| getAttr "id");
 
-    ExtensionInstallSources = singleton "https://services.helium.imput.net/*";
-
+    # Allow user-installed extensions from any HTTP/HTTPS source. Unpacked
+    # extensions still require Developer mode in helium://extensions.
     ExtensionSettings =
-      extensions
-      |> concatMapAttrs (
-        _: extension: optionalAttrs (extension ? settings) { ${extension.id} = extension.settings; }
-      );
+      {
+        "*" = {
+          installation_mode = "allowed";
+          install_sources = [ "*://*/*" ];
+        };
+      }
+      // (extensions
+        |> concatMapAttrs (
+          _: extension: optionalAttrs (extension ? settings) { ${extension.id} = extension.settings; }
+        ));
 
     "3rdparty".extensions =
       extensions
