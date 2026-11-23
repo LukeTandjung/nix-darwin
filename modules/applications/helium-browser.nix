@@ -346,12 +346,15 @@ in
     environment.etc."chromium/policies/managed/helium.json".text = builtins.toJSON policy;
   };
 
-  modules.darwin.helium-browser = { pkgs, ... }:
+  modules.darwin.helium-browser = { config, pkgs, ... }:
     let
       managed = { "net.imput.helium" = policy; }
         // lib.mapAttrs' (id: value:
           lib.nameValuePair "net.imput.helium.extensions.${id}" value
         ) policy."3rdparty".extensions;
+      # Chromium reads this per-user MCX path. macOS removes unmanaged files
+      # from the top-level directory when it recomposes managed preferences.
+      managedDirectory = "/Library/Managed Preferences/${config.system.primaryUser}";
     in {
       system.defaults.CustomUserPreferences."net.imput.helium" = {
         SUEnableAutomaticChecks = false;
@@ -362,8 +365,8 @@ in
         lib.mapAttrsToList (domain: value:
           let plist = pkgs.writeText "${domain}.plist" (lib.generators.toPlist { escape = true; } value);
           in ''
-            /usr/bin/install -d -m 0755 '/Library/Managed Preferences'
-            /usr/bin/install -m 0644 ${plist} '/Library/Managed Preferences/${domain}.plist'
+            /usr/bin/install -d -m 0755 ${lib.escapeShellArg managedDirectory}
+            /usr/bin/install -m 0644 ${plist} ${lib.escapeShellArg "${managedDirectory}/${domain}.plist"}
           ''
         ) managed
       );
