@@ -71,6 +71,10 @@
       url = "github:AvengeMedia/dms-plugin-registry";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    xmMicAudioFix = {
+      url = "github:LukeTandjung/xm-mic-audio-fix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     dsearch = {
       url = "github:AvengeMedia/danksearch";
       inputs.nixpkgs.follows = "nixpkgs";

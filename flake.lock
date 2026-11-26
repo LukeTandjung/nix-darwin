@@ -116,6 +116,22 @@
         "type": "github"
       }
     },
+    "dank-qml-common_2": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789768710,
+        "narHash": "sha256-bg5uT5R5rE00UsuM5zyvjJMi/y6HvhygYA2haYmjpvg=",
+        "owner": "AvengeMedia",
+        "repo": "dank-qml-common",
+        "rev": "ccab90ec90e0cdd620eadc2e1ad8b4740363472c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AvengeMedia",
+        "repo": "dank-qml-common",
+        "type": "github"
+      }
+    },
     "dankMaterialShell": {
       "inputs": {
         "dank-qml-common": "dank-qml-common",
@@ -135,6 +151,30 @@
       "original": {
         "owner": "AvengeMedia",
         "repo": "DankMaterialShell",
+        "type": "github"
+      }
+    },
+    "dankMaterialShell_2": {
+      "inputs": {
+        "dank-qml-common": "dank-qml-common_2",
+        "flake-compat": "flake-compat_2",
+        "nixpkgs": [
+          "xmMicAudioFix",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789810632,
+        "narHash": "sha256-WzfyQ40POKVSd3ay8IJFH7mrq/SZr/mEqmdOi6ds/Ps=",
+        "owner": "AvengeMedia",
+        "repo": "DankMaterialShell",
+        "rev": "617bfcaca953d01271664b2b6a54a41090692cb4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AvengeMedia",
+        "repo": "DankMaterialShell",
+        "rev": "617bfcaca953d01271664b2b6a54a41090692cb4",
         "type": "github"
       }
     },
@@ -219,6 +259,22 @@
       }
     },
     "flake-compat": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1767039857,
+        "narHash": "sha256-vNpUSpF5Nuw8xvDLj2KCwwksIbjua2LZCqhV1LNRDns=",
+        "owner": "NixOS",
+        "repo": "flake-compat",
+        "rev": "5edf11c44bc78a0d334f6334cdaf7d60d732daab",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
+    "flake-compat_2": {
       "flake": false,
       "locked": {
         "lastModified": 1767039857,
@@ -616,7 +672,8 @@
         "nixpkgs-vesktop": "nixpkgs-vesktop",
         "omp": "omp",
         "spicetify-nix": "spicetify-nix",
-        "ublock": "ublock"
+        "ublock": "ublock",
+        "xmMicAudioFix": "xmMicAudioFix"
       }
     },
     "rust-overlay": {
@@ -784,6 +841,27 @@
       "original": {
         "owner": "imputnet",
         "repo": "uBlock",
+        "type": "github"
+      }
+    },
+    "xmMicAudioFix": {
+      "inputs": {
+        "dankMaterialShell": "dankMaterialShell_2",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795734291,
+        "narHash": "sha256-w86RZV8BpJcrUJDTeESsopImF+w/JYv1obfbLGMVG6A=",
+        "owner": "LukeTandjung",
+        "repo": "xm-mic-audio-fix",
+        "rev": "a48246bca0ad7d8d011ea8083c5c9949fbd85215",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LukeTandjung",
+        "repo": "xm-mic-audio-fix",
         "type": "github"
       }
     }

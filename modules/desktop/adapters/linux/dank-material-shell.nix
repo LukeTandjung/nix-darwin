@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  modules.hjem.dank-material-shell = { pkgs, lib, osConfig, theme, ... }:
+  modules.hjem.dank-material-shell = { pkgs, lib, osConfig, theme, config, ... }:
     let
           settings = {
             # The custom theme file is generated from our shared palette.
@@ -78,6 +78,10 @@
                     id = "battery";
                     enabled = true;
                   }
+                  {
+                    id = "xmHeadset";
+                    enabled = true;
+                  }
                   "controlCenterButton"
                   {
                     id = "vpn";
@@ -139,6 +143,7 @@
       dms = inputs.dankMaterialShell.lib.mkDmsShell pkgs;
       dsearch = inputs.dsearch.packages.${pkgs.stdenv.hostPlatform.system}.default;
       plugins = inputs.dms-plugin-registry.packages.${pkgs.stdenv.hostPlatform.system};
+      xmPackages = inputs.xmMicAudioFix.packages.${pkgs.stdenv.hostPlatform.system};
       selectedPlugins = [ "powerUsagePlugin" "dankKDEConnect" ]
         ++ lib.optional (osConfig.networking.hostName == "Lukes-Um790") "mpvpaperWallpaper";
       dmsColors = variant: with variant.colors; {
@@ -153,7 +158,7 @@
         |> lib.mapAttrs (_: variant: dmsColors variant)
         |> (pkgs.formats.json { }).generate "dms-kanagawa.json";
     in {
-      packages = [ dms dsearch pkgs.quickshell pkgs.glib pkgs.networkmanager pkgs.matugen pkgs.cava ];
+      packages = [ dms dsearch xmPackages.xm pkgs.quickshell pkgs.glib pkgs.networkmanager pkgs.matugen pkgs.cava pkgs.coreutils pkgs.util-linux ];
       xdg.config.files = {
         "DankMaterialShell/settings.json" = {
           clobber = true;
@@ -165,11 +170,51 @@
           });
         };
       } // lib.genAttrs (map (name: "DankMaterialShell/plugins/${name}") selectedPlugins)
-        (path: { source = plugins.${lib.last (lib.splitString "/" path)}; });
+        (path: { source = plugins.${lib.last (lib.splitString "/" path)}; }) // {
+        "DankMaterialShell/plugins/xmHeadset".source = xmPackages.dms-plugin;
+        "wireplumber/wireplumber.conf.d/51-bt-calls.conf".source = "${inputs.xmMicAudioFix}/51-bt-calls.conf";
+      };
       xdg.state.files."DankMaterialShell/session.json" = {
         clobber = true;
         source = (pkgs.formats.json { }).generate "dms-session.json" session;
       };
+      activationScripts.xm-headset = ''
+        ${pkgs.python3}/bin/python3 - ${lib.escapeShellArg "${config.xdg.config.directory}/DankMaterialShell/plugin_settings.json"} <<'PY'
+        import json
+        import os
+        import pathlib
+        import sys
+        import tempfile
+
+        target = pathlib.Path(sys.argv[1])
+        try:
+            settings = json.loads(target.read_text())
+        except FileNotFoundError:
+            settings = {}
+        if not isinstance(settings, dict):
+            raise TypeError(f"{target} must contain a JSON object")
+        xm = settings.setdefault("xmHeadset", {})
+        if not isinstance(xm, dict):
+            raise TypeError(f"{target}: xmHeadset must be a JSON object")
+        if xm.get("enabled") is True:
+            raise SystemExit(0)
+        xm["enabled"] = True
+        target.parent.mkdir(parents=True, exist_ok=True)
+        fd, temporary = tempfile.mkstemp(prefix=".xm-headset-", dir=target.parent)
+        try:
+            with os.fdopen(fd, "w") as output:
+                json.dump(settings, output, indent=2)
+                output.write("\n")
+                output.flush()
+                os.fsync(output.fileno())
+            os.chmod(temporary, target.stat().st_mode if target.exists() else 0o600)
+            os.replace(temporary, target)
+        finally:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
+        PY
+        ${dms}/bin/dms ipc call plugins enable xmHeadset >/dev/null 2>&1 || true
+      '';
       systemd.services.dsearch = {
         description = "dsearch - Fast filesystem search service";
         wantedBy = [ "default.target" ];
